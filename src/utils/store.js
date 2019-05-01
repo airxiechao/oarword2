@@ -172,12 +172,27 @@ const store = new Vuex.Store({
                     }
                 }
             ]
-        ]
+        ],
+        cursorTarget: {
+            paraIndex: 0,
+            runIndex: 0,
+            startIndex: 0,
+            inlineStartIndex: 0,
+            posX: 0,
+            posY: 0,
+            height: 0,
+        },
     },
     mutations: {
-        test (state, payload) {
-            state.paras[payload.paraIndex][payload.runIndex]['text'] = '*'
-        },
+        setCursorTarget(state, payplaod){
+            state.cursorTarget.paraIndex = payplaod.paraIndex
+            state.cursorTarget.runIndex = payplaod.runIndex
+            state.cursorTarget.startIndex = payplaod.startIndex
+            state.cursorTarget.inlineStartIndex = payplaod.inlineStartIndex
+            state.cursorTarget.posX = payplaod.posX
+            state.cursorTarget.posY = payplaod.posY
+            state.cursorTarget.height = payplaod.height
+        }
     }
 })
 

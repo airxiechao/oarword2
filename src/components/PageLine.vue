@@ -21,7 +21,7 @@ export default {
                     textStyle: run.textStyle,
                     paraIndex: run.paraIndex,
                     runIndex: run.runIndex,
-                    startPos: run.startPos,
+                    startIndex: run.startIndex,
                 }
             })
             inlineBlocks.push(inlineBlock)

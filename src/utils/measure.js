@@ -14,4 +14,19 @@ function measureFontTextWH(text, fontFamily, fontSize, fontWeight){
     return {w:w, h:h};
 }
 
-export { measureFontTextWH }
+function measureElePageXY(ele){
+    var x = 0, y = 0;
+
+    while( ele ) {
+        x += ele.offsetLeft;
+        y += ele.offsetTop;
+        ele = ele.offsetParent;
+        if( ele && ele == document.body ) {
+            break;
+        }
+    }
+
+    return {x:x, y:y};
+}
+
+export { measureFontTextWH, measureElePageXY }

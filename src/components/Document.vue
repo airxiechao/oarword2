@@ -2,15 +2,17 @@
 import PageParagraph from './PageParagraph.vue'
 import PageSpacing from './PageSpacing.vue'
 import PageBackground from './PageBackground.vue'
+import DocCursor from './DocCursor.vue'
 
 import { measureFontTextWH } from '../utils/measure'
 
 export default {
     name: 'Document',
     components: {
+        DocCursor,
+        PageBackground,
         PageParagraph,
         PageSpacing,
-        PageBackground,
     },
     props: {
         pageWidth: {
@@ -118,7 +120,12 @@ export default {
             }
         }, pageBgs)
 
-        return createElement('div', [pageBgsWrap, pageParasWrap])
+        // render cursor
+        var docCursor = createElement('DocCursor')
+
+        return createElement('div', {
+            class: 'doc',
+        }, [pageBgsWrap, pageParasWrap, docCursor])
     },
     methods: {
         paraRunsToLinesAndSpacings: function(runs, paragraphWidth, posTop, paraIndex){
@@ -130,7 +137,7 @@ export default {
                 var run = runs[i]
                 run.paraIndex = paraIndex
                 run.runIndex = i
-                run.startPos = 0
+                run.startIndex = 0
                 runsQueue.push(run)
             }
 
@@ -187,7 +194,7 @@ export default {
                         textStyle: run.textStyle,
                         paraIndex: run.paraIndex,
                         runIndex: run.runIndex,
-                        startPos: i
+                        startIndex: i
                     })
 
                     run = {
@@ -195,7 +202,7 @@ export default {
                         textStyle: run.textStyle,
                         paraIndex: run.paraIndex,
                         runIndex: run.runIndex,
-                        startPos: 0
+                        startIndex: 0
                     }
                 }
 
