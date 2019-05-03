@@ -3,49 +3,47 @@ import PageParagraph from './PageParagraph.vue'
 import PageSpacing from './PageSpacing.vue'
 import PageBackground from './PageBackground.vue'
 import DocCursor from './DocCursor.vue'
+import DocInputBox from './DocInputBox.vue'
 
-import { measureFontTextWH } from '../utils/measure'
+import { getPageNo } from '../utils/convert'
 
 export default {
     name: 'Document',
     components: {
         DocCursor,
+        DocInputBox,
         PageBackground,
         PageParagraph,
         PageSpacing,
     },
-    props: {
-        pageWidth: {
-            type: Number,
-            default: 500
+    computed: {
+        pageWidth: function(){
+            return this.$store.state.document.pageWidth
         },
-        pageHeight: {
-            type: Number,
-            default: 300
+        pageHeight: function(){
+            return this.$store.state.document.pageHeight
         },
-        pageSpacingHeight: {
-            type: Number,
-            default: 10
+        pageSpacingHeight: function(){
+            return this.$store.state.document.pageSpacingHeight
         },
-        marginTop: {
-            type: Number,
-            default: 100
+        marginTop: function(){
+            return this.$store.state.document.marginTop
         },
-        marginRight: {
-            type: Number,
-            default: 100
+        marginRight: function(){
+            return this.$store.state.document.marginRight
         },
-        marginBottom: {
-            type: Number,
-            default: 100
+        marginBottom: function(){
+            return this.$store.state.document.marginBottom
         },
-        marginLeft: {
-            type: Number,
-            default: 100
+        marginLeft: function(){
+            return this.$store.state.document.marginLeft
         },
-        paras: Array,
+        documentBody: function(){
+            return this.$store.state.document.body
+        },
     },
     render: function (createElement) {
+        this.$store.state.document.vue = this
 
         // render first page spacing
         var firstPageSpacing = createElement('PageSpacing', {
@@ -59,29 +57,22 @@ export default {
         var lastPosBottom = this.marginTop;
         
         var pageParas = [firstPageSpacing]
-        for(let i = 0; i < this.paras.length; ++i){
-            var para = this.paras[i];
-
-            // conver paragraph to lines and spacings
-            var paragraphWidth = this.pageWidth-this.marginLeft-this.marginRight
-            var lh = this.paraRunsToLinesAndSpacings(para, paragraphWidth, lastPosBottom, i)
-            var paraLinesAndSpacings = lh.paraLinesAndSpacings
-            var paraHeight = lh.paraHeight
-
+        for(let i = 0; i < this.documentBody.length; ++i){
+            var para = this.documentBody[i]
             var pagePara = createElement('PageParagraph', {
                 props: {
                     posLeft: this.marginLeft,
                     posTop: lastPosBottom,
-                    paragraphWidth: paragraphWidth,
-                    linesAndSpacings: paraLinesAndSpacings,
+                    paraWidth: this.pageWidth - this.marginLeft - this.marginRight,
+                    linesAndSpacings: para.linesAndSpacings,
                     paraIndex: i,
-                }
+                }  
             })
             pageParas.push(pagePara)
-            lastPosBottom += paraHeight;
+            lastPosBottom += para.paraHeight;
         }
 
-        var pageNo = this.getPageNo(lastPosBottom)
+        var pageNo = getPageNo(lastPosBottom, this.pageHeight, this.pageSpacingHeight)
         var pageParasWrap = createElement('div', {
             class: 'page-paras-wrap',
             style: {
@@ -123,107 +114,15 @@ export default {
         // render cursor
         var docCursor = createElement('DocCursor')
 
+        // render inputbox
+        var docInputBox = createElement('DocInputBox')
+
         return createElement('div', {
             class: 'doc',
-        }, [pageBgsWrap, pageParasWrap, docCursor])
+        }, [ pageBgsWrap, pageParasWrap, docInputBox, docCursor ])
     },
     methods: {
-        paraRunsToLinesAndSpacings: function(runs, paragraphWidth, posTop, paraIndex){
-            var paraLinesAndSpacings = []
-            var paraHeight = 0
-
-            var runsQueue = []
-            for(var i = 0; i < runs.length; ++i){
-                var run = runs[i]
-                run.paraIndex = paraIndex
-                run.runIndex = i
-                run.startIndex = 0
-                runsQueue.push(run)
-            }
-
-            while(runsQueue.length > 0){
-                var rh = this.getLineRunsAndHeight(runsQueue, paragraphWidth)
-                var lineRuns = rh.lineRuns
-                var lineHeight = rh.lineHeight
-
-                // check if page has enough space for line
-                var leftHeight = this.getPageLeftHeight(posTop)
-                if(leftHeight < lineHeight){
-                    // add page spacing
-                    var spacingHeight = leftHeight + this.marginBottom + this.pageSpacingHeight + this.marginTop
-                    var pageSpacing = {
-                        spacingHeight: spacingHeight
-                    }
-                    paraLinesAndSpacings.push(pageSpacing)
-                    posTop += spacingHeight
-                    paraHeight += spacingHeight
-                }
-                
-                paraLinesAndSpacings.push(lineRuns)
-                posTop += lineHeight
-                paraHeight += lineHeight
-            }
-
-            return {
-                paraLinesAndSpacings: paraLinesAndSpacings,
-                paraHeight: paraHeight,
-            }
-        },
-        getLineRunsAndHeight: function(runsQueue, lineWidth){
-            var totalWidth = 0;
-            var maxHeight = 0;
-            var lineRuns = []
-            while(totalWidth < lineWidth && runsQueue.length > 0){
-                var run = runsQueue.shift()
-
-                for(var i = 1; i<=run.text.length; ++i){
-                    var text = run.text.substr(0,i)
-                    var wh = measureFontTextWH(text, '', '', '')
-                    
-                    if(totalWidth + wh.w > lineWidth){
-                        i -= 1
-                        break
-                    }
-
-                    maxHeight = Math.max(maxHeight, wh.h)
-                }
-                
-                if(i < run.text.length){
-                    runsQueue.unshift({
-                        text: run.text.substr(i),
-                        textStyle: run.textStyle,
-                        paraIndex: run.paraIndex,
-                        runIndex: run.runIndex,
-                        startIndex: i
-                    })
-
-                    run = {
-                        text: run.text.substr(0, i),
-                        textStyle: run.textStyle,
-                        paraIndex: run.paraIndex,
-                        runIndex: run.runIndex,
-                        startIndex: 0
-                    }
-                }
-
-                lineRuns.push(run)
-                totalWidth += wh.w;
-            }
-
-            return {
-                lineRuns: lineRuns,
-                lineHeight: maxHeight
-            }
-        },
-        getPageNo: function(posY){
-            var pageNo = parseInt(posY/(this.pageHeight+this.pageSpacingHeight)) + 1
-            return pageNo
-        },
-        getPageLeftHeight: function(posTop){
-            var pageNo = this.getPageNo(posTop)
-            var leftHeight = pageNo*(this.pageHeight+this.pageSpacingHeight) - posTop - this.marginBottom - this.pageSpacingHeight
-            return leftHeight
-        }
+        
     }
 }
 </script>

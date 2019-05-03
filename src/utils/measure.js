@@ -29,4 +29,38 @@ function measureElePageXY(ele){
     return {x:x, y:y};
 }
 
-export { measureFontTextWH, measureElePageXY }
+function getCursorPos(cursorInlineBlock, inlineStartIndex){
+    var cursorPosX = 0
+    var cursorPoxY = 0
+    var cursorHeight = 0
+
+    var cb = cursorInlineBlock
+    if(cb && cb.vue && cb.vue.$el){
+        var InlineBlockLeft = cb.vue.$el.offsetLeft
+        var InlineBlocktTop = cb.vue.$el.offsetTop
+        
+        var text = cb.text
+        var si = inlineStartIndex
+
+        var t = text.substr(0, si + 1)
+        var h = measureFontTextWH(t, '', '', '').h
+
+        var w = 0
+        if( si > 0 ){
+            t = text.substr(0, si)
+            w = measureFontTextWH(t, '', '', '').w
+        }
+
+        cursorPosX = InlineBlockLeft + w
+        cursorPoxY = InlineBlocktTop
+        cursorHeight = h
+    }
+    
+    return {
+        cursorPosX: cursorPosX,
+        cursorPoxY: cursorPoxY,
+        cursorHeight: cursorHeight,
+    }
+}
+
+export { measureFontTextWH, measureElePageXY, getCursorPos }

@@ -11,30 +11,36 @@ export default {
     props: {
         posLeft: Number,
         posTop: Number,
-        paragraphWidth: Number,
+        paraWidth: Number,
         linesAndSpacings: Array,
         paraIndex: Number,
     },
     render: function(createElement) {
+        this.$store.state.document.body[this.paraIndex].vue = this
+
         var pageLinesAndSpacings = []
         for(var i = 0; i < this.linesAndSpacings.length; ++i){
             var ls = this.linesAndSpacings[i]
 
-            if(ls.spacingHeight){
+            if(ls.type == 'spacing'){
                 // create a page spacing
                 var pageSpacing = createElement('PageSpacing', {
                     props: {
                         posLeft: 0,
                         spacingHeight: ls.spacingHeight,
+                        paraIndex: this.paraIndex,
+                        lineSpacingIndex: i,
                     }
                 })
                 pageLinesAndSpacings.push(pageSpacing)
-            }else{
+            }else if(ls.type == 'line'){
                 // create a line
                 var pageLine = createElement('PageLine', {
                     props: {
-                        lineWidth: this.paragraphWidth,
-                        runs: ls,
+                        lineWidth: this.paraWidth,
+                        inlineBlocks: ls.inlineBlocks,
+                        paraIndex: this.paraIndex,
+                        lineSpacingIndex: i,
                     }
                 })
                 pageLinesAndSpacings.push(pageLine)
@@ -47,11 +53,11 @@ export default {
             style: {
                 marginLeft: this.posLeft+'px'
             }
-        }, pageLinesAndSpacings)
+        }, [pageLinesAndSpacings])
     },
     methods: {
         
-    }
+    },
 }
 </script>
 

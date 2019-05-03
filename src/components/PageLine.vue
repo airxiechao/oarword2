@@ -9,19 +9,23 @@ export default {
     },
     props: {
         lineWidth: Number,
-        runs: Array,
+        inlineBlocks: Array,
+        paraIndex: Number,
+        lineSpacingIndex: Number,
     },
     render: function(createElement){
+        this.$store.state.document.body[this.paraIndex].linesAndSpacings[this.lineSpacingIndex].vue = this
+
         var inlineBlocks = []
-        for(var i = 0; i<this.runs.length; ++i){
-            var run = this.runs[i]
+        for(var i = 0; i<this.inlineBlocks.length; ++i){
+            var ib = this.inlineBlocks[i]
             var inlineBlock = createElement('PageInlineBlock', {
                 props: {
-                    text: run.text,
-                    textStyle: run.textStyle,
-                    paraIndex: run.paraIndex,
-                    runIndex: run.runIndex,
-                    startIndex: run.startIndex,
+                    text: ib.text,
+                    textStyle: ib.textStyle,
+                    paraIndex: this.paraIndex,
+                    lineSpacingIndex: this.lineSpacingIndex,
+                    inlineBlockIndex: i,
                 }
             })
             inlineBlocks.push(inlineBlock)

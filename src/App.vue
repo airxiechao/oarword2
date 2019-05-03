@@ -1,6 +1,6 @@
 <script>
 import Document from './components/Document.vue'
-import store from './utils/store.js'
+import store from './utils/store'
 
 export default {
     name: 'app',
@@ -9,14 +9,14 @@ export default {
     },
     store,
     computed: {
-        paras: function(){
-            return this.$store.state.paras
+        documentBody: function(){
+            return this.$store.state.document.body
         }
     },
     render: function(createElement){
         var doc = createElement('Document', {
             props: {
-                paras: this.paras
+                documentBody: this.documentBody
             }
         })
 
