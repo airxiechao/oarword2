@@ -63,4 +63,15 @@ function getCursorPos(cursorInlineBlock, inlineStartIndex){
     }
 }
 
-export { measureFontTextWH, measureElePageXY, getCursorPos }
+function getPageNo(posY, pageHeight, pageSpacingHeight){
+    var pageNo = parseInt(posY/(pageHeight+pageSpacingHeight)) + 1
+    return pageNo
+}
+
+function getPageLeftHeight(posTop, marginBottom, pageHeight, pageSpacingHeight){
+    var pageNo = getPageNo(posTop, pageHeight, pageSpacingHeight)
+    var leftHeight = pageNo*(pageHeight+pageSpacingHeight) - posTop - marginBottom - pageSpacingHeight
+    return leftHeight
+}
+
+export { measureFontTextWH, measureElePageXY, getCursorPos, getPageNo, getPageLeftHeight }

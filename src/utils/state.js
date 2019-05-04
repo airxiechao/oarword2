@@ -1,12 +1,13 @@
-import { getCursorPos } from './measure'
+import { getCursorPos, getPageLeftHeight } from './measure'
 import { getPagePara, getPageParas } from './convert'
+
+import PageParagraph from '../components/PageParagraph'
+import PageSpacing from '../components/PageSpacing'
 
 var state = {
     document: {
         cursor: {
-            paraIndex: -1,
-            lineIndex: -1,
-            inlineBlockIndex: -1,
+            inlineBlock: null,
             inlineStartIndex: -1,
         },
         inputBox: {
@@ -24,11 +25,7 @@ var state = {
     },
     getters: {
         cursorInlineBlock: function(){
-            var cb = null
-            if(state.document.cursor.paraIndex >= 0){
-                cb = state.document.body[state.document.cursor.paraIndex].linesAndSpacings[state.document.cursor.lineIndex].inlineBlocks[state.document.cursor.inlineBlockIndex]
-            }
-            return cb
+            return state.document.cursor.inlineBlock
         },
         cursorPos: function(){
             var cursorInlineBlock = state.getters.cursorInlineBlock()
@@ -46,14 +43,14 @@ var state = {
         setInputBoxObj: function(obj){
             state.document.inputBox.obj = obj
         },
-        setParaObj: function(paraIndex, obj){
-            state.document.body[paraIndex].obj = obj
+        setParaObj: function(para, obj){
+            para.obj = obj
         },
-        setLineSpacingObj: function(paraIndex, lineSpacingIndex, obj){
-            state.document.body[paraIndex].linesAndSpacings[lineSpacingIndex].obj = obj
+        setLineSpacingObj: function(ls, obj){
+            ls.obj = obj
         },
-        setInlineBlockObj: function(paraIndex, lineSpacingIndex, inineBlockIndex, obj){
-            state.document.body[paraIndex].linesAndSpacings[lineSpacingIndex].inlineBlocks[inineBlockIndex].obj = obj
+        setInlineBlockObj: function(ib, obj){
+            ib.obj = obj
         },
         setDocument: function(doc){
             var documentBody = getPageParas(doc, state.document.marginTop, 
@@ -63,10 +60,8 @@ var state = {
             state.document.bodyDoc = doc
             state.document.body = documentBody
         },
-        setCursorIndex: function(payload){
-            state.document.cursor.paraIndex = payload.paraIndex
-            state.document.cursor.lineIndex = payload.lineIndex
-            state.document.cursor.inlineBlockIndex = payload.inlineBlockIndex
+        setCursorInlineBlock: function(payload){
+            state.document.cursor.inlineBlock = payload.inlineBlock
             state.document.cursor.inlineStartIndex = payload.inlineStartIndex
 
             state.ui.updateCursorAndInputBox()
@@ -88,11 +83,66 @@ var state = {
 
             run.text = leftText + text + rightText
 
-            var documentBody = getPageParas(state.document.bodyDoc, state.document.marginTop, 
+            // update document paragraph
+            var lastPosBottom = state.document.marginTop
+            for(var i = 0 ; i < paraIndex; ++i){
+                lastPosBottom += state.document.body[i].paraHeight
+            }
+            var oldPara = state.document.body[paraIndex]
+            var newPara = getPagePara(state.document.bodyDoc[paraIndex], lastPosBottom, paraIndex,
                 state.document.pageWidth, state.document.pageHeight, state.document.pageSpacingHeight, 
                 state.document.marginTop, state.document.marginRight, state.document.marginBottom, state.document.marginLeft)
+            state.document.body.splice(paraIndex, 1, newPara)
 
-            state.document.body = documentBody
+            var newPagePara = new PageParagraph(state.document.marginLeft, state.document.pageWidth - state.document.marginLeft - state.document.marginRight, newPara)
+            var oldPagePara = oldPara.obj.el
+            state.mutations.setParaObj(newPara, newPagePara)
+            window.goog.dom.replaceNode(newPagePara.render(), oldPagePara)
+            
+
+            lastPosBottom += newPara.paraHeight
+            for(var i = paraIndex + 1; i < state.document.body.length; ++i){
+                var pagePara = state.document.body[i]
+                var paraHeight = 0
+
+                for(var j = 0; j < pagePara.linesAndSpacings.length; ++j){
+                    var ls = pagePara.linesAndSpacings[j]
+                    if(ls.type == 'line'){
+                        // check paragraph height
+                        var leftHeight = getPageLeftHeight(lastPosBottom, state.document.marginBottom, state.document.pageHeight, state.document.pageSpacingHeight)
+                        if(ls.lineHeight > leftHeight){
+                            // create new page spacing
+                            var spacingHeight = leftHeight + state.document.marginBottom + state.document.pageSpacingHeight + state.document.marginTop
+                            var spacing = {
+                                spacingHeight: spacingHeight,
+                                type: 'spacing',
+                            }
+                            
+                            lastPosBottom += spacingHeight
+                            paraHeight += spacingHeight
+
+                            pagePara.linesAndSpacings.splice(j-1, 0, spacing)
+                            
+                            var pageSpacing = new PageSpacing(0, { spacingHeight: spacingHeight})
+                            state.mutations.setLineSpacingObj(spacing, pageSpacing)
+                            window.goog.dom.insertSiblingBefore(pageSpacing.render(), ls.obj.el)
+
+                            j += 1
+                        }
+                        
+                        lastPosBottom += ls.lineHeight
+                        paraHeight += ls.lineHeight
+                    }else if(ls.type == 'spacing'){
+                        // remove old page spacing
+                        pagePara.linesAndSpacings.splice(j, 1)
+                        j -= 1
+
+                        ls.obj.el.remove()
+                    }
+                }
+
+                pagePara.paraHeight = paraHeight
+            }
             
             // update cursor
             var nextStartIndex = si + 1
@@ -108,16 +158,13 @@ var state = {
 
                         if(lb.runIndex == runIndex){
                             if(nextStartIndex >= lb.startIndex && nextStartIndex < lb.startIndex + lb.text.length ){
-                                state.document.cursor.paraIndex = paraIndex
-                                state.document.cursor.lineIndex = i
-                                state.document.cursor.inlineBlockIndex = j
+                                state.document.cursor.inlineBlock = state.document.body[paraIndex].linesAndSpacings[i].inlineBlocks[j]
                                 state.document.cursor.inlineStartIndex = nextStartIndex - lb.startIndex
                             } 
                         }
                 }
             }
 
-            state.ui.updateDocument()
             state.ui.updateCursorAndInputBox()
         },
     },
@@ -133,10 +180,6 @@ var state = {
             var pos = state.getters.cursorPos()
             inputBox.updatePos(pos.cursorPosX, pos.cursorPosY)
         },
-        updateDocument: function(){
-            var doc = state.document.obj
-            doc.updateDoc(state.document.body)
-        }
     }
 }
 

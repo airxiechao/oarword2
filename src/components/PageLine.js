@@ -4,26 +4,25 @@ import { createElement } from '../utils/renderer'
 import state from '../utils/state'
 
 class PageLine{
-    constructor(lineWidth, inlineBlocks, paraIndex, lineSpacingIndex){
+    constructor(lineWidth, ls){
         this.lineWidth = lineWidth
-        this.inlineBlocks = inlineBlocks
-        this.paraIndex = paraIndex
-        this.lineSpacingIndex = lineSpacingIndex
-
-        state.mutations.setLineSpacingObj(this.paraIndex, this. lineSpacingIndex, this)
+        this.ls = ls
     }
 
     render(){
         var inlineBlocks = []
-        for(var i = 0; i<this.inlineBlocks.length; ++i){
-            var ib = this.inlineBlocks[i]
-            var inlineBlock = new PageInlineBlock(ib.text, ib.textStyle, this.paraIndex, this.lineSpacingIndex, i)
+        for(var i = 0; i < this.ls.inlineBlocks.length; ++i){
+            var ib = this.ls.inlineBlocks[i]
+            var inlineBlock = new PageInlineBlock(ib)
+            state.mutations.setInlineBlockObj(ib, inlineBlock)
+
             inlineBlocks.push(inlineBlock.render())
         }
 
         this.el = createElement('div', {
             class: 'page-line',
             style: {
+                whiteSpace: 'nowrap',
                 width: this.lineWidth+'px',
             }
         }, inlineBlocks)

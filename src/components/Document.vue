@@ -5,7 +5,7 @@ import PageBackground from './PageBackground.vue'
 import DocCursor from './DocCursor.vue'
 import DocInputBox from './DocInputBox.vue'
 
-import { getPageNo } from '../utils/convert'
+import { getPageNo } from '../utils/measure'
 
 export default {
     name: 'Document',

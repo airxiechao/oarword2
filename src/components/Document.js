@@ -4,7 +4,7 @@ import PageSpacing from './PageSpacing'
 import DocCursor from './DocCursor'
 import DocInputBox from './DocInputBox'
 
-import { getPageNo } from '../utils/convert'
+import { getPageNo } from '../utils/measure'
 import { createElement } from '../utils/renderer'
 import state from '../utils/state'
 
@@ -24,7 +24,7 @@ class Document{
 
     render(){
         // render first page spacing
-        var firstPageSpacing = new PageSpacing(this.marginLeft, this.marginTop)
+        var firstPageSpacing = new PageSpacing(this.marginLeft, { spacingHeight: this.marginTop })
 
         // render paragraphs
         var lastPosBottom = this.marginTop;
@@ -32,7 +32,9 @@ class Document{
         var pageParas = [firstPageSpacing.render()]
         for(let i = 0; i < this.documentBody.length; ++i){
             var para = this.documentBody[i]
-            var pagePara = new PageParagraph(this.marginLeft, lastPosBottom, this.pageWidth - this.marginLeft - this.marginRight, para.linesAndSpacings, i)
+            var pagePara = new PageParagraph(this.marginLeft, this.pageWidth - this.marginLeft - this.marginRight, para)
+            state.mutations.setParaObj(para, pagePara)
+
             pageParas.push(pagePara.render())
             lastPosBottom += para.paraHeight;
         }
@@ -79,13 +81,6 @@ class Document{
         }, [ pageBgsWrap, pageParasWrap, docInputBox.render(), docCursor.render() ])
 
         return this.el
-    }
-
-    updateDoc(documentBody){
-        this.documentBody = documentBody
-        var oldEle = this.el
-        var newEle = this.render()
-        oldEle.parentNode.replaceChild(newEle, oldEle)
     }
 }
 

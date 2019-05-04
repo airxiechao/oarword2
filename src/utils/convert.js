@@ -1,4 +1,4 @@
-import { measureFontTextWH } from './measure'
+import { measureFontTextWH, getPageLeftHeight } from './measure'
 
 function paraRunsToLinesAndSpacings(runs, paraIndex, paraWidth, posTop, marginTop, marginBottom, pageHeight, pageSpacingHeight){
     var paraLinesAndSpacings = []
@@ -15,11 +15,12 @@ function paraRunsToLinesAndSpacings(runs, paraIndex, paraWidth, posTop, marginTo
 
     while(runsQueue.length > 0){
         var lh = getLineInlineBlocksAndHeightFromQueue(runsQueue, paraWidth)
+        var lineHeight = lh.lineHeight
         var line = {
             inlineBlocks: lh.lineInlineBlocks,
+            lineHeight: lineHeight,
             type: 'line',
         }
-        var lineHeight = lh.lineHeight
 
         // check if page has enough space for line
         var leftHeight = getPageLeftHeight(posTop, marginBottom, pageHeight, pageSpacingHeight)
@@ -95,17 +96,6 @@ function getLineInlineBlocksAndHeightFromQueue(runsQueue, lineWidth){
     }
 }
 
-function getPageNo(posY, pageHeight, pageSpacingHeight){
-    var pageNo = parseInt(posY/(pageHeight+pageSpacingHeight)) + 1
-    return pageNo
-}
-
-function getPageLeftHeight(posTop, marginBottom, pageHeight, pageSpacingHeight){
-    var pageNo = getPageNo(posTop, pageHeight, pageSpacingHeight)
-    var leftHeight = pageNo*(pageHeight+pageSpacingHeight) - posTop - marginBottom - pageSpacingHeight
-    return leftHeight
-}
-
 function getPagePara(para, lastPosBottom, paraIndex,
         pageWidth, pageHeight, pageSpacingHeight, 
         marginTop, marginRight, marginBottom, marginLeft){
@@ -145,5 +135,5 @@ function getPageParas(paras, lastPosBottom,
 }
 
 
-export { paraRunsToLinesAndSpacings, getLineInlineBlocksAndHeightFromQueue, getPageNo, getPageLeftHeight, 
+export { paraRunsToLinesAndSpacings, getLineInlineBlocksAndHeightFromQueue, getPageLeftHeight, 
          getPagePara, getPageParas }

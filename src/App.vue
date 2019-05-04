@@ -1,6 +1,7 @@
 <script>
 //import Document from './components/Document.vue'
 import store from './utils/store'
+import state from './utils/state'
 
 import Document from './components/Document'
 
@@ -16,7 +17,7 @@ export default {
         }
     },
     mounted: function(){
-        var doc = new Document(500, 300, 10, 100, 100, 100, 100, this.documentBody);
+        var doc = new Document(500, 300, 10, 100, 100, 100, 100, state.document.body);
         window.goog.dom.appendChild(this.$el, doc.render())
     },
     render: function(createElement){

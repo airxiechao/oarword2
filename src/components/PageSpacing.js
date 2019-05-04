@@ -2,22 +2,16 @@ import { createElement } from '../utils/renderer'
 import state from '../utils/state'
 
 class PageSpacing{
-    constructor(posLeft, spacingHeight, paraIndex, lineSpacingIndex){
+    constructor(posLeft, ls){
         this.posLeft = posLeft
-        this.spacingHeight = spacingHeight
-        this.paraIndex = paraIndex
-        this.lineSpacingIndex = lineSpacingIndex
-
-        if(this.paraIndex != null){
-            state.mutations.setLineSpacingObj(this.paraIndex, this. lineSpacingIndex, this)
-        }
+        this.ls = ls
     }
 
     render(){
         this.el = createElement('div', {
             class: 'page-spacing',
             style: {
-                height: this.spacingHeight+'px',
+                height: this.ls.spacingHeight+'px',
                 marginLeft: this.posLeft+'px',
             }
         })

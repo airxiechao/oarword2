@@ -5,29 +5,29 @@ import { createElement } from '../utils/renderer'
 import state from '../utils/state'
 
 class PageParagraph{
-    constructor(posLeft, posTop, paraWidth, linesAndSpacings, paraIndex){
+    constructor(posLeft, paraWidth, para){
         this.posLeft = posLeft
-        this.posTop = posTop
         this.paraWidth = paraWidth
-        this.linesAndSpacings = linesAndSpacings
-        this.paraIndex = paraIndex
-
-        state.mutations.setParaObj(this.paraIndex, this)
+        this.para = para
     }
     
     render(){
         var pageLinesAndSpacings = []
-        for(var i = 0; i < this.linesAndSpacings.length; ++i){
-            var ls = this.linesAndSpacings[i]
+        for(var i = 0; i < this.para.linesAndSpacings.length; ++i){
+            var ls = this.para.linesAndSpacings[i]
 
             if(ls.type == 'spacing'){
                 // create a page spacing
-                var pageSpacing = new PageSpacing(0, ls.spacingHeight, this.paraIndex, i)
+                var pageSpacing = new PageSpacing(0, ls)
+                state.mutations.setLineSpacingObj(ls, pageSpacing)
+
                 pageLinesAndSpacings.push(pageSpacing.render())
                 
             }else if(ls.type == 'line'){
                 // create a line
-                var pageLine = new PageLine(this.paraWidth, ls.inlineBlocks, this.paraIndex, i)
+                var pageLine = new PageLine(this.paraWidth, ls)
+                state.mutations.setLineSpacingObj(ls, pageLine)
+
                 pageLinesAndSpacings.push(pageLine.render())
             }
         }
