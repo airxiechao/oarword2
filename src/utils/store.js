@@ -3,6 +3,7 @@ import Vuex from 'vuex'
 
 import { getPagePara, getPageParas } from './convert'
 import { getCursorPos } from '../utils/measure.js'
+import st from '../utils/state'
 
 Vue.use(Vuex)
 
@@ -49,6 +50,8 @@ const store = new Vuex.Store({
 
             state.document.bodyDoc = bodyDoc
             state.document.body = documentBody
+
+            st.mutations.setDocument(bodyDoc)
         },
         setCursorIndex: function(state, paypload){
             state.cursorIndex.paraIndex = paypload.paraIndex

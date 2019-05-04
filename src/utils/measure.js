@@ -31,13 +31,13 @@ function measureElePageXY(ele){
 
 function getCursorPos(cursorInlineBlock, inlineStartIndex){
     var cursorPosX = 0
-    var cursorPoxY = 0
+    var cursorPosY = 0
     var cursorHeight = 0
-
+    
     var cb = cursorInlineBlock
-    if(cb && cb.vue && cb.vue.$el){
-        var InlineBlockLeft = cb.vue.$el.offsetLeft
-        var InlineBlocktTop = cb.vue.$el.offsetTop
+    if(cb && cb.obj && cb.obj.el){
+        var InlineBlockLeft = cb.obj.el.offsetLeft
+        var InlineBlocktTop = cb.obj.el.offsetTop
         
         var text = cb.text
         var si = inlineStartIndex
@@ -52,13 +52,13 @@ function getCursorPos(cursorInlineBlock, inlineStartIndex){
         }
 
         cursorPosX = InlineBlockLeft + w
-        cursorPoxY = InlineBlocktTop
+        cursorPosY = InlineBlocktTop
         cursorHeight = h
     }
     
     return {
         cursorPosX: cursorPosX,
-        cursorPoxY: cursorPoxY,
+        cursorPosY: cursorPosY,
         cursorHeight: cursorHeight,
     }
 }

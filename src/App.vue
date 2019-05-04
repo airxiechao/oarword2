@@ -1,6 +1,8 @@
 <script>
-import Document from './components/Document.vue'
+//import Document from './components/Document.vue'
 import store from './utils/store'
+
+import Document from './components/Document'
 
 export default {
     name: 'app',
@@ -13,16 +15,21 @@ export default {
             return this.$store.state.document.body
         }
     },
+    mounted: function(){
+        var doc = new Document(500, 300, 10, 100, 100, 100, 100, this.documentBody);
+        window.goog.dom.appendChild(this.$el, doc.render())
+    },
     render: function(createElement){
+        /*
         var doc = createElement('Document', {
             props: {
                 documentBody: this.documentBody
             }
-        })
+        })*/
 
         var app = createElement('div', {
             class: 'app',
-        }, [doc])
+        })
 
         return app
     }
