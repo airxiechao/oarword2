@@ -19,14 +19,14 @@ class PageParagraph{
             if(ls.type == 'spacing'){
                 // create a page spacing
                 var pageSpacing = new PageSpacing(0, ls)
-                state.mutations.setLineSpacingObj(ls, pageSpacing)
+                ls.obj = pageSpacing
 
                 pageLinesAndSpacings.push(pageSpacing.render())
                 
             }else if(ls.type == 'line'){
                 // create a line
                 var pageLine = new PageLine(this.paraWidth, ls)
-                state.mutations.setLineSpacingObj(ls, pageLine)
+                ls.obj = pageLine
 
                 pageLinesAndSpacings.push(pageLine.render())
             }

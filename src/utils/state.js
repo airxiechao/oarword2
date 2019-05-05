@@ -1,5 +1,5 @@
 import { getCursorPos, getPageLeftHeight } from './measure'
-import { getPagePara, getPageParas } from './convert'
+import { getPagePara, getPageParas, getDocParaOfRun } from './convert'
 
 import PageParagraph from '../components/PageParagraph'
 import PageSpacing from '../components/PageSpacing'
@@ -13,7 +13,7 @@ var state = {
         inputBox: {
 
         },
-        bodyDoc: [],
+        doc: [],
         body: [],
         marginTop: 100,
         pageWidth: 500,
@@ -26,6 +26,19 @@ var state = {
     getters: {
         cursorInlineBlock: function(){
             return state.document.cursor.inlineBlock
+        },
+        cursorDocIndex: function(){
+            var cb = state.getters.cursorInlineBlock()
+            var cbPara = getDocParaOfRun(state.document.doc, cb.doc)
+            var paraIndex = state.document.doc.indexOf(cbPara)
+            var runIndex = state.document.doc[paraIndex].indexOf(cb.doc)
+            var startIndex = cb.startIndex + state.document.cursor.inlineStartIndex
+
+            return {
+                paraIndex: paraIndex,
+                runIndex: runIndex,
+                startIndex: startIndex,
+            }
         },
         cursorPos: function(){
             var cursorInlineBlock = state.getters.cursorInlineBlock()
@@ -43,69 +56,69 @@ var state = {
         setInputBoxObj: function(obj){
             state.document.inputBox.obj = obj
         },
-        setParaObj: function(para, obj){
-            para.obj = obj
-        },
-        setLineSpacingObj: function(ls, obj){
-            ls.obj = obj
-        },
-        setInlineBlockObj: function(ib, obj){
-            ib.obj = obj
-        },
         setDocument: function(doc){
             var documentBody = getPageParas(doc, state.document.marginTop, 
                 state.document.pageWidth, state.document.pageHeight, state.document.pageSpacingHeight, 
                 state.document.marginTop, state.document.marginRight, state.document.marginBottom, state.document.marginLeft)
 
-            state.document.bodyDoc = doc
+            state.document.doc = doc
             state.document.body = documentBody
         },
         setCursorInlineBlock: function(payload){
             state.document.cursor.inlineBlock = payload.inlineBlock
             state.document.cursor.inlineStartIndex = payload.inlineStartIndex
 
-            state.ui.updateCursorAndInputBox()
+            state.mutations._updateCursorAndInputBoxPos()
         },
         addOrUpdateParaRun: function(payload){
             var text = payload.text
             var textStyle = payload.textStyle
 
-            var cb = state.getters.cursorInlineBlock()
-            var paraIndex = cb.paraIndex
-            var runIndex = cb.runIndex
-            var startIndex = cb.startIndex
-
-            var run = state.document.bodyDoc[paraIndex][runIndex]
-            var si = startIndex + state.document.cursor.inlineStartIndex
+            var ci = state.getters.cursorDocIndex()
+            var paraIndex = ci.paraIndex
+            var runIndex = ci.runIndex
+            var startIndex = ci.startIndex
             
-            var leftText = run.text.substr(0, si)
-            var rightText = run.text.substr(si)
-
-            run.text = leftText + text + rightText
+            // update run text
+            state.mutations._spliceRun(paraIndex, runIndex, startIndex, text, textStyle)
 
             // update document paragraph
+            state.mutations._updatePara(paraIndex)
+            
+            // update cursor
+            state.mutations._updateCursor(paraIndex, runIndex, startIndex + text.length)
+        },
+        
+        _spliceRun(paraIndex, runIndex, startIndex, text, textStyle){
+            var run = state.document.doc[paraIndex][runIndex]
+            var leftText = run.text.substr(0, startIndex)
+            var rightText = run.text.substr(startIndex)
+
+            run.text = leftText + text + rightText
+        },
+        _updatePara(paraIndex){
             var lastPosBottom = state.document.marginTop
-            for(var i = 0 ; i < paraIndex; ++i){
+            for(let i = 0 ; i < paraIndex; ++i){
                 lastPosBottom += state.document.body[i].paraHeight
             }
             var oldPara = state.document.body[paraIndex]
-            var newPara = getPagePara(state.document.bodyDoc[paraIndex], lastPosBottom, paraIndex,
+            var newPara = getPagePara(state.document.doc[paraIndex], lastPosBottom,
                 state.document.pageWidth, state.document.pageHeight, state.document.pageSpacingHeight, 
                 state.document.marginTop, state.document.marginRight, state.document.marginBottom, state.document.marginLeft)
             state.document.body.splice(paraIndex, 1, newPara)
 
             var newPagePara = new PageParagraph(state.document.marginLeft, state.document.pageWidth - state.document.marginLeft - state.document.marginRight, newPara)
             var oldPagePara = oldPara.obj.el
-            state.mutations.setParaObj(newPara, newPagePara)
+            newPara.obj = newPagePara
             window.goog.dom.replaceNode(newPagePara.render(), oldPagePara)
             
 
             lastPosBottom += newPara.paraHeight
-            for(var i = paraIndex + 1; i < state.document.body.length; ++i){
+            for(let i = paraIndex + 1; i < state.document.body.length; ++i){
                 var pagePara = state.document.body[i]
                 var paraHeight = 0
 
-                for(var j = 0; j < pagePara.linesAndSpacings.length; ++j){
+                for(let j = 0; j < pagePara.linesAndSpacings.length; ++j){
                     var ls = pagePara.linesAndSpacings[j]
                     if(ls.type == 'line'){
                         // check paragraph height
@@ -124,7 +137,7 @@ var state = {
                             pagePara.linesAndSpacings.splice(j-1, 0, spacing)
                             
                             var pageSpacing = new PageSpacing(0, { spacingHeight: spacingHeight})
-                            state.mutations.setLineSpacingObj(spacing, pageSpacing)
+                            spacing.obj = pageSpacing
                             window.goog.dom.insertSiblingBefore(pageSpacing.render(), ls.obj.el)
 
                             j += 1
@@ -143,33 +156,32 @@ var state = {
 
                 pagePara.paraHeight = paraHeight
             }
-            
-            // update cursor
-            var nextStartIndex = si + 1
+        },
+        _updateCursor(paraIndex, runIndex, startIndex){
+            var nextStartIndex = startIndex
             var para = state.document.body[paraIndex]
-            for(var i = 0; i < para.linesAndSpacings.length; ++i){
-                var ls = para.linesAndSpacings[i]
+            for(let i = 0; i < para.linesAndSpacings.length; ++i){
+                let ls = para.linesAndSpacings[i]
                 if(ls.type == 'spacing'){
                     continue
                 }
 
-                for(var j = 0; j < ls.inlineBlocks.length; ++j){
-                        var lb = ls.inlineBlocks[j]
+                for(let j = 0; j < ls.inlineBlocks.length; ++j){
+                    let ib = ls.inlineBlocks[j]
+                    let ibRunIndex = para.doc.indexOf(ib.doc)
 
-                        if(lb.runIndex == runIndex){
-                            if(nextStartIndex >= lb.startIndex && nextStartIndex < lb.startIndex + lb.text.length ){
-                                state.document.cursor.inlineBlock = state.document.body[paraIndex].linesAndSpacings[i].inlineBlocks[j]
-                                state.document.cursor.inlineStartIndex = nextStartIndex - lb.startIndex
-                            } 
-                        }
+                    if(ibRunIndex == runIndex){
+                        if(nextStartIndex >= ib.startIndex && nextStartIndex < ib.startIndex + ib.text.length ){
+                            state.document.cursor.inlineBlock = state.document.body[paraIndex].linesAndSpacings[i].inlineBlocks[j]
+                            state.document.cursor.inlineStartIndex = nextStartIndex - ib.startIndex
+                        } 
+                    }
                 }
             }
 
-            state.ui.updateCursorAndInputBox()
+            state.mutations._updateCursorAndInputBoxPos()
         },
-    },
-    ui: {
-        updateCursorAndInputBox: function(){
+        _updateCursorAndInputBoxPos: function(){
             // update cursor ui
             var cursor = state.document.cursor.obj
             var pos = state.getters.cursorPos()
@@ -177,10 +189,9 @@ var state = {
 
             // update inputbox ui
             var inputBox = state.document.inputBox.obj
-            var pos = state.getters.cursorPos()
             inputBox.updatePos(pos.cursorPosX, pos.cursorPosY)
         },
-    }
+    },
 }
 
 window.state = state

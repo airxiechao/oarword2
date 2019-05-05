@@ -14,7 +14,7 @@ class PageLine{
         for(var i = 0; i < this.ls.inlineBlocks.length; ++i){
             var ib = this.ls.inlineBlocks[i]
             var inlineBlock = new PageInlineBlock(ib)
-            state.mutations.setInlineBlockObj(ib, inlineBlock)
+            ib.obj = inlineBlock
 
             inlineBlocks.push(inlineBlock.render())
         }

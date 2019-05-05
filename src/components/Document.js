@@ -33,7 +33,7 @@ class Document{
         for(let i = 0; i < this.documentBody.length; ++i){
             var para = this.documentBody[i]
             var pagePara = new PageParagraph(this.marginLeft, this.pageWidth - this.marginLeft - this.marginRight, para)
-            state.mutations.setParaObj(para, pagePara)
+            para.obj = pagePara
 
             pageParas.push(pagePara.render())
             lastPosBottom += para.paraHeight;

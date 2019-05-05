@@ -17,7 +17,14 @@ export default {
         }
     },
     mounted: function(){
-        var doc = new Document(500, 300, 10, 100, 100, 100, 100, state.document.body);
+        var doc = new Document(state.document.pageWidth, 
+                               state.document.pageHeight, 
+                               state.document.pageSpacingHeight, 
+                               state.document.marginTop, 
+                               state.document.marginRight, 
+                               state.document.marginBottom, 
+                               state.document.marginLeft, 
+                               state.document.body);
         window.goog.dom.appendChild(this.$el, doc.render())
     },
     render: function(createElement){
