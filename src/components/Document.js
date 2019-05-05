@@ -46,7 +46,6 @@ class Document{
                 position: 'absolute',
                 top: '0px',
                 left: '0px',
-                height: (this.pageHeight+this.pageSpacingHeight)*pageNo+'px'
             }
         }, pageParas)
         
@@ -66,7 +65,7 @@ class Document{
                 position: 'absolute',
                 top: '0px',
                 left: '0px',
-                height: (this.pageHeight+this.pageSpacingHeight)*2+'px'
+                height: (this.pageHeight+this.pageSpacingHeight)*pageNo+'px'
             }
         }, pageBgs)
 

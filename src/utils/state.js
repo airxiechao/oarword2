@@ -1,8 +1,10 @@
 import { getCursorPos, getPageLeftHeight } from './measure'
 import { getPagePara, getPageParas, getDocParaOfRun } from './convert'
+import { getPageNo } from '../utils/measure'
 
 import PageParagraph from '../components/PageParagraph'
 import PageSpacing from '../components/PageSpacing'
+import PageBackground from '../components/PageBackground'
 
 var state = {
     document: {
@@ -83,12 +85,15 @@ var state = {
             state.mutations._spliceRun(paraIndex, runIndex, startIndex, text, textStyle)
 
             // update document paragraph
-            state.mutations._updatePara(paraIndex)
+            var lastPosBottom = state.mutations._updatePara(paraIndex)
             
+            // update page background
+            state.mutations._updatePageBackground(lastPosBottom)
+
             // update cursor
             state.mutations._updateCursor(paraIndex, runIndex, startIndex + text.length)
         },
-        
+
         _spliceRun(paraIndex, runIndex, startIndex, text, textStyle){
             var run = state.document.doc[paraIndex][runIndex]
             var leftText = run.text.substr(0, startIndex)
@@ -97,10 +102,14 @@ var state = {
             run.text = leftText + text + rightText
         },
         _updatePara(paraIndex){
+            
+            // skip previous page paragraphs
             var lastPosBottom = state.document.marginTop
             for(let i = 0 ; i < paraIndex; ++i){
                 lastPosBottom += state.document.body[i].paraHeight
             }
+
+            // recreate current page paragraphs
             var oldPara = state.document.body[paraIndex]
             var newPara = getPagePara(state.document.doc[paraIndex], lastPosBottom,
                 state.document.pageWidth, state.document.pageHeight, state.document.pageSpacingHeight, 
@@ -112,7 +121,7 @@ var state = {
             newPara.obj = newPagePara
             window.goog.dom.replaceNode(newPagePara.render(), oldPagePara)
             
-
+            // adjust following page paragraph spacing
             lastPosBottom += newPara.paraHeight
             for(let i = paraIndex + 1; i < state.document.body.length; ++i){
                 var pagePara = state.document.body[i]
@@ -156,6 +165,26 @@ var state = {
 
                 pagePara.paraHeight = paraHeight
             }
+
+            return lastPosBottom
+        },
+        _updatePageBackground(lastPosBottom){
+            var pageNo = getPageNo(lastPosBottom, state.document.pageHeight, state.document.pageSpacingHeight)
+            var bgWrap = document.getElementsByClassName('page-bgs-wrap')[0]
+            var oldBgs = document.getElementsByClassName('page-bg')
+            if(pageNo > oldBgs.length){
+                for(let i = 0; i < pageNo - oldBgs.length; ++i){
+                    var pageBg = new PageBackground(state.document.pageWidth, state.document.pageHeight, state.document.pageSpacingHeight, state.document.marginTop, 
+                        state.document.marginRight, state.document.marginBottom, state.document.marginLeft, oldBgs.length+i)
+                    window.goog.dom.appendChild(bgWrap, pageBg.render())
+                }
+            }else if(pageNo < oldBgs.length){
+                for(let i = oldBgs.length; i > pageNo; --i){
+                    oldBgs[i-1].remove()
+                }
+            }
+
+            bgWrap.style.height = (state.document.pageHeight+state.document.pageSpacingHeight)*pageNo+'px'
         },
         _updateCursor(paraIndex, runIndex, startIndex){
             var nextStartIndex = startIndex
