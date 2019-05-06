@@ -174,9 +174,18 @@ var paras = [
     ]
 ]
 
+var paras2 = [
+    [
+        {
+            text: '',
+            textStyle: {
+                
+            }
+        },
+    ],
+]
 
-
-store.commit('setDocumentBody', paras)
+store.commit('setDocumentBody', paras2)
 
 new Vue({
     render: h => h(App),

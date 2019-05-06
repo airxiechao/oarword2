@@ -3,21 +3,23 @@ import { measureFontTextWH, measureElePageXY } from '../utils/measure.js'
 
 import state from '../utils/state'
 
-class PageInlineBlock{
+class PageInlineEop{
     constructor(ib){
         this.ib = ib
     }
 
     render(){
         var text = this.ib.text
-        var textStyle = this.ib.textStyle
+        var textStyle = this.ib.lastInlineBlock.textStyle
 
         var t = window.goog.dom.createTextNode(text)
+
         this.el = createElement('div', {
-            class: 'page-inline-block',
+            class: 'page-inline-eop',
             style: {
                 display: 'inline-block',
-                height: this.ib.inlineHeight + 'px',
+                opacity: 0,
+                cursor: 'text',
             }
         }, [
             t
@@ -29,25 +31,12 @@ class PageInlineBlock{
     }
 
     clickHandler(e){
-        var docXY = measureElePageXY(document.getElementsByClassName('doc')[0])
-        var docX = docXY.x
-        var pointLeft = e.clientX - docX - this.el.offsetLeft
-        
-        for(var i = 1; i <= this.ib.text.length; ++i){
-            var t = this.ib.text.substr(0, i)
-            var wh = measureFontTextWH(t, '', '', '')
-
-            if(wh.w > pointLeft){
-                break
-            }
-        }
-        
         state.mutations.setCursorInlineBlock({
-                inlineBlock: this.ib,
-                inlineStartIndex: i-1,
+                inlineBlock: this.ib.lastInlineBlock,
+                inlineStartIndex: this.ib.lastInlineBlock.text.length,
             }
         )
     }
 }
 
-export default PageInlineBlock
+export default PageInlineEop

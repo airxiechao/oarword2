@@ -44,6 +44,14 @@ function paraRunsToLinesAndSpacings(runs, paraWidth, posTop, marginTop, marginBo
         paraHeight += lineHeight
     }
 
+    // add eop to last line
+    var lastLineInlineBlock = line.inlineBlocks[line.inlineBlocks.length - 1]
+    line.inlineBlocks.push({
+        text: '¶',
+        type: 'inline-eop',
+        lastInlineBlock: lastLineInlineBlock,
+    })
+
     return {
         paraLinesAndSpacings: paraLinesAndSpacings,
         paraHeight: paraHeight,
@@ -57,10 +65,10 @@ function getLineInlineBlocksAndHeightFromQueue(runsQueue, lineWidth){
     while(totalWidth < lineWidth && runsQueue.length > 0){
         var run = runsQueue.shift()
 
+        var wh = {w:0,h:0}
         for(var i = 1; i<=run.text.length; ++i){
-            var text = run.text.substr(0,i)
-            var wh = measureFontTextWH(text, '', '', '')
-            
+            var t = run.text.substr(0,i)
+            wh = measureFontTextWH(t, '', '', '')            
             if(totalWidth + wh.w > lineWidth){
                 i -= 1
                 break
@@ -91,7 +99,13 @@ function getLineInlineBlocksAndHeightFromQueue(runsQueue, lineWidth){
             }
         }
 
+        if(run.text.length == 0){
+            wh = measureFontTextWH('|', '', '', '')  
+        }
+
         inlineBlock.type = 'inline-block'
+        inlineBlock.inlineHeight = wh.h
+
         lineInlineBlocks.push(inlineBlock)
         totalWidth += wh.w;
     }

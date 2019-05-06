@@ -40,14 +40,13 @@ function getCursorPos(cursorInlineBlock, inlineStartIndex){
         var InlineBlocktTop = cb.obj.el.offsetTop
         
         var text = cb.text
-        var si = inlineStartIndex
 
-        var t = text.substr(0, si + 1)
-        var h = measureFontTextWH(t, '', '', '').h
+        var t = text.substr(0, inlineStartIndex + 1)
+        var h = cb.inlineHeight
 
         var w = 0
-        if( si > 0 ){
-            t = text.substr(0, si)
+        if( inlineStartIndex > 0 ){
+            t = text.substr(0, inlineStartIndex)
             w = measureFontTextWH(t, '', '', '').w
         }
 

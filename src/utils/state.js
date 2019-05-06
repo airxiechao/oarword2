@@ -200,7 +200,7 @@ var state = {
                     let ibRunIndex = para.doc.indexOf(ib.doc)
 
                     if(ibRunIndex == runIndex){
-                        if(nextStartIndex >= ib.startIndex && nextStartIndex < ib.startIndex + ib.text.length ){
+                        if(nextStartIndex >= ib.startIndex && nextStartIndex <= ib.startIndex + ib.text.length ){
                             state.document.cursor.inlineBlock = state.document.body[paraIndex].linesAndSpacings[i].inlineBlocks[j]
                             state.document.cursor.inlineStartIndex = nextStartIndex - ib.startIndex
                         } 
