@@ -6,7 +6,6 @@ class DocCursor{
         this.cursorHeight = 0
         this.cursorPosX = 0
         this.cursorPoxY = 0
-        this.imeStatus = false
 
         state.mutations.setCursorObj(this)
     }
@@ -22,7 +21,7 @@ class DocCursor{
                 left: this.cursorPosX + 'px',
                 top: this.cursorPoxY + 'px',
                 opacity: 1,
-                visibility: this.imeStatus ? 'hidden' : 'visible',
+                visibility: 'visible',
             }
         })
 
@@ -37,12 +36,20 @@ class DocCursor{
         this.cursorHeight = cursorHeight
         this.cursorPosX = cursorPosX
         this.cursorPoxY = cursorPosY
+
         updateElement(this.el, {
             style: {
                 height: this.cursorHeight + 'px',
                 left: this.cursorPosX + 'px',
                 top: this.cursorPoxY + 'px',
-                visibility: this.imeStatus ? 'hidden' : 'visible',
+            }
+        })
+    }
+
+    updateVisibility(visibility){
+        updateElement(this.el, {
+            style: {
+                visibility: visibility ? 'visible' : 'hidden',
             }
         })
     }

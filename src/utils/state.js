@@ -72,6 +72,10 @@ var state = {
 
             state.mutations._updateCursorAndInputBoxPos()
         },
+        setImeStatus: function(imeStatus){
+            var cursor = state.document.cursor.obj
+            cursor.updateVisibility(!imeStatus)
+        },
         addOrUpdateParaRun: function(payload){
             var text = payload.text
             var textStyle = payload.textStyle
