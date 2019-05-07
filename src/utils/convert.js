@@ -44,14 +44,6 @@ function paraRunsToLinesAndSpacings(runs, paraWidth, posTop, marginTop, marginBo
         paraHeight += lineHeight
     }
 
-    // add eop to last line
-    var lastLineInlineBlock = line.inlineBlocks[line.inlineBlocks.length - 1]
-    line.inlineBlocks.push({
-        text: '¶',
-        type: 'inline-eop',
-        lastInlineBlock: lastLineInlineBlock,
-    })
-
     return {
         paraLinesAndSpacings: paraLinesAndSpacings,
         paraHeight: paraHeight,
@@ -168,6 +160,91 @@ function getDocParaOfRun(doc, run){
     return null
 }
 
+function getPreviousLineOfBody(body, inlineBlock){
+    let lastline = null
+    for(let i = 0; i < body.length; ++i){
+        let para = body[i]
+        for(let j = 0; j < para.linesAndSpacings.length; ++j){
+            let line = para.linesAndSpacings[j]
+            if(line.type == 'spacing'){
+                continue
+            }
+            for(let k = 0; k < line.inlineBlocks.length; ++k){
+                let ib = line.inlineBlocks[k]
+                if(ib == inlineBlock){
+                    return lastline
+                }
+            }
+            lastline = line
+        }
+    }
+
+    return lastline
+}
+
+function getNextLineOfBody(body, inlineBlock){
+    let nextline = null
+    for(let i = body.length - 1; i >= 0; --i){
+        let para = body[i]
+        for(let j = para.linesAndSpacings.length - 1; j >= 0 ; --j){
+            let line = para.linesAndSpacings[j]
+            if(line.type == 'spacing'){
+                continue
+            }
+            for(let k = line.inlineBlocks.length - 1; k >= 0 ; --k){
+                let ib = line.inlineBlocks[k]
+                if(ib == inlineBlock){
+                    return nextline
+                }
+            }
+            nextline = line
+        }
+    }
+
+    return nextline
+}
+
+function getPreviousInlineOfBody(body, inlineBlock){
+    let lastib = null
+    for(let i = 0; i < body.length; ++i){
+        let para = body[i]
+        for(let j = 0; j < para.linesAndSpacings.length; ++j){
+            let line = para.linesAndSpacings[j]
+            for(let k = 0; k < line.inlineBlocks.length; ++k){
+                let ib = line.inlineBlocks[k]
+                if(ib == inlineBlock){
+                    return lastib
+                }
+
+                lastib = ib
+            }
+        }
+    }
+
+    return lastib
+}
+
+function getNextInlineOfBody(body, inlineBlock){
+    let nextib = null
+    for(let i = body.length - 1; i >= 0; --i){
+        let para = body[i]
+        for(let j = para.linesAndSpacings.length - 1; j >= 0 ; --j){
+            let line = para.linesAndSpacings[j]
+            for(let k = line.inlineBlocks.length - 1; k >= 0 ; --k){
+                let ib = line.inlineBlocks[k]
+                if(ib == inlineBlock){
+                    return nextib
+                }
+
+                nextib = ib
+            }
+        }
+    }
+
+    return nextib
+}
+
 
 export { paraRunsToLinesAndSpacings, getLineInlineBlocksAndHeightFromQueue, getPageLeftHeight, 
-         getPagePara, getPageParas, getDocParaOfRun }
+         getPagePara, getPageParas, getDocParaOfRun, getPreviousInlineOfBody, getNextInlineOfBody,
+         getPreviousLineOfBody, getNextLineOfBody }

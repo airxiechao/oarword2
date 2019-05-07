@@ -30,6 +30,7 @@ class DocInputBox{
         window.goog.events.listen(this.el, window.goog.events.EventType.INPUT, this.inputHandler.bind(this));
         window.goog.events.listen(new window.goog.events.ImeHandler(this.el),
             window.goog.object.getValues(window.goog.events.ImeHandler.EventType), this.imeHandler.bind(this));
+        window.goog.events.listen(this.el, window.goog.events.EventType.KEYDOWN, this.keydownHandler.bind(this));
 
         return this.el
     }
@@ -50,14 +51,15 @@ class DocInputBox{
 
     inputHandler(e){
         if(!this.imeStatus){
-            state.mutations.addOrUpdateParaRun({
+            state.mutations.addToParaRun({
                 text: this.el.textContent,
                 textStyle: {},
             })
             this.el.textContent = ''
         }else{
             var ib = state.document.cursor.inlineBlock
-            var si = state.document.cursor.inlineStartIndex
+            var front = state.document.cursor.front
+            var si = state.document.cursor.inlineStartIndex + (front ? 0 : 1)
             
             var text = ib.text
             var leftText = text.substr(0, si)
@@ -103,7 +105,7 @@ class DocInputBox{
             state.mutations.setImeStatus(this.imeStatus)
 
         } else if(e.type == 'endIme' ) {
-            state.mutations.addOrUpdateParaRun({
+            state.mutations.addToParaRun({
                 text: this.el.textContent,
                 textStyle: {},
             })
@@ -120,6 +122,100 @@ class DocInputBox{
 
         } else if(e.type == 'updateIme') {
             
+        }
+    }
+
+    keydownHandler(e){
+        if(e.ctrlKey ) {
+            e.stopPropagation();
+            e.preventDefault();
+        }
+
+        switch(e.keyCode) {
+            // hot kes: ctrl+f
+            case 70: {
+                if(e.ctrlKey ) {
+
+                }
+                break;
+            }
+            // hot keys: ctrl+z
+            case 90: {
+                if( e.ctrlKey ) {
+                    
+                }
+    
+                break;
+            }
+            // hot keys: ctrl+y
+            case 89: {
+                if( e.ctrlKey ) {
+                    
+                }
+    
+                break;
+            }
+            // hot keys: ctrl+c
+            case 67: {
+                if( e.ctrlKey ) {
+                    
+                }
+    
+                break;
+            }
+            // hot keys: ctrl+v
+            case 86: {
+                if( e.ctrlKey ) {
+                    if(G.copySet && G.copySet.length > 0 ) {
+                        
+                    }
+                }
+    
+                break;
+            }
+            // hot keys: ctrl+x
+            case 88: {
+                if( e.ctrlKey ) {
+                    
+                }
+    
+                break;
+            }
+            // key delete
+            case 8:
+            {
+                state.mutations.deleteFromParaRun()
+                break;
+            }
+            // key enter
+            case 13:
+            {
+                break;
+            }
+            // left
+            case 37:
+            {
+                state.mutations.leftMoveCursor()
+                break;
+            }
+            // up
+            case 38:
+            {
+                state.mutations.upMoveCursor()
+                break;
+            }
+            // right
+            case 39:
+            {
+                state.mutations.rightMoveCursor()
+                break;
+            }
+            // down
+            case 40:
+            {
+                state.mutations.downMoveCursor()
+                break;
+            }
         }
     }
 }

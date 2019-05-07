@@ -1,5 +1,4 @@
 import PageInlineBlock from './PageInlineBlock'
-import PageInlineEop from './PageInlineEop'
 
 import { createElement } from '../utils/renderer'
 
@@ -18,13 +17,7 @@ class PageLine{
                 ib.obj = inlineBlock
     
                 inlineBlocks.push(inlineBlock.render())
-            }else if(ib.type == 'inline-eop'){
-                var inlineEop = new PageInlineEop(ib)
-                ib.obj = inlineEop
-    
-                inlineBlocks.push(inlineEop.render())
             }
-            
         }
 
         this.el = createElement('div', {
@@ -32,6 +25,7 @@ class PageLine{
             style: {
                 whiteSpace: 'nowrap',
                 width: this.lineWidth+'px',
+                //height: this.ls.lineHeight+'px',
             }
         }, inlineBlocks)
 

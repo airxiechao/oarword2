@@ -1,5 +1,6 @@
-import { getCursorPos, getPageLeftHeight } from './measure'
-import { getPagePara, getPageParas, getDocParaOfRun } from './convert'
+import { measureFontTextWH, getCursorPos, getPageLeftHeight } from './measure'
+import { getPagePara, getPageParas, getDocParaOfRun, 
+    getPreviousInlineOfBody, getNextInlineOfBody, getPreviousLineOfBody, getNextLineOfBody } from './convert'
 import { getPageNo } from '../utils/measure'
 
 import PageParagraph from '../components/PageParagraph'
@@ -11,6 +12,7 @@ var state = {
         cursor: {
             inlineBlock: null,
             inlineStartIndex: -1,
+            front: false,
         },
         inputBox: {
 
@@ -44,7 +46,7 @@ var state = {
         },
         cursorPos: function(){
             var cursorInlineBlock = state.getters.cursorInlineBlock()
-            var pos = getCursorPos(cursorInlineBlock, state.document.cursor.inlineStartIndex)
+            var pos = getCursorPos(cursorInlineBlock, state.document.cursor.inlineStartIndex, state.document.cursor.front)
             return pos
         },
     },
@@ -69,6 +71,154 @@ var state = {
         setCursorInlineBlock: function(payload){
             state.document.cursor.inlineBlock = payload.inlineBlock
             state.document.cursor.inlineStartIndex = payload.inlineStartIndex
+            state.document.cursor.front = payload.front
+
+            state.mutations._updateCursorAndInputBoxPos()
+        },
+        leftMoveCursor: function(){
+            var ci = state.getters.cursorDocIndex()
+            var runIndex = ci.runIndex
+
+            if(!state.document.cursor.front){
+                state.document.cursor.front = true
+            }else{
+                if(state.document.cursor.inlineStartIndex > 0){
+                    state.document.cursor.inlineStartIndex -= 1
+                }else{
+                    // get left inline block of body
+                    let lastib = getPreviousInlineOfBody(state.document.body, state.document.cursor.inlineBlock)
+                    if(lastib){
+                        state.document.cursor.inlineBlock = lastib
+                        state.document.cursor.inlineStartIndex = lastib.text.length - 1
+                        state.document.cursor.front = runIndex == 0 ? false : true
+                    }
+                }
+            }
+
+            state.mutations._updateCursorAndInputBoxPos()
+        },
+        rightMoveCursor: function(){
+            if(state.document.cursor.front){
+                state.document.cursor.front = false
+            }else{
+                if(state.document.cursor.inlineStartIndex < state.document.cursor.inlineBlock.text.length - 1){
+                    state.document.cursor.inlineStartIndex += 1
+                }else if(state.document.cursor.inlineStartIndex == state.document.cursor.inlineBlock.text.length - 1){
+                    // get right inline block of body
+                    let nextib = getNextInlineOfBody(state.document.body, state.document.cursor.inlineBlock)
+                    if(nextib){
+                        let para = getDocParaOfRun(state.document.doc, nextib.doc)
+                        let paraIndex = state.document.doc.indexOf(para)
+                        let runIndex = state.document.doc[paraIndex].indexOf(nextib.doc)
+
+                        state.document.cursor.inlineBlock = nextib
+                        state.document.cursor.inlineStartIndex = 0
+                        state.document.cursor.front = runIndex == 0 ? true : false
+                    }
+                }
+            }
+
+            state.mutations._updateCursorAndInputBoxPos()
+        },
+        upMoveCursor: function(){
+            let cx = state.document.cursor.obj.el.offsetLeft
+
+            let lastline = getPreviousLineOfBody(state.document.body, state.document.cursor.inlineBlock)
+            if(lastline){
+                let ib = null
+                let si = -1
+                let front = false
+                for(let i = 0; i < lastline.inlineBlocks.length; ++i){
+                    ib = lastline.inlineBlocks[i]
+                    let lx = ib.obj.el.offsetLeft
+                    let lw = ib.obj.el.offsetWidth
+
+                    if(cx >= lx && cx <= lx + lw){
+                        let lastw = 0
+                        for(let j = 1; j <= ib.text.length; ++j){
+                            let t = ib.text.substr(0, j)
+                            let wh = measureFontTextWH(t, '', '', '')
+                
+                            if(wh.w + lx > cx ){
+                                si = j - 1
+
+                                if( lx + lastw + (wh.w - lastw) / 2 > cx ){
+                                    front = true
+                                }else{
+                                    front = false
+                                }
+
+                                break
+                            }
+
+                            lastw = wh.w
+                        }
+
+                        if(si >= 0){
+                            break
+                        }
+                    }
+                }
+
+                if(si < 0){
+                    si = ib.text.length - 1
+                }
+
+                state.document.cursor.inlineBlock = ib
+                state.document.cursor.inlineStartIndex = si
+                state.document.cursor.front = front
+            }
+
+            state.mutations._updateCursorAndInputBoxPos()
+        },
+        downMoveCursor: function(){
+            let cx = state.document.cursor.obj.el.offsetLeft
+
+            var nextline = getNextLineOfBody(state.document.body, state.document.cursor.inlineBlock)
+            if(nextline){
+                let ib = null
+                let si = -1
+                let front = false
+                for(let i = 0; i < nextline.inlineBlocks.length; ++i){
+                    ib = nextline.inlineBlocks[i]
+                    let lx = ib.obj.el.offsetLeft
+                    let lw = ib.obj.el.offsetWidth
+
+                    if(cx >= lx && cx <= lx + lw){
+                        let lastw = 0
+                        for(let j = 1; j <= ib.text.length; ++j){
+                            let t = ib.text.substr(0, j)
+                            let wh = measureFontTextWH(t, '', '', '')
+                
+                            if(wh.w + lx > cx ){
+                                si = j - 1
+
+                                if( lx + lastw + (wh.w - lastw) / 2 > cx ){
+                                    front = true
+                                }else{
+                                    front = false
+                                }
+
+                                break
+                            }
+
+                            lastw = wh.w
+                        }
+
+                        if(si >= 0){
+                            break
+                        }
+                    }
+                }
+
+                if(si < 0){
+                    si = ib.text.length - 1
+                }
+
+                state.document.cursor.inlineBlock = ib
+                state.document.cursor.inlineStartIndex = si
+                state.document.cursor.front = front
+            }
 
             state.mutations._updateCursorAndInputBoxPos()
         },
@@ -76,7 +226,7 @@ var state = {
             var cursor = state.document.cursor.obj
             cursor.updateVisibility(!imeStatus)
         },
-        addOrUpdateParaRun: function(payload){
+        addToParaRun: function(payload){
             var text = payload.text
             var textStyle = payload.textStyle
 
@@ -84,9 +234,10 @@ var state = {
             var paraIndex = ci.paraIndex
             var runIndex = ci.runIndex
             var startIndex = ci.startIndex
+            var front = state.document.cursor.front
             
             // update run text
-            state.mutations._spliceRun(paraIndex, runIndex, startIndex, text, textStyle)
+            state.mutations._spliceRunText(paraIndex, runIndex, front ? startIndex : startIndex + 1, text, textStyle)
 
             // update document paragraph
             var lastPosBottom = state.mutations._updatePara(paraIndex)
@@ -97,8 +248,123 @@ var state = {
             // update cursor
             state.mutations._updateCursor(paraIndex, runIndex, startIndex + text.length)
         },
+        deleteFromParaRun: function(){
+            var ci = state.getters.cursorDocIndex()
+            var front = state.document.cursor.front
+            var paraIndex = ci.paraIndex
+            var runIndex = ci.runIndex
+            var startIndex = ci.startIndex
+            var para = state.document.doc[paraIndex]
+            var run = para[runIndex]
 
-        _spliceRun(paraIndex, runIndex, startIndex, text, textStyle){
+            if(!front){
+                state.mutations._deleteRunText(paraIndex, runIndex, startIndex)
+                
+                if(run.text == ''){
+                    if(runIndex >= 1 || (runIndex == 0 && para.length > 1)){
+                        para.splice(runIndex, 1)
+
+                        if(runIndex == 0){
+                            startIndex = 0
+                            front = true
+                        }else{
+                            let lastib = getPreviousInlineOfBody(state.document.body, state.document.cursor.inlineBlock)
+                            let p = getDocParaOfRun(state.document.doc, lastib.doc)
+                            paraIndex = state.document.doc.indexOf(p)
+                            runIndex = state.document.doc[paraIndex].indexOf(lastib.doc)
+                            startIndex = lastib.text.length - 1
+                            front = false
+                        }
+                    }else{
+                        front = true
+                    }
+                }else{
+                    if(startIndex > 0){
+                        startIndex -= 1
+                    }else{
+                        front = true
+                    }
+                }
+            }else{
+                if(startIndex > 0){
+                    startIndex -= 1
+                    state.mutations._deleteRunText(paraIndex, runIndex, startIndex)
+                }else{
+                    if(runIndex == 0){
+                        if(paraIndex > 0){
+                            // merge to previous paragraph
+                            state.mutations._mergePreviousPara(paraIndex)
+
+                            let lastib = getPreviousInlineOfBody(state.document.body, state.document.cursor.inlineBlock)
+                            if(lastib){
+                                let p = getDocParaOfRun(state.document.doc, lastib.doc)
+                                paraIndex = state.document.doc.indexOf(p)
+                                runIndex = state.document.doc[paraIndex].indexOf(lastib.doc)
+                                startIndex = lastib.text.length - 1
+
+                                
+                            }
+                            front = false
+                        }
+                    }else{
+                        let lastib = getPreviousInlineOfBody(state.document.body, state.document.cursor.inlineBlock)
+                        if(lastib){
+                            let p = getDocParaOfRun(state.document.doc, lastib.doc)
+                            paraIndex = state.document.doc.indexOf(p)
+                            runIndex = state.document.doc[paraIndex].indexOf(lastib.doc)
+                            startIndex = lastib.text.length - 1
+
+                            // delete previous inline block's text
+                            state.mutations._deleteRunText(paraIndex, runIndex, startIndex)
+
+                            startIndex -= 1
+                            front = false
+                        }
+
+                        
+                    }
+
+                    
+                    
+                }
+            }
+
+            // update document paragraph
+            var lastPosBottom = state.mutations._updatePara(paraIndex)
+                
+            // update page background
+            state.mutations._updatePageBackground(lastPosBottom)
+
+            // update cursor
+            state.mutations._updateCursor(paraIndex, runIndex, startIndex, front)
+        },
+        _mergePreviousPara(paraIndex){
+            if(paraIndex > 0){
+                var prePara = state.document.doc[paraIndex-1]
+                var para = state.document.doc[paraIndex]
+
+                for(let i = 0; i < para.length; ++i){
+                    let r = para[i]
+                    if(r.text != ''){
+                        prePara.push(para[i])
+                    }
+                }
+
+                state.document.doc.splice(paraIndex, 1)
+                state.document.body[paraIndex].obj.el.remove()
+                state.document.body.splice(paraIndex, 1)
+            }
+            
+        },
+        _deleteRunText(paraIndex, runIndex, startIndex){
+            var para = state.document.doc[paraIndex]
+            var run = para[runIndex]
+            var leftText = run.text.substr(0, startIndex)
+            var rightText = run.text.substr(startIndex+1)
+
+            run.text = leftText + rightText
+        },
+        _spliceRunText(paraIndex, runIndex, startIndex, text, textStyle){
             var run = state.document.doc[paraIndex][runIndex]
             var leftText = run.text.substr(0, startIndex)
             var rightText = run.text.substr(startIndex)
@@ -190,7 +456,7 @@ var state = {
 
             bgWrap.style.height = (state.document.pageHeight+state.document.pageSpacingHeight)*pageNo+'px'
         },
-        _updateCursor(paraIndex, runIndex, startIndex){
+        _updateCursor(paraIndex, runIndex, startIndex, front){
             var nextStartIndex = startIndex
             var para = state.document.body[paraIndex]
             for(let i = 0; i < para.linesAndSpacings.length; ++i){
@@ -202,11 +468,15 @@ var state = {
                 for(let j = 0; j < ls.inlineBlocks.length; ++j){
                     let ib = ls.inlineBlocks[j]
                     let ibRunIndex = para.doc.indexOf(ib.doc)
-
+                    
                     if(ibRunIndex == runIndex){
                         if(nextStartIndex >= ib.startIndex && nextStartIndex <= ib.startIndex + ib.text.length ){
                             state.document.cursor.inlineBlock = state.document.body[paraIndex].linesAndSpacings[i].inlineBlocks[j]
                             state.document.cursor.inlineStartIndex = nextStartIndex - ib.startIndex
+                            if(front !== undefined){
+                                state.document.cursor.front = front
+                            }
+                            
                         } 
                     }
                 }

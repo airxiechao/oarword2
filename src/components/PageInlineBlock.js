@@ -33,18 +33,29 @@ class PageInlineBlock{
         var docX = docXY.x
         var pointLeft = e.clientX - docX - this.el.offsetLeft
         
+        var front = false
+        var lastw = 0
         for(var i = 1; i <= this.ib.text.length; ++i){
             var t = this.ib.text.substr(0, i)
             var wh = measureFontTextWH(t, '', '', '')
 
             if(wh.w > pointLeft){
+                var cw = wh.w - lastw
+
+                if(pointLeft < lastw + cw / 2){
+                    front = true
+                }
+
                 break
             }
+
+            lastw = wh.w
         }
         
         state.mutations.setCursorInlineBlock({
                 inlineBlock: this.ib,
                 inlineStartIndex: i-1,
+                front: front,
             }
         )
     }
