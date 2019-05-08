@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import App from './App.vue'
 
-import store from './utils/store'
+import state from './utils/state'
 
 Vue.config.productionTip = false
 
@@ -205,7 +205,7 @@ var paras2 = [
     ],
 ]
 
-store.commit('setDocumentBody', paras)
+state.mutations.setDocument(paras)
 
 new Vue({
     render: h => h(App),
