@@ -216,7 +216,12 @@ var state = {
                 }
 
                 if(si < 0){
-                    si = ib.text.length - 1
+                    if(ib.text.length > 0){
+                        si = ib.text.length - 1
+                    }else{
+                        si = 0
+                        front = true
+                    }
                 }
 
                 state.document.cursor.inlineBlock = ib
