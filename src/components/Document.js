@@ -72,11 +72,34 @@ class Document{
         // render inputbox
         var docInputBox = new DocInputBox()
 
-        this.el = createElement('div', {
+        this.docEl = createElement('div', {
             class: 'doc',
+            style: {
+                position: 'absolute',
+                marginTop: this.pageSpacingHeight+'px',
+            },
         }, [ pageBgsWrap, pageParasWrap, docInputBox.render(), docCursor.render() ])
 
+        this.el = createElement('div', {
+            class: 'doc-wrap',
+            style: {
+                position: 'relative',
+                width: '100%',
+                overflow: 'auto',
+                background: '#ebebeb',
+            }
+        }, [this.docEl])
+
+        // handle viewport resize
+        this.vsm = new window.goog.dom.ViewportSizeMonitor();
+        window.goog.events.listen(this.vsm, goog.events.EventType.RESIZE, this.resizeHandler.bind(this));
+
         return this.el
+    }
+
+    resizeHandler(){
+        this.el.style.height = (this.el.offsetParent.offsetHeight - this.el.offsetTop) + 'px'
+        this.docEl.style.left = Math.max((this.docEl.offsetParent.offsetWidth - this.pageWidth) / 2, 0) + 'px'
     }
 }
 

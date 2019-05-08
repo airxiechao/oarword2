@@ -13,7 +13,7 @@ class DocInputBox{
 
     render(){
         this.el = createElement('div', {
-            class: 'inputbox',
+            class: 'doc-inputbox',
             attrs: {
                 contentEditable: true,
             },

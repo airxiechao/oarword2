@@ -1,22 +1,17 @@
 <script>
-//import Document from './components/Document.vue'
-import store from './utils/store'
-import state from './utils/state'
-
 import Document from './components/Document'
+import Toolbar from './components/Toolbar'
+
+import state from './utils/state'
 
 export default {
     name: 'app',
-    components: {
-        Document
-    },
-    store,
-    computed: {
-        documentBody: function(){
-            return this.$store.state.document.body
-        }
-    },
     mounted: function(){
+        // add toolbar
+        var toolbar = new Toolbar()
+        window.goog.dom.appendChild(this.$el, toolbar.render())
+
+        // add doc
         var doc = new Document(state.document.pageWidth, 
                                state.document.pageHeight, 
                                state.document.pageSpacingHeight, 
@@ -25,18 +20,19 @@ export default {
                                state.document.marginBottom, 
                                state.document.marginLeft, 
                                state.document.body);
+                               
         window.goog.dom.appendChild(this.$el, doc.render())
+        doc.resizeHandler()
     },
     render: function(createElement){
-        /*
-        var doc = createElement('Document', {
-            props: {
-                documentBody: this.documentBody
-            }
-        })*/
-
         var app = createElement('div', {
             class: 'app',
+            style: {
+                position: 'relative',
+                width: '100%',
+                height: '100%',
+                overflow: 'hidden',
+            }
         })
 
         return app
@@ -50,11 +46,6 @@ html, body{
     margin: 0;
     width: 100%;
     height: 100%;
-    background: #ebebeb;
 }
 
-.app {
-    margin: 10px;
-    position: relative;
-}
 </style>
