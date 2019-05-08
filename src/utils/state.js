@@ -19,8 +19,8 @@ var state = {
         doc: [],
         body: [],
         marginTop: 100,
-        pageWidth: 500,
-        pageHeight: 300,
+        pageWidth: 800,
+        pageHeight: 800 * Math.sqrt(2),
         pageSpacingHeight: 10,
         marginRight: 100,
         marginBottom: 100,
@@ -78,7 +78,7 @@ var state = {
             var ci = state.getters.cursorDocIndex()
             var runIndex = ci.runIndex
 
-            if(!state.document.cursor.front){
+            if(!state.document.cursor.front && state.document.cursor.inlineBlock.text.length > 0){
                 state.document.cursor.front = true
             }else{
                 if(state.document.cursor.inlineStartIndex > 0){
@@ -88,7 +88,7 @@ var state = {
                     let lastib = getPreviousInlineOfBody(state.document.body, state.document.cursor.inlineBlock)
                     if(lastib){
                         state.document.cursor.inlineBlock = lastib
-                        state.document.cursor.inlineStartIndex = lastib.text.length - 1
+                        state.document.cursor.inlineStartIndex = lastib.text.length > 0 ? lastib.text.length - 1 : 0
                         state.document.cursor.front = runIndex == 0 ? false : true
                     }
                 }
@@ -97,12 +97,12 @@ var state = {
             state.mutations._updateCursorAndInputBoxPos()
         },
         rightMoveCursor: function(){
-            if(state.document.cursor.front){
+            if(state.document.cursor.front && state.document.cursor.inlineBlock.text.length > 0){
                 state.document.cursor.front = false
             }else{
                 if(state.document.cursor.inlineStartIndex < state.document.cursor.inlineBlock.text.length - 1){
                     state.document.cursor.inlineStartIndex += 1
-                }else if(state.document.cursor.inlineStartIndex == state.document.cursor.inlineBlock.text.length - 1){
+                }else{
                     // get right inline block of body
                     let nextib = getNextInlineOfBody(state.document.body, state.document.cursor.inlineBlock)
                     if(nextib){
@@ -160,7 +160,12 @@ var state = {
                 }
 
                 if(si < 0){
-                    si = ib.text.length - 1
+                    if(ib.text.length > 0){
+                        si = ib.text.length - 1
+                    }else{
+                        si = 0
+                        front = true
+                    }
                 }
 
                 state.document.cursor.inlineBlock = ib
