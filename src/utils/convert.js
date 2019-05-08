@@ -22,6 +22,8 @@ function paraRunsToLinesAndSpacings(runs, paraWidth, posTop, marginTop, marginBo
         var line = {
             inlineBlocks: lh.lineInlineBlocks,
             lineHeight: lineHeight,
+            lineWidth: paraWidth,
+            spacingHeight: 0,
             type: 'line',
         }
 
@@ -30,11 +32,8 @@ function paraRunsToLinesAndSpacings(runs, paraWidth, posTop, marginTop, marginBo
         if(leftHeight < lineHeight){
             // add page spacing
             var spacingHeight = leftHeight + marginBottom + pageSpacingHeight + marginTop
-            var spacing = {
-                spacingHeight: spacingHeight,
-                type: 'spacing',
-            }
-            paraLinesAndSpacings.push(spacing)
+
+            line.spacingHeight = spacingHeight
             posTop += spacingHeight
             paraHeight += spacingHeight
         }
@@ -58,6 +57,10 @@ function getLineInlineBlocksAndHeightFromQueue(runsQueue, lineWidth){
         var run = runsQueue.shift()
 
         var wh = {w:0,h:0}
+        if(run.text.length == 0){
+            wh.h = measureFontTextWH('|', '', '', '').h
+            maxHeight = wh.h
+        }
         for(var i = 1; i<=run.text.length; ++i){
             var t = run.text.substr(0,i)
             wh = measureFontTextWH(t, '', '', '')            
@@ -91,10 +94,6 @@ function getLineInlineBlocksAndHeightFromQueue(runsQueue, lineWidth){
             }
         }
 
-        if(run.text.length == 0){
-            wh = measureFontTextWH('|', '', '', '')  
-        }
-
         inlineBlock.type = 'inline-block'
         inlineBlock.inlineHeight = wh.h
 
@@ -122,6 +121,7 @@ function getPagePara(para, lastPosBottom,
         type: 'para',
         doc: para,
         paraHeight: paraHeight,
+        paraWidth: paraWidth,
         linesAndSpacings: paraLinesAndSpacings,
     }
 
@@ -166,7 +166,7 @@ function getPreviousLineOfBody(body, inlineBlock){
         let para = body[i]
         for(let j = 0; j < para.linesAndSpacings.length; ++j){
             let line = para.linesAndSpacings[j]
-            if(line.type == 'spacing'){
+            if(line.type != 'line'){
                 continue
             }
             for(let k = 0; k < line.inlineBlocks.length; ++k){
@@ -188,7 +188,7 @@ function getNextLineOfBody(body, inlineBlock){
         let para = body[i]
         for(let j = para.linesAndSpacings.length - 1; j >= 0 ; --j){
             let line = para.linesAndSpacings[j]
-            if(line.type == 'spacing'){
+            if(line.type != 'line'){
                 continue
             }
             for(let k = line.inlineBlocks.length - 1; k >= 0 ; --k){

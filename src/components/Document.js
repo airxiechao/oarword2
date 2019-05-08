@@ -1,6 +1,5 @@
 import PageBackground from './PageBackground'
 import PageParagraph from './PageParagraph'
-import PageSpacing from './PageSpacing'
 import DocCursor from './DocCursor'
 import DocInputBox from './DocInputBox'
 
@@ -23,16 +22,13 @@ class Document{
     }
 
     render(){
-        // render first page spacing
-        var firstPageSpacing = new PageSpacing(this.marginLeft, { spacingHeight: this.marginTop })
-
         // render paragraphs
         var lastPosBottom = this.marginTop;
         
-        var pageParas = [firstPageSpacing.render()]
+        var pageParas = []
         for(let i = 0; i < this.documentBody.length; ++i){
             var para = this.documentBody[i]
-            var pagePara = new PageParagraph(this.marginLeft, this.pageWidth - this.marginLeft - this.marginRight, para)
+            var pagePara = new PageParagraph(this.marginLeft, para)
             para.obj = pagePara
 
             pageParas.push(pagePara.render())
@@ -46,6 +42,7 @@ class Document{
                 position: 'absolute',
                 top: '0px',
                 left: '0px',
+                paddingTop: this.marginTop+'px',
             }
         }, pageParas)
         

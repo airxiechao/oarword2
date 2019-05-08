@@ -166,9 +166,7 @@ class DocInputBox{
             // hot keys: ctrl+v
             case 86: {
                 if( e.ctrlKey ) {
-                    if(G.copySet && G.copySet.length > 0 ) {
-                        
-                    }
+                    
                 }
     
                 break;
@@ -190,6 +188,7 @@ class DocInputBox{
             // key enter
             case 13:
             {
+                state.mutations.splitParaRun()
                 break;
             }
             // left

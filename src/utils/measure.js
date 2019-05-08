@@ -36,8 +36,8 @@ function getCursorPos(cursorInlineBlock, inlineStartIndex, front){
     
     var cb = cursorInlineBlock
     if(cb && cb.obj && cb.obj.el){
-        var InlineBlockLeft = cb.obj.el.offsetLeft
-        var InlineBlocktTop = cb.obj.el.offsetTop
+        var inlineBlockLeft = cb.obj.el.offsetLeft
+        var inlineBlocktTop = cb.obj.el.offsetTop
         
         var text = cb.text
         var h = cb.inlineHeight
@@ -68,8 +68,8 @@ function getCursorPos(cursorInlineBlock, inlineStartIndex, front){
             }
         }
 
-        cursorPosX = InlineBlockLeft + w
-        cursorPosY = InlineBlocktTop
+        cursorPosX = inlineBlockLeft + w
+        cursorPosY = inlineBlocktTop
         cursorHeight = h
     }
     

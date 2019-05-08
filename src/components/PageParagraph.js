@@ -1,13 +1,11 @@
-import PageSpacing from './PageSpacing'
 import PageLine from './PageLine'
 
 import { createElement } from '../utils/renderer'
 import state from '../utils/state'
 
 class PageParagraph{
-    constructor(posLeft, paraWidth, para){
+    constructor(posLeft, para){
         this.posLeft = posLeft
-        this.paraWidth = paraWidth
         this.para = para
     }
     
@@ -16,16 +14,9 @@ class PageParagraph{
         for(var i = 0; i < this.para.linesAndSpacings.length; ++i){
             var ls = this.para.linesAndSpacings[i]
 
-            if(ls.type == 'spacing'){
-                // create a page spacing
-                var pageSpacing = new PageSpacing(0, ls)
-                ls.obj = pageSpacing
-
-                pageLinesAndSpacings.push(pageSpacing.render())
-                
-            }else if(ls.type == 'line'){
+            if(ls.type == 'line'){
                 // create a line
-                var pageLine = new PageLine(this.paraWidth, ls)
+                var pageLine = new PageLine(ls)
                 ls.obj = pageLine
 
                 pageLinesAndSpacings.push(pageLine.render())

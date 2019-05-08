@@ -3,8 +3,7 @@ import PageInlineBlock from './PageInlineBlock'
 import { createElement } from '../utils/renderer'
 
 class PageLine{
-    constructor(lineWidth, ls){
-        this.lineWidth = lineWidth
+    constructor(ls){
         this.ls = ls
     }
 
@@ -24,8 +23,9 @@ class PageLine{
             class: 'page-line',
             style: {
                 whiteSpace: 'nowrap',
-                width: this.lineWidth+'px',
-                //height: this.ls.lineHeight+'px',
+                width: this.ls.lineWidth+'px',
+                marginTop: this.ls.spacingHeight+'px',
+                height: this.ls.lineHeight+'px',
             }
         }, inlineBlocks)
 

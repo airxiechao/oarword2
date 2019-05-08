@@ -205,7 +205,7 @@ var paras2 = [
     ],
 ]
 
-store.commit('setDocumentBody', paras2)
+store.commit('setDocumentBody', paras)
 
 new Vue({
     render: h => h(App),
