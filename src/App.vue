@@ -10,6 +10,7 @@ export default {
         // add toolbar
         var toolbar = new Toolbar()
         window.goog.dom.appendChild(this.$el, toolbar.render())
+        toolbar.mounted()
 
         // add doc
         var doc = new Document(state.document.pageWidth, 

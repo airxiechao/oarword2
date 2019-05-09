@@ -14,7 +14,7 @@
 
 .goog-menu {
   background: #fff;
-  border-color: #ccc #666 #666 #ccc;
+  border-color: #cbcbcb #cbcbcb #cbcbcb #cbcbcb;
   border-style: solid;
   border-width: 1px;
   cursor: default;
@@ -24,4 +24,5 @@
   padding: 4px 0;
   position: absolute;
   z-index: 20000; /* Arbitrary, but some apps depend on it... */
+  box-shadow: 1px 2px 2px #eaeaea;
 }

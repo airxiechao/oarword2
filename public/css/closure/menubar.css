@@ -18,11 +18,12 @@
   position: relative;
   white-space: nowrap;
   background: #fff;
+  padding: 0px 45px 5px 45px;
 }
 
 .goog-menubar .goog-menu-button {
   padding: 1px 1px;
-  margin: 0px 0px;
+  margin: 0px;
   outline: none;
   border: none;
   background: #fff;
@@ -42,14 +43,14 @@
 }
 
 .goog-menubar .goog-menu-button-hover {
-  background: #eee;
-  border: 1px solid #eee;
+  border: 1px solid #ddd;
+  box-shadow: 1px 1px 1px #ddd;
 }
 
 .goog-menubar .goog-menu-button-open {
-  background: #fff;
-  border-left: 1px solid #ccc;
-  border-right: 1px solid #ccc;
+  background: #e5e5e5;
+  border: 1px solid #ddd;
+  box-shadow: 1px 1px 1px #ddd;
 }
 
 .goog-menubar .goog-menu-button-disabled {

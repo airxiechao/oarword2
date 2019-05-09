@@ -28,11 +28,13 @@
   overflow: hidden;
   position: absolute;
   top: 0;
+  background: url(../../img/dimension-highlighted.png);
 }
 
 .goog-dimension-picker-unhighlighted {
   /* Client apps must provide the URL at which they serve the image. */
   /* background: url(dimension-unhighlighted.png); */
+  background: url(../../img/dimension-unhighlighted.png);
 }
 
 .goog-dimension-picker-status {
@@ -45,3 +47,4 @@
   position: absolute !important;
   top: 0;
 }
+

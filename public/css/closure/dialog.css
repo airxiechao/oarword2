@@ -14,11 +14,13 @@
 
 
 .modal-dialog {
-  background: #c1d9ff;
-  border: 1px solid #3a5774;
+  background: #ffffff;
+  border: 1px solid #ccc;
   color: #000;
-  padding: 4px;
+  padding: 0px;
   position: absolute;
+  box-shadow: 0px 0px 3px 1px #ddd;
+  outline: 0px;
 }
 
 .modal-dialog a,
@@ -29,17 +31,18 @@
 }
 
 .modal-dialog-bg {
-  background: #666;
+  background: #ccc;
   left: 0;
   position: absolute;
   top: 0;
 }
 
 .modal-dialog-title {
-  background: #e0edfe;
-  color: #000;
-  cursor: pointer;
-  font-size: 120%;
+  background: #ffffff;
+  color: #444;
+  cursor: default;
+  font-size: 14px;
+  font-family: '黑体';
   font-weight: bold;
 
   /* Add padding on the right to ensure the close button has room. */
@@ -47,12 +50,14 @@
 
   position: relative;
   _zoom: 1; /* Ensures proper width in IE6 RTL. */
+
+    border-bottom: 1px solid #ccc;
 }
 
 .modal-dialog-title-close {
   /* Client apps may override the URL at which they serve the sprite. */
-  background: #e0edfe url(//ssl.gstatic.com/editor/editortoolbar.png) no-repeat -528px 0;
-  cursor: default;
+  background: url(../../img/close-x.png) no-repeat 0px 2px;
+  cursor: pointer;
   height: 15px;
   position: absolute;
   right: 10px;
@@ -64,7 +69,11 @@
 .modal-dialog-buttons,
 .modal-dialog-content {
   background-color: #fff;
-  padding: 8px;
+  padding: 2px 8px 8px 20px;
+}
+
+.modal-dialog-buttons {
+    float: right;
 }
 
 .goog-buttonset-default {

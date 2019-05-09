@@ -21,9 +21,9 @@
 
 .goog-tree-row {
   white-space: nowrap;
-  font: icon;
-  line-height: 16px;
-  height: 16px;
+  font-size: 11px;
+  line-height: 17px;
+  height: 17px;
 }
 
 .goog-tree-row span {
@@ -33,7 +33,7 @@
 
 .goog-tree-children {
   background-repeat: repeat-y;
-  background-image: url(//ssl.gstatic.com/closure/tree/I.png) !important;
+  background-image: url(../../img/I.png) !important;
   background-position-y: 1px !important;	/* IE only */
   font: icon;
 }
@@ -43,7 +43,7 @@
 }
 
 .goog-tree-icon {
-  background-image: url(//ssl.gstatic.com/closure/tree/tree.png);
+  background-image: url(../../img/tree.png);
 }
 
 .goog-tree-expand-icon {
@@ -128,17 +128,16 @@
 }
 
 .goog-tree-item-label:hover {
-  text-decoration: underline;
+  text-decoration: none;
+  cursor: pointer;
 }
 
 .selected .goog-tree-item-label {
-  background-color: ButtonFace;
-  color: ButtonText;
+  background-color: #ddd;
 }
 
 .focused .selected .goog-tree-item-label {
-  background-color: Highlight;
-  color: HighlightText;
+  background-color: #ddd;
 }
 
 .goog-tree-hide-root {
