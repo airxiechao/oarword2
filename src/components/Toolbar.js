@@ -54,8 +54,7 @@ class Toolbar{
         tbSep2.getElement().style.marginLeft = '0px';
 
         // font color
-        var fontColorSelector = new goog.ui.ColorMenuButton('A', goog.ui.ColorMenuButton.newColorMenu(),
-            goog.ui.ToolbarColorMenuButtonRenderer.getInstance());
+        var fontColorSelector = new goog.ui.ColorMenuButton('A', goog.ui.ColorMenuButton.newColorMenu(), goog.ui.ToolbarColorMenuButtonRenderer.getInstance());
 
         toolbar.addChild(fontColorSelector, true);
         toolbar.fontColorSelector = fontColorSelector;
@@ -71,7 +70,6 @@ class Toolbar{
         //goog.events.listen(fontColorSelector, goog.ui.Component.EventType.ACTION, toolbar.colorChange);
 
         // background color
-
         var bgColorMenu = goog.ui.ColorMenuButton.newColorMenu();
         var noneBgColorItem = new goog.ui.MenuItem('无填充颜色', goog.ui.ColorMenuButton.NO_COLOR);
         bgColorMenu.addChildAt(noneBgColorItem, 0, true);
@@ -79,8 +77,7 @@ class Toolbar{
 
         noneBgColorItem.getElement().style.paddingRight = '0px';
 
-        var bgColorSelector = new goog.ui.ColorMenuButton('A', bgColorMenu,
-            goog.ui.ToolbarColorMenuButtonRenderer.getInstance());
+        var bgColorSelector = new goog.ui.ColorMenuButton('A', bgColorMenu, goog.ui.ToolbarColorMenuButtonRenderer.getInstance());
 
         toolbar.addChild(bgColorSelector, true);
         toolbar.bgColorSelector = bgColorSelector;
