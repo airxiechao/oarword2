@@ -21,9 +21,10 @@ class DocInputBox{
                 position: 'absolute',
                 left: this.cursorPosX + 'px',
                 top: this.cursorPoxY + 'px',
-                opacity: 0,
+                opacity: 1,
                 pointerEvents: 'none',
                 outline: 'none',
+                whiteSpace: 'nowrap',
             }
         })
 

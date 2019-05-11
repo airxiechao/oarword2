@@ -6,6 +6,7 @@ function measureFontTextWH(text, fontFamily, fontSize, fontWeight){
     dummy.style.fontWeight = fontWeight;
     dummy.style.visibility = 'hidden';
     dummy.style.display = 'inline-block';
+    dummy.style.whiteSpace = 'nowrap';
     dummy.textContent = text;
 
     document.body.appendChild(dummy)
@@ -101,7 +102,6 @@ function getWidthFontTextPos(text, textStyle, width){
             wh: twh,
         }
     }
-
     var mw = twh.w / text.length
     var i0 = parseInt(width / mw)
     var wh0 = measureFontTextWH(text.substr(0, i0+1), '', '', '')
@@ -146,7 +146,7 @@ function getWidthFontTextPos(text, textStyle, width){
             i = -1
         }
     }
-
+    
     return {
         i: i,
         wh: {

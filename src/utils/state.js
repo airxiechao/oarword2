@@ -356,7 +356,7 @@ var state = {
             var front = state.document.cursor.front
             
 
-            if(runIndex == 0 && startIndex == 0 && front){
+            if(runIndex == 0 && startIndex == 0){
                 // add paragraph before
                 let lastPosBottom = state.mutations._addEmptyParaBefore(paraIndex)
 
