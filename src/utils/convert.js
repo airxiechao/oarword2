@@ -1,4 +1,4 @@
-import { measureFontTextWH, getPageLeftHeight } from './measure'
+import { measureFontTextWH, getPageLeftHeight, getWidthFontTextPos } from './measure'
 
 function paraRunsToLinesAndSpacings(runs, paraWidth, posTop, marginTop, marginBottom, pageHeight, pageSpacingHeight){
     var paraLinesAndSpacings = []
@@ -50,25 +50,26 @@ function paraRunsToLinesAndSpacings(runs, paraWidth, posTop, marginTop, marginBo
 }
 
 function getLineInlineBlocksAndHeightFromQueue(runsQueue, lineWidth){
-    var totalWidth = 0;
-    var maxHeight = 0;
+    var totalWidth = 0
+    var maxHeight = 0
     var lineInlineBlocks = []
     while(totalWidth < lineWidth && runsQueue.length > 0){
         var run = runsQueue.shift()
 
         var wh = {w:0,h:0}
+        var i = 0
         if(run.text.length == 0){
             wh.h = measureFontTextWH('|', '', '', '').h
             maxHeight = wh.h
-        }
-        for(var i = 1; i<=run.text.length; ++i){
-            var t = run.text.substr(0,i)
-            wh = measureFontTextWH(t, '', '', '')            
-            if(totalWidth + wh.w > lineWidth){
-                i -= 1
+        }else{
+            var iwh = getWidthFontTextPos(run.text, run.textStyle, lineWidth - totalWidth)
+            if(iwh.i < 0){
+                runsQueue.unshift(run)
                 break
             }
 
+            i = iwh.i + 1
+            wh = iwh.wh
             maxHeight = Math.max(maxHeight, wh.h)
         }
         
@@ -78,7 +79,7 @@ function getLineInlineBlocksAndHeightFromQueue(runsQueue, lineWidth){
             textStyle: run.textStyle,
             startIndex: run.startIndex,
         }
-        if(i < run.text.length){
+        if(i > 0 && i < run.text.length){
             runsQueue.unshift({
                 doc: run.doc,
                 text: run.text.substr(i),

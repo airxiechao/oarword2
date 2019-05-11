@@ -1,3 +1,4 @@
+
 function measureFontTextWH(text, fontFamily, fontSize, fontWeight){
     var dummy = document.createElement('div');
     dummy.style.fontFamily = fontFamily;
@@ -11,6 +12,7 @@ function measureFontTextWH(text, fontFamily, fontSize, fontWeight){
     var w = dummy.offsetWidth;
     var h = dummy.offsetHeight;
     document.body.removeChild(dummy);
+
     return {w:w, h:h};
 }
 
@@ -91,4 +93,68 @@ function getPageLeftHeight(posTop, marginBottom, pageHeight, pageSpacingHeight){
     return leftHeight
 }
 
-export { measureFontTextWH, measureElePageXY, getCursorPos, getPageNo, getPageLeftHeight }
+function getWidthFontTextPos(text, textStyle, width){
+    var twh = measureFontTextWH(text, '', '', '')
+    if(twh.w <= width){
+        return {
+            i: text.length - 1,
+            wh: twh,
+        }
+    }
+
+    var mw = twh.w / text.length
+    var i0 = parseInt(width / mw)
+    var wh0 = measureFontTextWH(text.substr(0, i0+1), '', '', '')
+
+    var i = i0
+    var maxHeight = wh0.h;
+    var maxWidth = wh0.w;
+    var found = false
+    if(wh0.w == width){
+
+    }else if(wh0.w < width){
+        for(i = i0+1; i<text.length; ++i){
+            let t = text.substr(0,i+1)
+            let wh = measureFontTextWH(t, '', '', '')
+            maxHeight = Math.max(maxHeight, wh.h)
+            maxWidth = wh.w
+
+            if(wh.w > width){
+                i -= 1
+                found = true
+                break
+            }
+        }
+
+        if(!found){
+            i = text.length-1
+        }
+    }else{
+        for(i = i0-1; i>=0; --i){
+            let t = text.substr(0,i+1)
+            let wh = measureFontTextWH(t, '', '', '')
+            maxHeight = Math.max(maxHeight, wh.h)
+            maxWidth = wh.w
+
+            if(wh.w <= width){
+                found = true
+                break
+            }
+        }
+
+        if(!found){
+            i = -1
+        }
+    }
+
+    return {
+        i: i,
+        wh: {
+            w: maxWidth,
+            h: maxHeight,
+        },
+    }
+}
+
+export { measureFontTextWH, measureElePageXY, getCursorPos, getPageNo, getPageLeftHeight,
+         getWidthFontTextPos }

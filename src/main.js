@@ -8,7 +8,7 @@ Vue.config.productionTip = false
 var paras = [
     [
         {
-            text: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1aaaaaaaaaaaaaaaaaaaaaaaaaaaa1aaaaaaaaaaaaaaaaaaaaaaaaa',
+            text: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1aaaaaaaaaaaaaaaaaaaaaaaaaaaa1aaadddddddddddaaaaaaaaaaaaaaaaaaaaaa',
             textStyle: {
                 
             }

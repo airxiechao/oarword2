@@ -255,7 +255,13 @@ var state = {
             state.mutations._updatePageBackground(lastPosBottom)
 
             // update cursor
-            state.mutations._updateCursor(paraIndex, runIndex, startIndex + text.length)
+            var si = startIndex + text.length
+            var len = state.document.doc[paraIndex][runIndex].text.length
+            if(si >= len){
+                state.mutations._updateCursor(paraIndex, runIndex, Math.max(len - 1, 0), false)
+            }else{
+                state.mutations._updateCursor(paraIndex, runIndex, si)
+            }
         },
         deleteFromParaRun: function(){
             var ci = state.getters.cursorDocIndex()
