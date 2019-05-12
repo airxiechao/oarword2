@@ -156,13 +156,11 @@ function getPageBody(paras, lastPosBottom,
         lastPosBottom += pagePara.paraHeight;
     }
 
-    let pageBody = {
-        parasAndTables: parasAndTables
-    }
+    let pageBody = []
 
     // set parent for paragraphs and tables
     for(let i = 0; i < pageBody.parasAndTables.length; ++i){
-        let pt = pageBody.parasAndTables[i]
+        let pt = pageBody[i]
         pt.parent = pageBody
     }
 

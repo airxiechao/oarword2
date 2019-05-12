@@ -432,6 +432,7 @@ var state = {
             var newPara = getPagePara(state.document.doc[paraIndex], lastPosBottom,
                 state.document.pageWidth, state.document.pageHeight, state.document.pageSpacingHeight, 
                 state.document.marginTop, state.document.marginRight, state.document.marginBottom, state.document.marginLeft)
+            newPara.parent = state.document.body
             state.document.body.splice(paraIndex, 1, newPara)
 
             var newPagePara = new PageParagraph(state.document.marginLeft, newPara)
@@ -449,6 +450,7 @@ var state = {
                 var newParaRight = getPagePara(state.document.doc[paraIndex], lastPosBottom,
                     state.document.pageWidth, state.document.pageHeight, state.document.pageSpacingHeight, 
                     state.document.marginTop, state.document.marginRight, state.document.marginBottom, state.document.marginLeft)
+                newPara.parent = state.document.body
                 state.document.body.splice(paraIndex, 0, newParaRight)
     
                 var newPageParaRight = new PageParagraph(state.document.marginLeft, newParaRight)
@@ -486,6 +488,7 @@ var state = {
             var newPara = getPagePara(state.document.doc[paraIndex], lastPosBottom,
                 state.document.pageWidth, state.document.pageHeight, state.document.pageSpacingHeight, 
                 state.document.marginTop, state.document.marginRight, state.document.marginBottom, state.document.marginLeft)
+            newPara.parent = state.document.body
             state.document.body.splice(paraIndex, 0, newPara)
 
             var newPagePara = new PageParagraph(state.document.marginLeft, newPara)
@@ -521,6 +524,7 @@ var state = {
             var newPara = getPagePara(state.document.doc[paraIndex+1], lastPosBottom,
                 state.document.pageWidth, state.document.pageHeight, state.document.pageSpacingHeight, 
                 state.document.marginTop, state.document.marginRight, state.document.marginBottom, state.document.marginLeft)
+            newPara.parent = state.document.body
             state.document.body.splice(paraIndex+1, 0, newPara)
 
             var newPagePara = new PageParagraph(state.document.marginLeft, newPara)
@@ -584,6 +588,7 @@ var state = {
             var newPara = getPagePara(state.document.doc[paraIndex], lastPosBottom,
                 state.document.pageWidth, state.document.pageHeight, state.document.pageSpacingHeight, 
                 state.document.marginTop, state.document.marginRight, state.document.marginBottom, state.document.marginLeft)
+            newPara.parent = state.document.body
             state.document.body.splice(paraIndex, 1, newPara)
 
             var newPagePara = new PageParagraph(state.document.marginLeft, newPara)
