@@ -1,5 +1,5 @@
 import { measureFontTextWH, getCursorPos, getPageLeftHeight } from './measure'
-import { getPagePara, getPageParas, getDocParaOfRun, 
+import { getPagePara, getPageBody, getDocParaOfRun, 
     getPreviousInlineOfBody, getNextInlineOfBody, getPreviousLineOfBody, getNextLineOfBody } from './convert'
 import { getPageNo } from '../utils/measure'
 
@@ -60,12 +60,12 @@ var state = {
             state.document.inputBox.obj = obj
         },
         setDocument: function(doc){
-            var documentBody = getPageParas(doc, state.document.marginTop, 
+            var documentBody = getPageBody(doc, state.document.marginTop, 
                 state.document.pageWidth, state.document.pageHeight, state.document.pageSpacingHeight, 
                 state.document.marginTop, state.document.marginRight, state.document.marginBottom, state.document.marginLeft)
 
             state.document.doc = doc
-            state.document.body = documentBody
+            state.document.body = documentBody.parasAndTables
         },
         setCursorInlineBlock: function(payload){
             state.document.cursor.inlineBlock = payload.inlineBlock

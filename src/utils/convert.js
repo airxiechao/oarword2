@@ -1,12 +1,12 @@
 import { measureFontTextWH, getPageLeftHeight, getWidthFontTextPos } from './measure'
 
 function paraRunsToLinesAndSpacings(runs, paraWidth, posTop, marginTop, marginBottom, pageHeight, pageSpacingHeight){
-    var paraLinesAndSpacings = []
-    var paraHeight = 0
+    let paraLinesAndSpacings = []
+    let paraHeight = 0
 
-    var runsQueue = []
-    for(var i = 0; i < runs.length; ++i){
-        var run = runs[i]
+    let runsQueue = []
+    for(let i = 0; i < runs.length; ++i){
+        let run = runs[i]
         run.startIndex = 0
         runsQueue.push({
             doc: run,
@@ -17,9 +17,9 @@ function paraRunsToLinesAndSpacings(runs, paraWidth, posTop, marginTop, marginBo
     }
 
     while(runsQueue.length > 0){
-        var lh = getLineInlineBlocksAndHeightFromQueue(runsQueue, paraWidth)
-        var lineHeight = lh.lineHeight
-        var line = {
+        let lh = getLineInlineBlocksAndHeightFromQueue(runsQueue, paraWidth)
+        let lineHeight = lh.lineHeight
+        let line = {
             inlineBlocks: lh.lineInlineBlocks,
             lineHeight: lineHeight,
             lineWidth: paraWidth,
@@ -27,11 +27,17 @@ function paraRunsToLinesAndSpacings(runs, paraWidth, posTop, marginTop, marginBo
             type: 'line',
         }
 
+        // set parent for inline blocks
+        for(let i = 0; i < line.inlineBlocks.length; ++i){
+            let ib = line.inlineBlocks[i]
+            ib.parent = line
+        }
+
         // check if page has enough space for line
-        var leftHeight = getPageLeftHeight(posTop, marginBottom, pageHeight, pageSpacingHeight)
+        let leftHeight = getPageLeftHeight(posTop, marginBottom, pageHeight, pageSpacingHeight)
         if(leftHeight < lineHeight){
             // add page spacing
-            var spacingHeight = leftHeight + marginBottom + pageSpacingHeight + marginTop
+            let spacingHeight = leftHeight + marginBottom + pageSpacingHeight + marginTop
 
             line.spacingHeight = spacingHeight
             posTop += spacingHeight
@@ -113,12 +119,12 @@ function getPagePara(para, lastPosBottom,
         marginTop, marginRight, marginBottom, marginLeft){
 
     // conver paragraph to lines and spacings
-    var paraWidth = pageWidth-marginLeft-marginRight
-    var lh = paraRunsToLinesAndSpacings(para, paraWidth, lastPosBottom, marginTop, marginBottom, pageHeight, pageSpacingHeight)
-    var paraLinesAndSpacings = lh.paraLinesAndSpacings
-    var paraHeight = lh.paraHeight
+    let paraWidth = pageWidth-marginLeft-marginRight
+    let lh = paraRunsToLinesAndSpacings(para, paraWidth, lastPosBottom, marginTop, marginBottom, pageHeight, pageSpacingHeight)
+    let paraLinesAndSpacings = lh.paraLinesAndSpacings
+    let paraHeight = lh.paraHeight
 
-    var pagePara = {
+    let pagePara = {
         type: 'para',
         doc: para,
         paraHeight: paraHeight,
@@ -126,25 +132,41 @@ function getPagePara(para, lastPosBottom,
         linesAndSpacings: paraLinesAndSpacings,
     }
 
+    // set parent for lines
+    for(let i = 0; i < pagePara.linesAndSpacings.length; ++i){
+        let ls = pagePara.linesAndSpacings[i]
+        ls.parent = pagePara
+    }
+
     return pagePara
 }
 
-function getPageParas(paras, lastPosBottom, 
+function getPageBody(paras, lastPosBottom, 
         pageWidth, pageHeight, pageSpacingHeight, 
         marginTop, marginRight, marginBottom, marginLeft){
 
-    var pageParas = []
+    let parasAndTables = []
     for(let i = 0; i < paras.length; ++i){
-        var para = paras[i];
-        var pagePara = getPagePara(para, lastPosBottom,
+        let para = paras[i];
+        let pagePara = getPagePara(para, lastPosBottom,
                                     pageWidth, pageHeight, pageSpacingHeight,
                                     marginTop, marginRight, marginBottom, marginLeft)
 
-        pageParas.push(pagePara)
+        parasAndTables.push(pagePara)
         lastPosBottom += pagePara.paraHeight;
     }
 
-    return pageParas
+    let pageBody = {
+        parasAndTables: parasAndTables
+    }
+
+    // set parent for paragraphs and tables
+    for(let i = 0; i < pageBody.parasAndTables.length; ++i){
+        let pt = pageBody.parasAndTables[i]
+        pt.parent = pageBody
+    }
+
+    return pageBody
 }
 
 function getDocParaOfRun(doc, run){
@@ -247,5 +269,5 @@ function getNextInlineOfBody(body, inlineBlock){
 
 
 export { paraRunsToLinesAndSpacings, getLineInlineBlocksAndHeightFromQueue, getPageLeftHeight, 
-         getPagePara, getPageParas, getDocParaOfRun, getPreviousInlineOfBody, getNextInlineOfBody,
+         getPagePara, getPageBody, getDocParaOfRun, getPreviousInlineOfBody, getNextInlineOfBody,
          getPreviousLineOfBody, getNextLineOfBody }
