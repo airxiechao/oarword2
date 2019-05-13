@@ -156,10 +156,14 @@ function getPageBody(paras, lastPosBottom,
         lastPosBottom += pagePara.paraHeight;
     }
 
-    let pageBody = []
+    let pageBody = {
+        parasAndTables: parasAndTables,
+        doc: paras,
+        type: 'body',
+    }
 
     // set parent for paragraphs and tables
-    for(let i = 0; i < pageBody.parasAndTables.length; ++i){
+    for(let i = 0; i < pageBody.length; ++i){
         let pt = pageBody[i]
         pt.parent = pageBody
     }
@@ -181,7 +185,8 @@ function getDocParaOfRun(doc, run){
     return null
 }
 
-function getPreviousLineOfBody(body, inlineBlock){
+function getPreviousLineOfBody(inlineBlock){
+    let body = inlineBlock.parent.parent.parent
     let lastline = null
     for(let i = 0; i < body.length; ++i){
         let para = body[i]
@@ -203,7 +208,8 @@ function getPreviousLineOfBody(body, inlineBlock){
     return lastline
 }
 
-function getNextLineOfBody(body, inlineBlock){
+function getNextLineOfBody(inlineBlock){
+    let body = inlineBlock.parent.parent.parent
     let nextline = null
     for(let i = body.length - 1; i >= 0; --i){
         let para = body[i]
@@ -225,7 +231,8 @@ function getNextLineOfBody(body, inlineBlock){
     return nextline
 }
 
-function getPreviousInlineOfBody(body, inlineBlock){
+function getPreviousInlineOfBody(inlineBlock){
+    let body = inlineBlock.parent.parent.parent
     let lastib = null
     for(let i = 0; i < body.length; ++i){
         let para = body[i]
@@ -245,7 +252,8 @@ function getPreviousInlineOfBody(body, inlineBlock){
     return lastib
 }
 
-function getNextInlineOfBody(body, inlineBlock){
+function getNextInlineOfBody(inlineBlock){
+    let body = inlineBlock.parent.parent.parent
     let nextib = null
     for(let i = body.length - 1; i >= 0; --i){
         let para = body[i]
@@ -265,7 +273,24 @@ function getNextInlineOfBody(body, inlineBlock){
     return nextib
 }
 
+function getInlineBlockBodyIndex(inlineBlock){
+    let ib = inlineBlock
+    let line = ib.parent
+    let para = line.parent
+    let body = para.parent
+    
+    let paraIndex = body.parasAndTables.indexOf(para)
+    let runIndex = body.parasAndTables[paraIndex].doc.indexOf(ib.doc)
+    let startIndex = ib.startIndex + state.document.cursor.inlineStartIndex
+
+    return {
+        body: body,
+        paraIndex: paraIndex,
+        runIndex: runIndex,
+        startIndex: startIndex,
+    }
+}
 
 export { paraRunsToLinesAndSpacings, getLineInlineBlocksAndHeightFromQueue, getPageLeftHeight, 
          getPagePara, getPageBody, getDocParaOfRun, getPreviousInlineOfBody, getNextInlineOfBody,
-         getPreviousLineOfBody, getNextLineOfBody }
+         getPreviousLineOfBody, getNextLineOfBody, getInlineBlockBodyIndex }
