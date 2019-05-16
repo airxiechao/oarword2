@@ -1,7 +1,7 @@
 import { measureFontTextWH, getPageLeftHeight, getWidthFontTextPos } from './measure'
 
-function paraRunsToLinesAndSpacings(runs, paraWidth, posTop, marginTop, marginBottom, pageHeight, pageSpacingHeight){
-    let paraLinesAndSpacings = []
+function paraRunsToLines(runs, paraWidth, posTop, marginTop, marginBottom, pageHeight, pageSpacingHeight){
+    let paraLines = []
     let paraHeight = 0
 
     let runsQueue = []
@@ -44,13 +44,13 @@ function paraRunsToLinesAndSpacings(runs, paraWidth, posTop, marginTop, marginBo
             paraHeight += spacingHeight
         }
         
-        paraLinesAndSpacings.push(line)
+        paraLines.push(line)
         posTop += lineHeight
         paraHeight += lineHeight
     }
 
     return {
-        paraLinesAndSpacings: paraLinesAndSpacings,
+        paraLines: paraLines,
         paraHeight: paraHeight,
     }
 }
@@ -120,8 +120,8 @@ function getPagePara(para, lastPosBottom,
 
     // conver paragraph to lines and spacings
     let paraWidth = pageWidth-marginLeft-marginRight
-    let lh = paraRunsToLinesAndSpacings(para, paraWidth, lastPosBottom, marginTop, marginBottom, pageHeight, pageSpacingHeight)
-    let paraLinesAndSpacings = lh.paraLinesAndSpacings
+    let lh = paraRunsToLines(para.runs, paraWidth, lastPosBottom, marginTop, marginBottom, pageHeight, pageSpacingHeight)
+    let paraLines = lh.paraLines
     let paraHeight = lh.paraHeight
 
     let pagePara = {
@@ -129,42 +129,65 @@ function getPagePara(para, lastPosBottom,
         doc: para,
         paraHeight: paraHeight,
         paraWidth: paraWidth,
-        linesAndSpacings: paraLinesAndSpacings,
+        lines: paraLines,
     }
 
     // set parent for lines
-    for(let i = 0; i < pagePara.linesAndSpacings.length; ++i){
-        let ls = pagePara.linesAndSpacings[i]
+    for(let i = 0; i < pagePara.lines.length; ++i){
+        let ls = pagePara.lines[i]
         ls.parent = pagePara
     }
 
     return pagePara
 }
 
-function getPageBody(paras, lastPosBottom, 
+function getPageTable(table, lastPosBottom,
+    pageWidth, pageHeight, pageSpacingHeight, 
+    marginTop, marginRight, marginBottom, marginLeft){
+
+    let pageTable = {
+        type: 'table',
+        doc: table,
+        cells: []
+    }
+
+    return pageTable
+}
+
+function getPageBody(doc, lastPosBottom, 
         pageWidth, pageHeight, pageSpacingHeight, 
         marginTop, marginRight, marginBottom, marginLeft){
 
-    let parasAndTables = []
-    for(let i = 0; i < paras.length; ++i){
-        let para = paras[i];
-        let pagePara = getPagePara(para, lastPosBottom,
-                                    pageWidth, pageHeight, pageSpacingHeight,
-                                    marginTop, marginRight, marginBottom, marginLeft)
+    let pts = []
+    for(let i = 0; i < doc.pts.length; ++i){
+        let pt = doc.pts[i];
+        if(pt.type == 'para'){
+            let pagePara = getPagePara(pt, lastPosBottom,
+                pageWidth, pageHeight, pageSpacingHeight,
+                marginTop, marginRight, marginBottom, marginLeft)
 
-        parasAndTables.push(pagePara)
-        lastPosBottom += pagePara.paraHeight;
+            pts.push(pagePara)
+            lastPosBottom += pagePara.paraHeight;
+        }else if(pt.type == 'table'){
+            let pageTable = getPageTable(pt, lastPosBottom,
+                pageWidth, pageHeight, pageSpacingHeight,
+                marginTop, marginRight, marginBottom, marginLeft)
+
+            pts.push(pageTable)
+            lastPosBottom += pageTable.tableHeight;
+        }
+        
     }
 
     let pageBody = {
-        parasAndTables: parasAndTables,
-        doc: paras,
+        pts: pts,
+        doc: doc,
         type: 'body',
     }
 
     // set parent for paragraphs and tables
-    for(let i = 0; i < pageBody.length; ++i){
-        let pt = pageBody[i]
+    for(let i = 0; i < pageBody.pts.length; ++i){
+        let pt = pageBody.pts[i]
         pt.parent = pageBody
     }
 
@@ -190,8 +213,8 @@ function getPreviousLineOfBody(inlineBlock){
     let lastline = null
     for(let i = 0; i < body.length; ++i){
         let para = body[i]
-        for(let j = 0; j < para.linesAndSpacings.length; ++j){
-            let line = para.linesAndSpacings[j]
+        for(let j = 0; j < para.lines.length; ++j){
+            let line = para.lines[j]
             if(line.type != 'line'){
                 continue
             }
@@ -213,8 +236,8 @@ function getNextLineOfBody(inlineBlock){
     let nextline = null
     for(let i = body.length - 1; i >= 0; --i){
         let para = body[i]
-        for(let j = para.linesAndSpacings.length - 1; j >= 0 ; --j){
-            let line = para.linesAndSpacings[j]
+        for(let j = para.lines.length - 1; j >= 0 ; --j){
+            let line = para.lines[j]
             if(line.type != 'line'){
                 continue
             }
@@ -236,8 +259,8 @@ function getPreviousInlineOfBody(inlineBlock){
     let lastib = null
     for(let i = 0; i < body.length; ++i){
         let para = body[i]
-        for(let j = 0; j < para.linesAndSpacings.length; ++j){
-            let line = para.linesAndSpacings[j]
+        for(let j = 0; j < para.lines.length; ++j){
+            let line = para.lines[j]
             for(let k = 0; k < line.inlineBlocks.length; ++k){
                 let ib = line.inlineBlocks[k]
                 if(ib == inlineBlock){
@@ -257,8 +280,8 @@ function getNextInlineOfBody(inlineBlock){
     let nextib = null
     for(let i = body.length - 1; i >= 0; --i){
         let para = body[i]
-        for(let j = para.linesAndSpacings.length - 1; j >= 0 ; --j){
-            let line = para.linesAndSpacings[j]
+        for(let j = para.lines.length - 1; j >= 0 ; --j){
+            let line = para.lines[j]
             for(let k = line.inlineBlocks.length - 1; k >= 0 ; --k){
                 let ib = line.inlineBlocks[k]
                 if(ib == inlineBlock){
@@ -279,8 +302,8 @@ function getInlineBlockBodyIndex(inlineBlock){
     let para = line.parent
     let body = para.parent
     
-    let paraIndex = body.parasAndTables.indexOf(para)
-    let runIndex = body.parasAndTables[paraIndex].doc.indexOf(ib.doc)
+    let paraIndex = body.pts.indexOf(para)
+    let runIndex = body.pts[paraIndex].doc.indexOf(ib.doc)
     let startIndex = ib.startIndex + state.document.cursor.inlineStartIndex
 
     return {
@@ -291,6 +314,6 @@ function getInlineBlockBodyIndex(inlineBlock){
     }
 }
 
-export { paraRunsToLinesAndSpacings, getLineInlineBlocksAndHeightFromQueue, getPageLeftHeight, 
+export { paraRunsToLines, getLineInlineBlocksAndHeightFromQueue, getPageLeftHeight, 
          getPagePara, getPageBody, getDocParaOfRun, getPreviousInlineOfBody, getNextInlineOfBody,
-         getPreviousLineOfBody, getNextLineOfBody, getInlineBlockBodyIndex }
+         getPreviousLineOfBody, getNextLineOfBody, getInlineBlockBodyIndex, getPageTable }

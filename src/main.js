@@ -205,7 +205,53 @@ var paras2 = [
     ],
 ]
 
-state.mutations.setDocument(paras)
+var doc = {
+    type: 'body',
+    grid: {
+
+    },
+    pts: [
+        {
+            type: 'para',
+            runs: [
+                {
+                    type: 'run',
+                    text: 'aaa',
+                    textStyle: {},
+                },
+                {
+                    type: 'run',
+                    text: 'bbb',
+                    textStyle: {},
+                }
+            ],
+        },
+        {
+            type: 'table',
+            grid: [],
+            cells: [
+                [
+                    {
+                        type: 'body',
+                        rowspan: 1,
+                        colspan: 1,
+                        pts: [],
+                    }
+                ],
+                [
+                    {
+                        type: 'body',
+                        rowspan: 1,
+                        colspan: 1,
+                        pts: [],
+                    }
+                ]
+            ],
+        }
+    ],
+}
+
+state.mutations.setDocument(doc)
 
 new Vue({
     render: h => h(App),
