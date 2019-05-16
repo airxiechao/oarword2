@@ -208,7 +208,13 @@ var paras2 = [
 var doc = {
     type: 'body',
     grid: {
-
+        pageWidth: 800,
+        pageHeight: 800 * Math.sqrt(2),
+        pageSpacingHeight: 5,
+        marginTop: 100,
+        marginRight: 100,
+        marginBottom: 100,
+        marginLeft: 100,
     },
     pts: [
         {

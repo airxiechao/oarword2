@@ -15,13 +15,6 @@ var state = {
         },
         inputBox: {},
         body: null,
-        marginTop: 100,
-        pageWidth: 800,
-        pageHeight: 800 * Math.sqrt(2),
-        pageSpacingHeight: 5,
-        marginRight: 100,
-        marginBottom: 100,
-        marginLeft: 100,
     },
     getters: {
         cursorInlineBlock: function(){
