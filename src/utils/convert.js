@@ -154,9 +154,15 @@ function getPageTable(table, lastPosBottom,
     return pageTable
 }
 
-function getPageBody(doc, lastPosBottom, 
-        pageWidth, pageHeight, pageSpacingHeight, 
-        marginTop, marginRight, marginBottom, marginLeft){
+function getPageBody(doc, lastPosBottom){
+
+    let pageWidth = doc.grid.pageWidth
+    let pageHeight = doc.grid.pageHeight
+    let pageSpacingHeight = doc.grid.pageSpacingHeight 
+    let marginTop = doc.grid.marginTop
+    let marginRight = doc.grid.marginRight
+    let marginBottom = doc.grid.marginBottom
+    let marginLeft = doc.grid.marginLeft
 
     let pts = []
     for(let i = 0; i < doc.pts.length; ++i){

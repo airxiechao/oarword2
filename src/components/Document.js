@@ -8,15 +8,15 @@ import { createElement } from '../utils/renderer'
 import state from '../utils/state'
 
 class Document{
-    constructor(pageWidth, pageHeight, pageSpacingHeight, marginTop, marginRight, marginBottom, marginLeft, documentBody){
-        this.pageWidth = pageWidth
-        this.pageHeight = pageHeight
-        this.pageSpacingHeight = pageSpacingHeight
-        this.marginTop = marginTop
-        this.marginRight = marginRight
-        this.marginBottom = marginBottom
-        this.marginLeft = marginLeft
-        this.documentBody = documentBody
+    constructor(body){
+        this.pageWidth = body.doc.grid.pageWidth
+        this.pageHeight = body.doc.grid.pageHeight
+        this.pageSpacingHeight = body.doc.grid.pageSpacingHeight
+        this.marginTop = body.doc.grid.marginTop
+        this.marginRight = body.doc.grid.marginRight
+        this.marginBottom = body.doc.grid.marginBottom
+        this.marginLeft = body.doc.grid.marginLeft
+        this.body = body
 
         state.mutations.setDocumentObj(this)
     }
@@ -26,13 +26,19 @@ class Document{
         var lastPosBottom = this.marginTop;
         
         var pageParas = []
-        for(let i = 0; i < this.documentBody.length; ++i){
-            var para = this.documentBody[i]
-            var pagePara = new PageParagraph(this.marginLeft, para)
-            para.obj = pagePara
+        for(let i = 0; i < this.body.pts.length; ++i){
+            let para = this.body.pts[i]
 
-            pageParas.push(pagePara.render())
-            lastPosBottom += para.paraHeight;
+            if(para.type == 'para'){
+                let pagePara = new PageParagraph(this.marginLeft, para)
+                para.obj = pagePara
+    
+                pageParas.push(pagePara.render())
+                lastPosBottom += para.paraHeight;
+            }else if(para.type == 'table'){
+                
+            }
+            
         }
         
         var pageNo = getPageNo(lastPosBottom, this.pageHeight, this.pageSpacingHeight)

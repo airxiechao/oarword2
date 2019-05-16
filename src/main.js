@@ -233,6 +233,21 @@ var doc = {
             ],
         },
         {
+            type: 'para',
+            runs: [
+                {
+                    type: 'run',
+                    text: 'ccc',
+                    textStyle: {},
+                },
+                {
+                    type: 'run',
+                    text: 'ddd',
+                    textStyle: {},
+                }
+            ],
+        },
+        {
             type: 'table',
             grid: [],
             cells: [

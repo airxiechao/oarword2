@@ -1,7 +1,6 @@
 import PageLine from './PageLine'
 
 import { createElement } from '../utils/renderer'
-import state from '../utils/state'
 
 class PageParagraph{
     constructor(posLeft, para){
@@ -10,16 +9,16 @@ class PageParagraph{
     }
     
     render(){
-        var pageLinesAndSpacings = []
-        for(var i = 0; i < this.para.linesAndSpacings.length; ++i){
-            var ls = this.para.linesAndSpacings[i]
+        var pageLines = []
+        for(var i = 0; i < this.para.lines.length; ++i){
+            var ls = this.para.lines[i]
 
             if(ls.type == 'line'){
                 // create a line
                 var pageLine = new PageLine(ls)
                 ls.obj = pageLine
 
-                pageLinesAndSpacings.push(pageLine.render())
+                pageLines.push(pageLine.render())
             }
         }
         
@@ -29,7 +28,7 @@ class PageParagraph{
             style: {
                 marginLeft: this.posLeft+'px'
             }
-        }, pageLinesAndSpacings)
+        }, pageLines)
 
         return this.el
     }

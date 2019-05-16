@@ -13,14 +13,7 @@ export default {
         toolbar.mounted()
 
         // add doc
-        var doc = new Document(state.document.pageWidth, 
-                               state.document.pageHeight, 
-                               state.document.pageSpacingHeight, 
-                               state.document.marginTop, 
-                               state.document.marginRight, 
-                               state.document.marginBottom, 
-                               state.document.marginLeft, 
-                               state.document.body);
+        var doc = new Document(state.document.body);
                                
         window.goog.dom.appendChild(this.$el, doc.render())
         doc.resizeHandler()
