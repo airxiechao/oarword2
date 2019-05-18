@@ -201,10 +201,10 @@ function getPageBody(doc, lastPosBottom){
 }
 
 function getDocParaOfRun(doc, run){
-    for(let i = 0; i < doc.length; ++i){
-        let para = doc[i]
-        for(let j = 0; j < para.length; ++j){
-            let r = para[j]
+    for(let i = 0; i < doc.pts.length; ++i){
+        let para = doc.pts[i]
+        for(let j = 0; j < para.runs.length; ++j){
+            let r = para.runs[j]
             if(r === run){
                 return para
             }
@@ -217,8 +217,8 @@ function getDocParaOfRun(doc, run){
 function getPreviousLineOfBody(inlineBlock){
     let body = inlineBlock.parent.parent.parent
     let lastline = null
-    for(let i = 0; i < body.length; ++i){
-        let para = body[i]
+    for(let i = 0; i < body.pts.length; ++i){
+        let para = body.pts[i]
         for(let j = 0; j < para.lines.length; ++j){
             let line = para.lines[j]
             if(line.type != 'line'){
@@ -240,8 +240,8 @@ function getPreviousLineOfBody(inlineBlock){
 function getNextLineOfBody(inlineBlock){
     let body = inlineBlock.parent.parent.parent
     let nextline = null
-    for(let i = body.length - 1; i >= 0; --i){
-        let para = body[i]
+    for(let i = body.pts.length - 1; i >= 0; --i){
+        let para = body.pts[i]
         for(let j = para.lines.length - 1; j >= 0 ; --j){
             let line = para.lines[j]
             if(line.type != 'line'){
@@ -263,8 +263,8 @@ function getNextLineOfBody(inlineBlock){
 function getPreviousInlineOfBody(inlineBlock){
     let body = inlineBlock.parent.parent.parent
     let lastib = null
-    for(let i = 0; i < body.length; ++i){
-        let para = body[i]
+    for(let i = 0; i < body.pts.length; ++i){
+        let para = body.pts[i]
         for(let j = 0; j < para.lines.length; ++j){
             let line = para.lines[j]
             for(let k = 0; k < line.inlineBlocks.length; ++k){
@@ -284,8 +284,8 @@ function getPreviousInlineOfBody(inlineBlock){
 function getNextInlineOfBody(inlineBlock){
     let body = inlineBlock.parent.parent.parent
     let nextib = null
-    for(let i = body.length - 1; i >= 0; --i){
-        let para = body[i]
+    for(let i = body.pts.length - 1; i >= 0; --i){
+        let para = body.pts[i]
         for(let j = para.lines.length - 1; j >= 0 ; --j){
             let line = para.lines[j]
             for(let k = line.inlineBlocks.length - 1; k >= 0 ; --k){

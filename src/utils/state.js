@@ -237,7 +237,7 @@ var state = {
             let lastPosBottom = state.mutations._updatePara(body, paraIndex)
             
             // update page background
-            state.mutations._updatePageBackground(lastPosBottom)
+            state.mutations._updatePageBackground(body.doc, lastPosBottom)
 
             // update cursor
             let si = startIndex + text.length
@@ -251,27 +251,28 @@ var state = {
         deleteFromParaRun: function(){
             var ci = state.getters.cursorBodyIndex()
             var front = state.document.cursor.front
+            var body = ci.body
             var paraIndex = ci.paraIndex
             var runIndex = ci.runIndex
             var startIndex = ci.startIndex
-            var para = state.document.doc[paraIndex]
-            var run = para[runIndex]
+            var para = body.doc.pts[paraIndex]
+            var run = para.runs[runIndex]
 
             if(!front){
-                state.mutations._deleteRunText(paraIndex, runIndex, startIndex)
+                state.mutations._deleteRunText(body.doc, paraIndex, runIndex, startIndex)
                 
                 if(run.text == ''){
-                    if(runIndex >= 1 || (runIndex == 0 && para.length > 1)){
-                        para.splice(runIndex, 1)
+                    if(runIndex >= 1 || (runIndex == 0 && para.runs.length > 1)){
+                        para.runs.splice(runIndex, 1)
 
                         if(runIndex == 0){
                             startIndex = 0
                             front = true
                         }else{
-                            let lastib = getPreviousInlineOfBody(state.document.body, state.document.cursor.inlineBlock)
-                            let p = getDocParaOfRun(state.document.doc, lastib.doc)
-                            paraIndex = state.document.doc.indexOf(p)
-                            runIndex = state.document.doc[paraIndex].indexOf(lastib.doc)
+                            let lastib = getPreviousInlineOfBody(state.document.cursor.inlineBlock)
+                            let p = getDocParaOfRun(body.doc, lastib.doc)
+                            paraIndex = body.doc.pts.indexOf(p)
+                            runIndex = body.doc.pts[paraIndex].runs.indexOf(lastib.doc)
                             startIndex = lastib.text.length - 1
                             front = false
                         }
@@ -288,16 +289,16 @@ var state = {
             }else{
                 if(startIndex > 0){
                     startIndex -= 1
-                    state.mutations._deleteRunText(paraIndex, runIndex, startIndex)
+                    state.mutations._deleteRunText(body.doc, paraIndex, runIndex, startIndex)
                 }else{
                     if(runIndex == 0){
                         if(paraIndex > 0){
                             // merge to previous paragraph
                             let pi = paraIndex - 1
-                            let ri = state.document.doc[pi].length - 1
-                            let si = state.document.doc[pi][ri].text.length - 1
+                            let ri = body.doc.pts[pi].runs.length - 1
+                            let si = body.doc.pts[pi].runs[ri].text.length - 1
 
-                            state.mutations._mergePreviousPara(paraIndex)
+                            state.mutations._mergePreviousPara(body, paraIndex)
                             paraIndex = pi
                             runIndex = ri
                             startIndex = si
@@ -311,10 +312,10 @@ var state = {
                         }
                     }else{
                         runIndex -= 1
-                        startIndex = state.document.doc[paraIndex][runIndex].text.length - 1
+                        startIndex = body.doc.pts[paraIndex].runs[runIndex].text.length - 1
 
                         // delete previous inline block's text
-                        state.mutations._deleteRunText(paraIndex, runIndex, startIndex)
+                        state.mutations._deleteRunText(body.doc, paraIndex, runIndex, startIndex)
 
                         startIndex -= 1
                         front = false
@@ -323,62 +324,62 @@ var state = {
             }
 
             // update document paragraph
-            var lastPosBottom = state.mutations._updatePara(paraIndex)
+            var lastPosBottom = state.mutations._updatePara(body, paraIndex)
                 
             // update page background
-            state.mutations._updatePageBackground(lastPosBottom)
+            state.mutations._updatePageBackground(body.doc, lastPosBottom)
 
             // update cursor
-            state.mutations._updateCursor(paraIndex, runIndex, startIndex, front)
+            state.mutations._updateCursor(body, paraIndex, runIndex, startIndex, front)
         },
         splitParaRun: function(){
             var ci = state.getters.cursorBodyIndex()
+            var body = ci.body
             var paraIndex = ci.paraIndex
-            var runLen = state.document.doc[paraIndex].length
+            var runLen = body.doc.pts[paraIndex].runs.length
             var runIndex = ci.runIndex
-            var textLen = state.document.doc[paraIndex][runIndex].text.length
+            var textLen = body.doc.pts[paraIndex].runs[runIndex].text.length
             var startIndex = ci.startIndex
             var front = state.document.cursor.front
             
-
-            if(runIndex == 0 && startIndex == 0){
+            if(runIndex == 0 && startIndex == 0 && front){
                 // add paragraph before
-                let lastPosBottom = state.mutations._addEmptyParaBefore(paraIndex)
+                let lastPosBottom = state.mutations._addEmptyParaBefore(body, paraIndex)
 
                 // update page background
-                state.mutations._updatePageBackground(lastPosBottom)
+                state.mutations._updatePageBackground(body.doc, lastPosBottom)
 
                 // update cursor
-                state.mutations._updateCursor(paraIndex+1, 0, 0)
+                state.mutations._updateCursor(body, paraIndex+1, 0, 0)
             }else if(runIndex == runLen - 1 && startIndex == textLen - 1 && !front){
                 // add paragraph after
-                let lastPosBottom = state.mutations._addEmptyParaAfter(paraIndex)
+                let lastPosBottom = state.mutations._addEmptyParaAfter(body, paraIndex)
 
                 // update page background
-                state.mutations._updatePageBackground(lastPosBottom)
+                state.mutations._updatePageBackground(body.doc, lastPosBottom)
 
                 // update cursor
-                state.mutations._updateCursor(paraIndex+1, 0, 0, true)
+                state.mutations._updateCursor(body, paraIndex+1, 0, 0, true)
             }else{
-                let lastPosBottom = state.mutations._splitParaInner(paraIndex, runIndex, front ? startIndex : startIndex + 1)
-
+                let lastPosBottom = state.mutations._splitParaInner(body, paraIndex, runIndex, front ? startIndex : startIndex + 1)
+                
                 // update page background
-                state.mutations._updatePageBackground(lastPosBottom)
+                state.mutations._updatePageBackground(body.doc, lastPosBottom)
 
                 // update cursor
-                state.mutations._updateCursor(paraIndex+1, 0, 0, true)
+                state.mutations._updateCursor(body, paraIndex+1, 0, 0, true)
             }
         },
-        _splitParaInner(paraIndex, runIndex, startIndex){
+        _splitParaInner(body, paraIndex, runIndex, startIndex){
             // skip previous page paragraphs
-            var lastPosBottom = state.document.marginTop
+            var lastPosBottom = body.doc.grid.marginTop
             for(let i = 0 ; i < paraIndex; ++i){
-                lastPosBottom += state.document.body[i].paraHeight
+                lastPosBottom += body.pts[i].paraHeight
             }
 
             // split paragraph
-            var para = state.document.doc[paraIndex]
-            var oldRun = para[runIndex]
+            var para = body.doc.pts[paraIndex]
+            var oldRun = para.runs[runIndex]
             var leftRun = {
                 text: oldRun.text.substr(0, startIndex),
                 textStyle : oldRun.textStyle,
@@ -388,39 +389,45 @@ var state = {
                 textStyle : oldRun.textStyle,
             }
 
-            var leftPara = []
-            var rightPara = []
-            for(let i = 0; i < para.length; ++i){
+            var leftPara = {
+                runs: [],
+                type: 'para',
+            }
+            var rightPara = {
+                runs: [],
+                type: 'para',
+            }
+            for(let i = 0; i < para.runs.length; ++i){
                 if(i < runIndex){
-                    leftPara.push(para[i])
+                    leftPara.runs.push(para.runs[i])
                 }else if(i == runIndex){
                     if(leftRun.text != ''){
-                        leftPara.push(leftRun)
+                        leftPara.runs.push(leftRun)
                     }
                     if(rightRun.text != ''){
-                        rightPara.push(rightRun)
+                        rightPara.runs.push(rightRun)
                     }
                 }else{
-                    rightPara.push(para[i])
+                    rightPara.runs.push(para.runs[i])
                 }
             }
             
-            if(leftPara.length == 0){
+            if(leftPara.runs.length == 0){
                 leftPara = rightPara
-                rightPara = []
+                rightPara.runs = []
             }
 
             // replace by left paragraph
-            state.document.doc.splice(paraIndex, 1, leftPara)
+            body.doc.pts.splice(paraIndex, 1, leftPara)
 
-            var oldPara = state.document.body[paraIndex]
-            var newPara = getPagePara(state.document.doc[paraIndex], lastPosBottom,
-                state.document.pageWidth, state.document.pageHeight, state.document.pageSpacingHeight, 
-                state.document.marginTop, state.document.marginRight, state.document.marginBottom, state.document.marginLeft)
-            newPara.parent = state.document.body
-            state.document.body.splice(paraIndex, 1, newPara)
+            var oldPara = body.pts[paraIndex]
+            var newPara = getPagePara(body.doc.pts[paraIndex], lastPosBottom,
+                body.doc.grid.pageWidth, body.doc.grid.pageHeight, body.doc.grid.pageSpacingHeight, 
+                body.doc.grid.marginTop, body.doc.grid.marginRight, body.doc.grid.marginBottom, body.doc.grid.marginLeft)
+            newPara.parent = body
+            body.pts.splice(paraIndex, 1, newPara)
 
-            var newPagePara = new PageParagraph(state.document.marginLeft, newPara)
+            var newPagePara = new PageParagraph(body.doc.grid.marginLeft, newPara)
             var oldPagePara = oldPara.obj.el
             newPara.obj = newPagePara
             window.goog.dom.replaceNode(newPagePara.render(), oldPagePara)
@@ -428,17 +435,17 @@ var state = {
             lastPosBottom += newPara.paraHeight
 
             // add right paragraph
-            if(rightPara.length > 0){
+            if(rightPara.runs.length > 0){
                 paraIndex += 1
-                state.document.doc.splice(paraIndex, 0, rightPara)
+                body.doc.pts.splice(paraIndex, 0, rightPara)
     
-                var newParaRight = getPagePara(state.document.doc[paraIndex], lastPosBottom,
-                    state.document.pageWidth, state.document.pageHeight, state.document.pageSpacingHeight, 
-                    state.document.marginTop, state.document.marginRight, state.document.marginBottom, state.document.marginLeft)
-                newPara.parent = state.document.body
-                state.document.body.splice(paraIndex, 0, newParaRight)
+                var newParaRight = getPagePara(body.doc.pts[paraIndex], lastPosBottom,
+                    body.doc.grid.pageWidth, body.doc.grid.pageHeight, body.doc.grid.pageSpacingHeight, 
+                    body.doc.grid.marginTop, body.doc.grid.marginRight, body.doc.grid.marginBottom, body.doc.grid.marginLeft)
+                newParaRight.parent = body
+                body.pts.splice(paraIndex, 0, newParaRight)
     
-                var newPageParaRight = new PageParagraph(state.document.marginLeft, newParaRight)
+                var newPageParaRight = new PageParagraph(body.doc.grid.marginLeft, newParaRight)
                 var pageParaLeft = newPagePara.el
                 newParaRight.obj = newPageParaRight
                 window.goog.dom.insertSiblingAfter(newPageParaRight.render(), pageParaLeft)
@@ -447,107 +454,116 @@ var state = {
             }
 
             // adjust following page paragraph spacing
-            lastPosBottom = state.mutations._adjustFollowingParaSpacing(lastPosBottom, paraIndex+1)
+            lastPosBottom = state.mutations._adjustFollowingParaSpacing(body, lastPosBottom, paraIndex+1)
 
             return lastPosBottom
         },
-        _addEmptyParaBefore(paraIndex){
+        _addEmptyParaBefore(body, paraIndex){
 
             // skip previous page paragraphs
-            var lastPosBottom = state.document.marginTop
+            var lastPosBottom = body.doc.grid.marginTop
             for(let i = 0 ; i < paraIndex; ++i){
-                lastPosBottom += state.document.body[i].paraHeight
+                lastPosBottom += body.pts[i].paraHeight
             }
 
             // create new empty paragraph
-            var emptyPara = [
-                {
-                    text: '',
-                    textStyle: {},
-                }
-            ]
+            var emptyPara = {
+                runs: [
+                    {
+                        type: 'run',
+                        text: '',
+                        textStyle: {},
+                    }
+                ],
+                type: 'para',
+            }
 
-            state.document.doc.splice(paraIndex, 0, emptyPara)
+            body.doc.pts.splice(paraIndex, 0, emptyPara)
 
-            var oldPara = state.document.body[paraIndex]
-            var newPara = getPagePara(state.document.doc[paraIndex], lastPosBottom,
-                state.document.pageWidth, state.document.pageHeight, state.document.pageSpacingHeight, 
-                state.document.marginTop, state.document.marginRight, state.document.marginBottom, state.document.marginLeft)
-            newPara.parent = state.document.body
-            state.document.body.splice(paraIndex, 0, newPara)
+            var oldPara = body.pts[paraIndex]
+            var newPara = getPagePara(body.doc.pts[paraIndex], lastPosBottom,
+                body.doc.grid.pageWidth, body.doc.grid.pageHeight, body.doc.grid.pageSpacingHeight, 
+                body.doc.grid.marginTop, body.doc.grid.marginRight, body.doc.grid.marginBottom, body.doc.grid.marginLeft)
+            newPara.parent = body
+            body.pts.splice(paraIndex, 0, newPara)
 
-            var newPagePara = new PageParagraph(state.document.marginLeft, newPara)
+            var newPagePara = new PageParagraph(body.doc.grid.marginLeft, newPara)
             var oldPagePara = oldPara.obj.el
             newPara.obj = newPagePara
             window.goog.dom.insertSiblingBefore(newPagePara.render(), oldPagePara)
 
             // adjust following page paragraph spacing
             lastPosBottom += newPara.paraHeight
-            lastPosBottom = state.mutations._adjustFollowingParaSpacing(lastPosBottom, paraIndex+1)
+            lastPosBottom = state.mutations._adjustFollowingParaSpacing(body, lastPosBottom, paraIndex+1)
 
             return lastPosBottom
         },
-        _addEmptyParaAfter(paraIndex){
+        _addEmptyParaAfter(body, paraIndex){
 
             // skip previous page paragraphs
-            var lastPosBottom = state.document.marginTop
+            var lastPosBottom = body.doc.grid.marginTop
             for(let i = 0 ; i < paraIndex+1; ++i){
-                lastPosBottom += state.document.body[i].paraHeight
+                lastPosBottom += body.pts[i].paraHeight
             }
 
             // create new empty paragraph
-            var emptyPara = [
-                {
-                    text: '',
-                    textStyle: {},
-                }
-            ]
+            var emptyPara = {
+                runs: [
+                    {
+                        type: 'run',
+                        text: '',
+                        textStyle: {},
+                    }
+                ],
+                type: 'para',
+            }
 
-            state.document.doc.splice(paraIndex+1, 0, emptyPara)
+            body.doc.pts.splice(paraIndex+1, 0, emptyPara)
 
-            var oldPara = state.document.body[paraIndex]
-            var newPara = getPagePara(state.document.doc[paraIndex+1], lastPosBottom,
-                state.document.pageWidth, state.document.pageHeight, state.document.pageSpacingHeight, 
-                state.document.marginTop, state.document.marginRight, state.document.marginBottom, state.document.marginLeft)
-            newPara.parent = state.document.body
-            state.document.body.splice(paraIndex+1, 0, newPara)
+            var oldPara = body.pts[paraIndex]
+            var newPara = getPagePara(body.doc.pts[paraIndex+1], lastPosBottom,
+                body.doc.grid.pageWidth, body.doc.grid.pageHeight, body.doc.grid.pageSpacingHeight, 
+                body.doc.grid.marginTop, body.doc.grid.marginRight, body.doc.grid.marginBottom, body.doc.grid.marginLeft)
+            newPara.parent = body
+            body.pts.splice(paraIndex+1, 0, newPara)
 
-            var newPagePara = new PageParagraph(state.document.marginLeft, newPara)
+            var newPagePara = new PageParagraph(body.doc.grid.marginLeft, newPara)
             var oldPagePara = oldPara.obj.el
             newPara.obj = newPagePara
             window.goog.dom.insertSiblingAfter(newPagePara.render(), oldPagePara)
 
             // adjust following page paragraph spacing
             lastPosBottom += newPara.paraHeight
-            lastPosBottom = state.mutations._adjustFollowingParaSpacing(lastPosBottom, paraIndex+1)
+            lastPosBottom = state.mutations._adjustFollowingParaSpacing(body, lastPosBottom, paraIndex+1)
 
             return lastPosBottom
         },
-        _mergePreviousPara(paraIndex){
+        _mergePreviousPara(body, paraIndex){
+            let bodyDoc = body.doc
             if(paraIndex > 0){
-                var prePara = state.document.doc[paraIndex-1]
-                var para = state.document.doc[paraIndex]
+                var prePara = bodyDoc.pts[paraIndex-1]
+                var para = bodyDoc.pts[paraIndex]
 
-                for(let i = 0; i < para.length; ++i){
-                    let r = para[i]
+                for(let i = 0; i < para.runs.length; ++i){
+                    let r = para.runs[i]
                     if(r.text != ''){
-                        prePara.push(para[i])
+                        prePara.runs.push(para.runs[i])
                     }
                 }
 
-                if(prePara[0].text == '' && prePara.length > 1){
-                    prePara.splice(0,1)
+                if(prePara.runs[0].text == '' && prePara.runs.length > 1){
+                    prePara.runs.splice(0,1)
                 }
 
-                state.document.doc.splice(paraIndex, 1)
-                state.document.body[paraIndex].obj.el.remove()
-                state.document.body.splice(paraIndex, 1)
+                bodyDoc.pts.splice(paraIndex, 1)
+                body.pts[paraIndex].obj.el.remove()
+                body.pts.splice(paraIndex, 1)
             }
             
         },
         _deleteRunText(bodyDoc, paraIndex, runIndex, startIndex){
-            var para = bodyDoc[paraIndex]
-            var run = para[runIndex]
+            var para = bodyDoc.pts[paraIndex]
+            var run = para.runs[runIndex]
             var leftText = run.text.substr(0, startIndex)
             var rightText = run.text.substr(startIndex+1)
 
@@ -565,7 +581,7 @@ var state = {
             // skip previous page paragraphs
             var lastPosBottom = body.doc.grid.marginTop
             for(let i = 0 ; i < paraIndex; ++i){
-                lastPosBottom += body.pts[i].paraHeight
+                lastPosBottom += body.doc.pts[i].paraHeight
             }
 
             // recreate current page paragraphs
@@ -583,11 +599,11 @@ var state = {
             
             // adjust following page paragraph spacing
             lastPosBottom += newPara.paraHeight
-            lastPosBottom = state.mutations._adjustFollowingParaSpacing(lastPosBottom, body, paraIndex+1)
+            lastPosBottom = state.mutations._adjustFollowingParaSpacing(body, paraIndex+1, lastPosBottom)
 
             return lastPosBottom
         },
-        _adjustFollowingParaSpacing(lastPosBottom, body, paraIndex){
+        _adjustFollowingParaSpacing(body, paraIndex, lastPosBottom){
             for(let i = paraIndex; i < body.pts.length; ++i){
                 var pagePara = body.pts[i]
                 var paraHeight = 0
@@ -621,14 +637,14 @@ var state = {
 
             return lastPosBottom
         },
-        _updatePageBackground(lastPosBottom){
-            var pageNo = getPageNo(lastPosBottom, state.document.pageHeight, state.document.pageSpacingHeight)
+        _updatePageBackground(bodyDoc, lastPosBottom){
+            var pageNo = getPageNo(lastPosBottom, bodyDoc.grid.pageHeight, bodyDoc.grid.pageSpacingHeight)
             var bgWrap = document.getElementsByClassName('page-bgs-wrap')[0]
             var oldBgs = document.getElementsByClassName('page-bg')
             if(pageNo > oldBgs.length){
                 for(let i = 0; i < pageNo - oldBgs.length; ++i){
-                    var pageBg = new PageBackground(state.document.pageWidth, state.document.pageHeight, state.document.pageSpacingHeight, state.document.marginTop, 
-                        state.document.marginRight, state.document.marginBottom, state.document.marginLeft, oldBgs.length+i)
+                    var pageBg = new PageBackground(bodyDoc.grid.pageWidth, bodyDoc.grid.pageHeight, bodyDoc.grid.pageSpacingHeight, bodyDoc.grid.marginTop, 
+                        bodyDoc.grid.marginRight, bodyDoc.grid.marginBottom, bodyDoc.grid.marginLeft, oldBgs.length+i)
                     window.goog.dom.appendChild(bgWrap, pageBg.render())
                 }
             }else if(pageNo < oldBgs.length){
@@ -637,7 +653,7 @@ var state = {
                 }
             }
 
-            bgWrap.style.height = (state.document.pageHeight+state.document.pageSpacingHeight)*pageNo+'px'
+            bgWrap.style.height = (bodyDoc.grid.pageHeight+bodyDoc.grid.pageSpacingHeight)*pageNo+'px'
         },
         _updateCursor(body, paraIndex, runIndex, startIndex, front){
             var nextStartIndex = startIndex

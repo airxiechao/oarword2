@@ -21,7 +21,7 @@ class DocInputBox{
                 position: 'absolute',
                 left: this.cursorPosX + 'px',
                 top: this.cursorPoxY + 'px',
-                opacity: 1,
+                opacity: 0,
                 pointerEvents: 'none',
                 outline: 'none',
                 whiteSpace: 'nowrap',
@@ -52,11 +52,13 @@ class DocInputBox{
 
     inputHandler(e){
         if(!this.imeStatus){
-            state.mutations.addToParaRun({
-                text: this.el.textContent,
-                textStyle: {},
-            })
-            this.el.textContent = ''
+            if(this.el.textContent != ''){
+                state.mutations.addToParaRun({
+                    text: this.el.textContent,
+                    textStyle: {},
+                })
+                this.el.textContent = ''
+            }
         }else{
             var ib = state.document.cursor.inlineBlock
             var front = state.document.cursor.front
