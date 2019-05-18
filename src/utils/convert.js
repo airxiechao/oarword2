@@ -309,7 +309,7 @@ function getInlineBlockBodyIndex(inlineBlock){
     let body = para.parent
     
     let paraIndex = body.pts.indexOf(para)
-    let runIndex = body.pts[paraIndex].doc.indexOf(ib.doc)
+    let runIndex = para.doc.runs.indexOf(ib.doc)
     let startIndex = ib.startIndex + state.document.cursor.inlineStartIndex
 
     return {
