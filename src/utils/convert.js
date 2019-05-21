@@ -141,14 +141,37 @@ function getPagePara(para, lastPosBottom,
     return pagePara
 }
 
-function getPageTable(table, lastPosBottom,
-    pageWidth, pageHeight, pageSpacingHeight, 
-    marginTop, marginRight, marginBottom, marginLeft){
+function getPageTable(table, lastPosBottom){
+
+    let tableCells = []
+    let tableHeight = 0
+    for(let i = 0; i < table.cells.length; ++i){
+        let tableRow = []
+        tableCells.push(tableRow)
+        let row = table.cells[i]
+        let rowHeight = 0
+        for(let j = 0; j < row.length; ++j){
+            let col = row[j]
+            let rowspan = col.rowspan
+            let colspan = col.colspan
+
+            let pb = getPageBody(col, lastPosBottom)
+            let pageBody = pb.pageBody
+            let bodyHeight = pb.bodyHeight
+            rowHeight = Math.max(rowHeight, bodyHeight)
+
+            tableRow.push(pageBody)
+        }
+
+        lastPosBottom += rowHeight
+        tableHeight += rowHeight
+    }
 
     let pageTable = {
         type: 'table',
         doc: table,
-        cells: []
+        cells: tableCells,
+        tableHeight: tableHeight,
     }
 
     return pageTable
@@ -163,6 +186,7 @@ function getPageBody(doc, lastPosBottom){
     let marginRight = doc.grid.marginRight
     let marginBottom = doc.grid.marginBottom
     let marginLeft = doc.grid.marginLeft
+    let bodyHeight = 0
 
     let pts = []
     for(let i = 0; i < doc.pts.length; ++i){
@@ -174,13 +198,13 @@ function getPageBody(doc, lastPosBottom){
 
             pts.push(pagePara)
             lastPosBottom += pagePara.paraHeight;
+            bodyHeight += pagePara.paraHeight;
         }else if(pt.type == 'table'){
-            let pageTable = getPageTable(pt, lastPosBottom,
-                pageWidth, pageHeight, pageSpacingHeight,
-                marginTop, marginRight, marginBottom, marginLeft)
+            let pageTable = getPageTable(pt, lastPosBottom)
 
             pts.push(pageTable)
             lastPosBottom += pageTable.tableHeight;
+            bodyHeight += pageTable.tableHeight;
         }
         
     }
@@ -197,7 +221,10 @@ function getPageBody(doc, lastPosBottom){
         pt.parent = pageBody
     }
 
-    return pageBody
+    return {
+        pageBody: pageBody,
+        bodyHeight: bodyHeight,
+    }
 }
 
 function getDocParaOfRun(doc, run){

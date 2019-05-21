@@ -247,7 +247,6 @@ var doc = {
                 }
             ],
         },
-        /*
         {
             type: 'table',
             grid: [],
@@ -257,7 +256,32 @@ var doc = {
                         type: 'body',
                         rowspan: 1,
                         colspan: 1,
-                        pts: [],
+                        pts: [
+                            {
+                                type: 'para',
+                                runs: [
+                                    {
+                                        type: 'run',
+                                        text: '111',
+                                        textStyle: {},
+                                    },
+                                    {
+                                        type: 'run',
+                                        text: '222',
+                                        textStyle: {},
+                                    }
+                                ],
+                            },
+                        ],
+                        grid: {
+                            pageWidth: 400,
+                            pageHeight: 800 * Math.sqrt(2),
+                            pageSpacingHeight: 5,
+                            marginTop: 100,
+                            marginRight: 0,
+                            marginBottom: 100,
+                            marginLeft: 0,
+                        },
                     }
                 ],
                 [
@@ -265,11 +289,36 @@ var doc = {
                         type: 'body',
                         rowspan: 1,
                         colspan: 1,
-                        pts: [],
+                        pts: [
+                            {
+                                type: 'para',
+                                runs: [
+                                    {
+                                        type: 'run',
+                                        text: '333',
+                                        textStyle: {},
+                                    },
+                                    {
+                                        type: 'run',
+                                        text: '444',
+                                        textStyle: {},
+                                    }
+                                ],
+                            },
+                        ],
+                        grid: {
+                            pageWidth: 400,
+                            pageHeight: 800 * Math.sqrt(2),
+                            pageSpacingHeight: 5,
+                            marginTop: 100,
+                            marginRight: 0,
+                            marginBottom: 100,
+                            marginLeft: 0,
+                        },
                     }
                 ]
             ],
-        }*/
+        },
     ],
 }
 

@@ -48,7 +48,7 @@ var state = {
             state.document.inputBox.obj = obj
         },
         setDocument: function(doc){
-            var body = getPageBody(doc, doc.grid.marginTop)
+            var body = getPageBody(doc, doc.grid.marginTop).pageBody
             
             state.document.body = body
         },

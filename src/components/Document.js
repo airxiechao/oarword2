@@ -1,5 +1,5 @@
 import PageBackground from './PageBackground'
-import PageParagraph from './PageParagraph'
+import PageBody from './PageBody'
 import DocCursor from './DocCursor'
 import DocInputBox from './DocInputBox'
 
@@ -24,34 +24,11 @@ class Document{
     render(){
         // render paragraphs
         var lastPosBottom = this.marginTop;
-        
-        var pageParas = []
-        for(let i = 0; i < this.body.pts.length; ++i){
-            let para = this.body.pts[i]
 
-            if(para.type == 'para'){
-                let pagePara = new PageParagraph(this.marginLeft, para)
-                para.obj = pagePara
-    
-                pageParas.push(pagePara.render())
-                lastPosBottom += para.paraHeight;
-            }else if(para.type == 'table'){
-                
-            }
-            
-        }
-        
+        var pageBody = new PageBody(lastPosBottom, this.body)
+        var pageBodyEl = pageBody.render()
+        lastPosBottom += pageBody.bodyHeight
         var pageNo = getPageNo(lastPosBottom, this.pageHeight, this.pageSpacingHeight)
-        var pageParasWrap = createElement('div', {
-            class: 'page-paras-wrap',
-            style: {
-                position: 'absolute',
-                top: '0px',
-                left: '0px',
-                paddingTop: this.marginTop+'px',
-            }
-        }, pageParas)
-        
         
         // render page backgrounds
         var pageBgs = []
@@ -84,7 +61,7 @@ class Document{
                 position: 'absolute',
                 marginTop: this.pageSpacingHeight+'px',
             },
-        }, [ pageBgsWrap, pageParasWrap, docInputBox.render(), docCursor.render() ])
+        }, [ pageBgsWrap, pageBodyEl, docInputBox.render(), docCursor.render() ])
 
         this.el = createElement('div', {
             class: 'doc-wrap',
