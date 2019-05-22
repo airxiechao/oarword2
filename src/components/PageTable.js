@@ -17,11 +17,14 @@ class PageTable{
 
                 let pageBody = new PageBody(0, col)
                 let pageBodyEl = pageBody.render()
-
+                console.log(col)
                 let tableCol = createElement('td', {
                     class: 'page-table-col',
                     style: {
                         position: 'relative',
+                        width: col.doc.grid.pageWidth+'px',
+                        height: pageBody.bodyHeight+'px',
+                        border: '1px solid #333',
                     }
                 }, [pageBodyEl])
 
@@ -41,8 +44,13 @@ class PageTable{
         // create table
         this.el =  createElement('table', {
             class: 'page-table',
+            attrs: {
+                cellpadding: 0,
+                cellspacing: 0,
+            },
             style: {
-                marginLeft: this.posLeft+'px'
+                marginLeft: this.posLeft+'px',
+                borderCollapse: 'collapse',
             }
         }, tableRows)
 
