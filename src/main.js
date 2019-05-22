@@ -251,7 +251,7 @@ var doc = {
             type: 'table',
             grid: [],
             cells: [
-                [
+                [ // row 0
                     {
                         type: 'body',
                         rowspan: 1,
@@ -274,7 +274,38 @@ var doc = {
                             },
                         ],
                         grid: {
-                            pageWidth: 400,
+                            pageWidth: 200,
+                            pageHeight: 800 * Math.sqrt(2),
+                            pageSpacingHeight: 5,
+                            marginTop: 100,
+                            marginRight: 0,
+                            marginBottom: 100,
+                            marginLeft: 0,
+                        },
+                    },
+                    {
+                        type: 'body',
+                        rowspan: 1,
+                        colspan: 1,
+                        pts: [
+                            {
+                                type: 'para',
+                                runs: [
+                                    {
+                                        type: 'run',
+                                        text: 'aaa',
+                                        textStyle: {},
+                                    },
+                                    {
+                                        type: 'run',
+                                        text: 'bbb',
+                                        textStyle: {},
+                                    }
+                                ],
+                            },
+                        ],
+                        grid: {
+                            pageWidth: 200,
                             pageHeight: 800 * Math.sqrt(2),
                             pageSpacingHeight: 5,
                             marginTop: 100,
@@ -284,7 +315,7 @@ var doc = {
                         },
                     }
                 ],
-                [
+                [ // row 1
                     {
                         type: 'body',
                         rowspan: 1,
@@ -307,7 +338,38 @@ var doc = {
                             },
                         ],
                         grid: {
-                            pageWidth: 400,
+                            pageWidth: 200,
+                            pageHeight: 800 * Math.sqrt(2),
+                            pageSpacingHeight: 5,
+                            marginTop: 100,
+                            marginRight: 0,
+                            marginBottom: 100,
+                            marginLeft: 0,
+                        },
+                    },
+                    {
+                        type: 'body',
+                        rowspan: 1,
+                        colspan: 1,
+                        pts: [
+                            {
+                                type: 'para',
+                                runs: [
+                                    {
+                                        type: 'run',
+                                        text: 'ccc',
+                                        textStyle: {},
+                                    },
+                                    {
+                                        type: 'run',
+                                        text: 'ddd',
+                                        textStyle: {},
+                                    }
+                                ],
+                            },
+                        ],
+                        grid: {
+                            pageWidth: 200,
                             pageHeight: 800 * Math.sqrt(2),
                             pageSpacingHeight: 5,
                             marginTop: 100,

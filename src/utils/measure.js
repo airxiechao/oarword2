@@ -32,6 +32,21 @@ function measureElePageXY(ele){
     return {x:x, y:y};
 }
 
+function measureEleDocXY(ele){
+    var x = 0, y = 0;
+
+    while( ele ) {
+        x += ele.offsetLeft;
+        y += ele.offsetTop;
+        ele = ele.offsetParent;
+        if( ele && ele.className == 'doc' ) {
+            break;
+        }
+    }
+
+    return {x:x, y:y};
+}
+
 function getCursorPos(cursorInlineBlock, inlineStartIndex, front){
     var cursorPosX = 0
     var cursorPosY = 0
@@ -39,8 +54,9 @@ function getCursorPos(cursorInlineBlock, inlineStartIndex, front){
     
     var cb = cursorInlineBlock
     if(cb && cb.obj && cb.obj.el){
-        var inlineBlockLeft = cb.obj.el.offsetLeft
-        var inlineBlocktTop = cb.obj.el.offsetTop
+        var ibp = measureEleDocXY(cb.obj.el)
+        var inlineBlockLeft = ibp.x
+        var inlineBlocktTop = ibp.y
         
         var text = cb.text
         var h = cb.inlineHeight
@@ -156,5 +172,5 @@ function getWidthFontTextPos(text, textStyle, width){
     }
 }
 
-export { measureFontTextWH, measureElePageXY, getCursorPos, getPageNo, getPageLeftHeight,
+export { measureFontTextWH, measureElePageXY, measureEleDocXY, getCursorPos, getPageNo, getPageLeftHeight,
          getWidthFontTextPos }

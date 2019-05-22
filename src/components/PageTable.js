@@ -17,7 +17,7 @@ class PageTable{
 
                 let pageBody = new PageBody(0, col)
                 let pageBodyEl = pageBody.render()
-                console.log(col)
+                
                 let tableCol = createElement('td', {
                     class: 'page-table-col',
                     style: {

@@ -684,6 +684,7 @@ var state = {
             // update cursor ui
             var cursor = state.document.cursor.obj
             var pos = state.getters.cursorPos()
+            
             cursor.updatePos(pos.cursorPosX, pos.cursorPosY, pos.cursorHeight)
 
             // update inputbox ui

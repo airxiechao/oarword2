@@ -1,5 +1,5 @@
 import { createElement } from '../utils/renderer'
-import { measureFontTextWH, measureElePageXY } from '../utils/measure.js'
+import { measureFontTextWH, measureElePageXY, measureEleDocXY } from '../utils/measure.js'
 
 import state from '../utils/state'
 
@@ -30,8 +30,8 @@ class PageInlineBlock{
 
     clickHandler(e){
         var docXY = measureElePageXY(document.getElementsByClassName('doc')[0])
-        var docX = docXY.x
-        var pointLeft = e.clientX - docX - this.el.offsetLeft
+        var elXY = measureEleDocXY(this.el)
+        var pointLeft = e.clientX - docXY.x - elXY.x
         
         var front = false
         var lastw = 0
