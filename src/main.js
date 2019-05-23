@@ -209,7 +209,7 @@ var doc = {
     type: 'body',
     grid: {
         pageWidth: 800,
-        pageHeight: 800 * Math.sqrt(2),
+        pageHeight: 400 * Math.sqrt(2),
         pageSpacingHeight: 5,
         marginTop: 100,
         marginRight: 100,
@@ -249,13 +249,14 @@ var doc = {
         },
         {
             type: 'table',
-            grid: [],
+            grid: [200, 200],
             cells: [
                 [ // row 0
                     {
                         type: 'body',
                         rowspan: 1,
                         colspan: 1,
+                        grid: {},
                         pts: [
                             {
                                 type: 'para',
@@ -273,20 +274,12 @@ var doc = {
                                 ],
                             },
                         ],
-                        grid: {
-                            pageWidth: 200,
-                            pageHeight: 800 * Math.sqrt(2),
-                            pageSpacingHeight: 5,
-                            marginTop: 100,
-                            marginRight: 0,
-                            marginBottom: 100,
-                            marginLeft: 0,
-                        },
                     },
                     {
                         type: 'body',
                         rowspan: 1,
                         colspan: 1,
+                        grid: {},
                         pts: [
                             {
                                 type: 'para',
@@ -304,15 +297,6 @@ var doc = {
                                 ],
                             },
                         ],
-                        grid: {
-                            pageWidth: 200,
-                            pageHeight: 800 * Math.sqrt(2),
-                            pageSpacingHeight: 5,
-                            marginTop: 100,
-                            marginRight: 0,
-                            marginBottom: 100,
-                            marginLeft: 0,
-                        },
                     }
                 ],
                 [ // row 1
@@ -320,6 +304,7 @@ var doc = {
                         type: 'body',
                         rowspan: 1,
                         colspan: 1,
+                        grid: {},
                         pts: [
                             {
                                 type: 'para',
@@ -337,20 +322,12 @@ var doc = {
                                 ],
                             },
                         ],
-                        grid: {
-                            pageWidth: 200,
-                            pageHeight: 800 * Math.sqrt(2),
-                            pageSpacingHeight: 5,
-                            marginTop: 100,
-                            marginRight: 0,
-                            marginBottom: 100,
-                            marginLeft: 0,
-                        },
                     },
                     {
                         type: 'body',
                         rowspan: 1,
                         colspan: 1,
+                        grid: {},
                         pts: [
                             {
                                 type: 'para',
@@ -368,15 +345,6 @@ var doc = {
                                 ],
                             },
                         ],
-                        grid: {
-                            pageWidth: 200,
-                            pageHeight: 800 * Math.sqrt(2),
-                            pageSpacingHeight: 5,
-                            marginTop: 100,
-                            marginRight: 0,
-                            marginBottom: 100,
-                            marginLeft: 0,
-                        },
                     }
                 ]
             ],

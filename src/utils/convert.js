@@ -141,7 +141,7 @@ function getPagePara(para, lastPosBottom,
     return pagePara
 }
 
-function getPageTable(table, lastPosBottom){
+function getPageTable(doc, table, lastPosBottom){
 
     let tableCells = []
     let tableHeight = 0
@@ -154,6 +154,14 @@ function getPageTable(table, lastPosBottom){
             let col = row[j]
             let rowspan = col.rowspan
             let colspan = col.colspan
+
+            col.grid.pageWidth = table.grid[j]
+            col.grid.pageHeight = doc.grid.pageHeight
+            col.grid.pageSpacingHeight = doc.grid.pageSpacingHeight 
+            col.grid.marginTop = doc.grid.marginTop
+            col.grid.marginRight = 0
+            col.grid.marginBottom = doc.grid.marginBottom
+            col.grid.marginLeft = 0
 
             let pb = getPageBody(col, lastPosBottom)
             let pageBody = pb.pageBody
@@ -200,7 +208,7 @@ function getPageBody(doc, lastPosBottom){
             lastPosBottom += pagePara.paraHeight;
             bodyHeight += pagePara.paraHeight;
         }else if(pt.type == 'table'){
-            let pageTable = getPageTable(pt, lastPosBottom)
+            let pageTable = getPageTable(doc, pt, lastPosBottom)
 
             pts.push(pageTable)
             lastPosBottom += pageTable.tableHeight;
