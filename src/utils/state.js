@@ -1,7 +1,7 @@
 import { measureFontTextWH, getCursorPos, getPageLeftHeight } from './measure'
 import { getPagePara, getPageBody, getPreviousInlineOfBody, 
     getNextInlineOfBody, getPreviousLineOfBody, getNextLineOfBody, getInlineBlockBodyIndex } from './convert'
-import { getPageNo } from '../utils/measure'
+import { getPageNo, measureEleDocXY } from '../utils/measure'
 
 import PageParagraph from '../components/PageParagraph'
 import PageBackground from '../components/PageBackground'
@@ -113,7 +113,8 @@ var state = {
                 let front = false
                 for(let i = 0; i < lastline.inlineBlocks.length; ++i){
                     ib = lastline.inlineBlocks[i]
-                    let lx = ib.obj.el.offsetLeft
+                    let lxy = measureEleDocXY(ib.obj.el)
+                    let lx = lxy.x
                     let lw = ib.obj.el.offsetWidth
 
                     if(cx >= lx && cx <= lx + lw){
@@ -169,7 +170,8 @@ var state = {
                 let front = false
                 for(let i = 0; i < nextline.inlineBlocks.length; ++i){
                     ib = nextline.inlineBlocks[i]
-                    let lx = ib.obj.el.offsetLeft
+                    let lxy = measureEleDocXY(ib.obj.el)
+                    let lx = lxy.x
                     let lw = ib.obj.el.offsetWidth
 
                     if(cx >= lx && cx <= lx + lw){
