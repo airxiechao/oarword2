@@ -164,7 +164,7 @@ function getPageTable(doc, table, lastPosBottom){
             col.grid.marginLeft = 0
 
             let pb = getPageBody(col, lastPosBottom)
-            let pageBody = pb.pageBody
+            let pageBody = pb
             let bodyHeight = pb.bodyHeight
             rowHeight = Math.max(rowHeight, bodyHeight)
 
@@ -180,6 +180,15 @@ function getPageTable(doc, table, lastPosBottom){
         doc: table,
         cells: tableCells,
         tableHeight: tableHeight,
+    }
+
+    // set parent for cells
+    for(let i = 0; i < pageTable.cells.length; ++i){
+        let row = pageTable.cells[i]
+        for(let j = 0; j < row.length; ++j){
+            let col = row[j]
+            col.parent = pageTable
+        }
     }
 
     return pageTable
@@ -220,6 +229,7 @@ function getPageBody(doc, lastPosBottom){
     let pageBody = {
         pts: pts,
         doc: doc,
+        bodyHeight: bodyHeight,
         type: 'body',
     }
 
@@ -229,43 +239,28 @@ function getPageBody(doc, lastPosBottom){
         pt.parent = pageBody
     }
 
-    return {
-        pageBody: pageBody,
-        bodyHeight: bodyHeight,
-    }
-}
-
-function getDocParaOfRun(doc, run){
-    for(let i = 0; i < doc.pts.length; ++i){
-        let para = doc.pts[i]
-        for(let j = 0; j < para.runs.length; ++j){
-            let r = para.runs[j]
-            if(r === run){
-                return para
-            }
-        }
-    }
-
-    return null
+    return pageBody
 }
 
 function getPreviousLineOfBody(inlineBlock){
     let body = inlineBlock.parent.parent.parent
     let lastline = null
     for(let i = 0; i < body.pts.length; ++i){
-        let para = body.pts[i]
-        for(let j = 0; j < para.lines.length; ++j){
-            let line = para.lines[j]
-            if(line.type != 'line'){
-                continue
-            }
-            for(let k = 0; k < line.inlineBlocks.length; ++k){
-                let ib = line.inlineBlocks[k]
-                if(ib == inlineBlock){
-                    return lastline
+        let pt = body.pts[i]
+        if(pt.type == 'para'){
+            for(let j = 0; j < pt.lines.length; ++j){
+                let line = pt.lines[j]
+                if(line.type != 'line'){
+                    continue
                 }
+                for(let k = 0; k < line.inlineBlocks.length; ++k){
+                    let ib = line.inlineBlocks[k]
+                    if(ib == inlineBlock){
+                        return lastline
+                    }
+                }
+                lastline = line
             }
-            lastline = line
         }
     }
 
@@ -276,19 +271,21 @@ function getNextLineOfBody(inlineBlock){
     let body = inlineBlock.parent.parent.parent
     let nextline = null
     for(let i = body.pts.length - 1; i >= 0; --i){
-        let para = body.pts[i]
-        for(let j = para.lines.length - 1; j >= 0 ; --j){
-            let line = para.lines[j]
-            if(line.type != 'line'){
-                continue
-            }
-            for(let k = line.inlineBlocks.length - 1; k >= 0 ; --k){
-                let ib = line.inlineBlocks[k]
-                if(ib == inlineBlock){
-                    return nextline
+        let pt = body.pts[i]
+        if(pt.type == 'para'){
+            for(let j = pt.lines.length - 1; j >= 0 ; --j){
+                let line = pt.lines[j]
+                if(line.type != 'line'){
+                    continue
                 }
+                for(let k = line.inlineBlocks.length - 1; k >= 0 ; --k){
+                    let ib = line.inlineBlocks[k]
+                    if(ib == inlineBlock){
+                        return nextline
+                    }
+                }
+                nextline = line
             }
-            nextline = line
         }
     }
 
@@ -299,16 +296,18 @@ function getPreviousInlineOfBody(inlineBlock){
     let body = inlineBlock.parent.parent.parent
     let lastib = null
     for(let i = 0; i < body.pts.length; ++i){
-        let para = body.pts[i]
-        for(let j = 0; j < para.lines.length; ++j){
-            let line = para.lines[j]
-            for(let k = 0; k < line.inlineBlocks.length; ++k){
-                let ib = line.inlineBlocks[k]
-                if(ib == inlineBlock){
-                    return lastib
+        let pt = body.pts[i]
+        if(pt.type == 'para'){
+            for(let j = 0; j < pt.lines.length; ++j){
+                let line = pt.lines[j]
+                for(let k = 0; k < line.inlineBlocks.length; ++k){
+                    let ib = line.inlineBlocks[k]
+                    if(ib == inlineBlock){
+                        return lastib
+                    }
+    
+                    lastib = ib
                 }
-
-                lastib = ib
             }
         }
     }
@@ -320,16 +319,18 @@ function getNextInlineOfBody(inlineBlock){
     let body = inlineBlock.parent.parent.parent
     let nextib = null
     for(let i = body.pts.length - 1; i >= 0; --i){
-        let para = body.pts[i]
-        for(let j = para.lines.length - 1; j >= 0 ; --j){
-            let line = para.lines[j]
-            for(let k = line.inlineBlocks.length - 1; k >= 0 ; --k){
-                let ib = line.inlineBlocks[k]
-                if(ib == inlineBlock){
-                    return nextib
+        let pt = body.pts[i]
+        if(pt.type == 'para'){
+            for(let j = pt.lines.length - 1; j >= 0 ; --j){
+                let line = pt.lines[j]
+                for(let k = line.inlineBlocks.length - 1; k >= 0 ; --k){
+                    let ib = line.inlineBlocks[k]
+                    if(ib == inlineBlock){
+                        return nextib
+                    }
+    
+                    nextib = ib
                 }
-
-                nextib = ib
             }
         }
     }
@@ -356,5 +357,5 @@ function getInlineBlockBodyIndex(inlineBlock){
 }
 
 export { paraRunsToLines, getLineInlineBlocksAndHeightFromQueue, getPageLeftHeight, 
-         getPagePara, getPageBody, getDocParaOfRun, getPreviousInlineOfBody, getNextInlineOfBody,
+         getPagePara, getPageBody, getPreviousInlineOfBody, getNextInlineOfBody,
          getPreviousLineOfBody, getNextLineOfBody, getInlineBlockBodyIndex, getPageTable }

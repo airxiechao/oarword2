@@ -16,17 +16,17 @@ class PageTable{
                 let col = row[j]
 
                 let pageBody = new PageBody(0, col)
-                let pageBodyEl = pageBody.render()
+                col.obj = pageBody
                 
                 let tableCol = createElement('td', {
                     class: 'page-table-col',
                     style: {
                         position: 'relative',
                         width: col.doc.grid.pageWidth+'px',
-                        height: pageBody.bodyHeight+'px',
+                        height: col.bodyHeight+'px',
                         border: '1px solid #333',
                     }
-                }, [pageBodyEl])
+                }, [pageBody.render()])
 
                 tableCols.push(tableCol)
             }

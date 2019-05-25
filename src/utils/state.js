@@ -1,5 +1,5 @@
 import { measureFontTextWH, getCursorPos, getPageLeftHeight } from './measure'
-import { getPagePara, getPageBody, getDocParaOfRun, getPreviousInlineOfBody, 
+import { getPagePara, getPageBody, getPreviousInlineOfBody, 
     getNextInlineOfBody, getPreviousLineOfBody, getNextLineOfBody, getInlineBlockBodyIndex } from './convert'
 import { getPageNo } from '../utils/measure'
 
@@ -48,7 +48,7 @@ var state = {
             state.document.inputBox.obj = obj
         },
         setDocument: function(doc){
-            var body = getPageBody(doc, doc.grid.marginTop).pageBody
+            var body = getPageBody(doc, doc.grid.marginTop)
             
             state.document.body = body
         },
@@ -233,11 +233,20 @@ var state = {
             // update run text
             state.mutations._spliceRunText(body.doc, paraIndex, runIndex, front ? startIndex : startIndex + 1, text, textStyle)
 
+            // get last position bottom
+            let lastPosBottom = state.mutations._getParaLastPosBottom(body, paraIndex)
+
             // update document paragraph
-            let lastPosBottom = state.mutations._updatePara(body, paraIndex)
+            lastPosBottom = state.mutations._updatePara(body, paraIndex, lastPosBottom)
+
+            // adjust following spacing
+            lastPosBottom = state.mutations._adjustBodyPtFollowingSpacing(body, paraIndex+1, lastPosBottom)
+
+            // adjust parent following spacing
+            lastPosBottom = state.mutations._adjustBodyParentFollowingSpacing(body, lastPosBottom)
             
             // update page background
-            state.mutations._updatePageBackground(body.doc, lastPosBottom)
+            state.mutations._updatePageBackground(lastPosBottom)
 
             // update cursor
             let si = startIndex + text.length
@@ -249,14 +258,14 @@ var state = {
             }
         },
         deleteFromParaRun: function(){
-            var ci = state.getters.cursorBodyIndex()
-            var front = state.document.cursor.front
-            var body = ci.body
-            var paraIndex = ci.paraIndex
-            var runIndex = ci.runIndex
-            var startIndex = ci.startIndex
-            var para = body.doc.pts[paraIndex]
-            var run = para.runs[runIndex]
+            let ci = state.getters.cursorBodyIndex()
+            let front = state.document.cursor.front
+            let body = ci.body
+            let paraIndex = ci.paraIndex
+            let runIndex = ci.runIndex
+            let startIndex = ci.startIndex
+            let para = body.doc.pts[paraIndex]
+            let run = para.runs[runIndex]
 
             if(!front){
                 state.mutations._deleteRunText(body.doc, paraIndex, runIndex, startIndex)
@@ -270,9 +279,9 @@ var state = {
                             front = true
                         }else{
                             let lastib = getPreviousInlineOfBody(state.document.cursor.inlineBlock)
-                            let p = getDocParaOfRun(body.doc, lastib.doc)
-                            paraIndex = body.doc.pts.indexOf(p)
-                            runIndex = body.doc.pts[paraIndex].runs.indexOf(lastib.doc)
+                            let bi = getInlineBlockBodyIndex(lastib)
+                            paraIndex = bi.paraIndex
+                            runIndex = bi.runIndex
                             startIndex = lastib.text.length - 1
                             front = false
                         }
@@ -323,11 +332,20 @@ var state = {
                 }
             }
 
+            // get last position bottom
+            let lastPosBottom = state.mutations._getParaLastPosBottom(body, paraIndex)
+
             // update document paragraph
-            var lastPosBottom = state.mutations._updatePara(body, paraIndex)
+            lastPosBottom = state.mutations._updatePara(body, paraIndex, lastPosBottom)
+
+            // adjust following spacing
+            lastPosBottom = state.mutations._adjustBodyPtFollowingSpacing(body, paraIndex+1, lastPosBottom)
+
+            // adjust parent following spacing
+            lastPosBottom = state.mutations._adjustBodyParentFollowingSpacing(body, lastPosBottom)
                 
             // update page background
-            state.mutations._updatePageBackground(body.doc, lastPosBottom)
+            state.mutations._updatePageBackground(lastPosBottom)
 
             // update cursor
             state.mutations._updateCursor(body, paraIndex, runIndex, startIndex, front)
@@ -347,7 +365,7 @@ var state = {
                 let lastPosBottom = state.mutations._addEmptyParaBefore(body, paraIndex)
 
                 // update page background
-                state.mutations._updatePageBackground(body.doc, lastPosBottom)
+                state.mutations._updatePageBackground(lastPosBottom)
 
                 // update cursor
                 state.mutations._updateCursor(body, paraIndex+1, 0, 0)
@@ -356,7 +374,7 @@ var state = {
                 let lastPosBottom = state.mutations._addEmptyParaAfter(body, paraIndex)
 
                 // update page background
-                state.mutations._updatePageBackground(body.doc, lastPosBottom)
+                state.mutations._updatePageBackground(lastPosBottom)
 
                 // update cursor
                 state.mutations._updateCursor(body, paraIndex+1, 0, 0, true)
@@ -364,19 +382,76 @@ var state = {
                 let lastPosBottom = state.mutations._splitParaInner(body, paraIndex, runIndex, front ? startIndex : startIndex + 1)
                 
                 // update page background
-                state.mutations._updatePageBackground(body.doc, lastPosBottom)
+                state.mutations._updatePageBackground(lastPosBottom)
 
                 // update cursor
                 state.mutations._updateCursor(body, paraIndex+1, 0, 0, true)
             }
         },
+        _getParaLastPosBottom(body, paraIndex){
+            let lastPosBottom = 0
+            
+            while(body){
+                
+                for(let i = 0 ; i < paraIndex; ++i){
+                    let pt = body.pts[i]
+                    if(pt.type == 'para'){
+                        lastPosBottom += pt.paraHeight
+                    }else if(pt.type == 'table'){
+                        lastPosBottom += pt.tableHeight
+                    }
+                }
+
+                let bodyParent = body.parent
+                if(!bodyParent){
+                    lastPosBottom += body.doc.grid.marginTop
+                    break
+                }else{
+                    if(bodyParent.type == 'table'){
+                        for(let i = 0; i < bodyParent.cells.length; ++i){
+                            let row = bodyParent.cells[i]
+                            let colHeights = []
+                            let found = false
+                            for(let j = 0; j < row.length; ++j){
+                                let col = row[j]
+                                if(col == body){
+                                    found = true
+                                    break
+                                }
+                                colHeights.push(col.bodyHeight)
+                            }
+                            if(colHeights.length == row.length){
+                                lastPosBottom += Math.max(...colHeights)
+                            }
+                            if(found){
+                                break
+                            }
+                        }
+    
+                        body = bodyParent.parent
+                        paraIndex = body.pts.indexOf(bodyParent)
+                    }else{
+                        break
+                    }
+                }
+                
+            }
+
+            return lastPosBottom
+        },
         _splitParaInner(body, paraIndex, runIndex, startIndex){
             // skip previous page paragraphs
             var lastPosBottom = body.doc.grid.marginTop
             for(let i = 0 ; i < paraIndex; ++i){
-                lastPosBottom += body.pts[i].paraHeight
+                let pt = body.pts[i]
+                if(pt.type == 'para'){
+                    lastPosBottom += body.pts[i].paraHeight
+                }else if(pt.type == 'table'){
+                    lastPosBottom += body.pts[i].tableHeight
+                }
+                
             }
-
+            
             // split paragraph
             var para = body.doc.pts[paraIndex]
             var oldRun = para.runs[runIndex]
@@ -452,9 +527,12 @@ var state = {
     
                 lastPosBottom += newParaRight.paraHeight
             }
-
+            
             // adjust following page paragraph spacing
-            lastPosBottom = state.mutations._adjustFollowingParaSpacing(body, lastPosBottom, paraIndex+1)
+            lastPosBottom = state.mutations._adjustBodyPtFollowingSpacing(body, paraIndex+1, lastPosBottom)
+
+            // adjust parent following spacing
+            lastPosBottom = state.mutations._adjustBodyParentFollowingSpacing(body, lastPosBottom)
 
             return lastPosBottom
         },
@@ -463,7 +541,13 @@ var state = {
             // skip previous page paragraphs
             var lastPosBottom = body.doc.grid.marginTop
             for(let i = 0 ; i < paraIndex; ++i){
-                lastPosBottom += body.pts[i].paraHeight
+                let pt = body.pts[i]
+                if(pt.type == 'para'){
+                    lastPosBottom += body.pts[i].paraHeight
+                }else if(pt.type == 'table'){
+                    lastPosBottom += body.pts[i].tableHeight
+                }
+                
             }
 
             // create new empty paragraph
@@ -494,7 +578,10 @@ var state = {
 
             // adjust following page paragraph spacing
             lastPosBottom += newPara.paraHeight
-            lastPosBottom = state.mutations._adjustFollowingParaSpacing(body, lastPosBottom, paraIndex+1)
+            lastPosBottom = state.mutations._adjustBodyPtFollowingSpacing(body, paraIndex+1, lastPosBottom)
+
+            // adjust parent following spacing
+            lastPosBottom = state.mutations._adjustBodyParentFollowingSpacing(body, lastPosBottom)
 
             return lastPosBottom
         },
@@ -502,8 +589,14 @@ var state = {
 
             // skip previous page paragraphs
             var lastPosBottom = body.doc.grid.marginTop
-            for(let i = 0 ; i < paraIndex+1; ++i){
-                lastPosBottom += body.pts[i].paraHeight
+            for(let i = 0 ; i < paraIndex; ++i){
+                let pt = body.pts[i]
+                if(pt.type == 'para'){
+                    lastPosBottom += body.pts[i].paraHeight
+                }else if(pt.type == 'table'){
+                    lastPosBottom += body.pts[i].tableHeight
+                }
+                
             }
 
             // create new empty paragraph
@@ -534,7 +627,10 @@ var state = {
 
             // adjust following page paragraph spacing
             lastPosBottom += newPara.paraHeight
-            lastPosBottom = state.mutations._adjustFollowingParaSpacing(body, lastPosBottom, paraIndex+1)
+            lastPosBottom = state.mutations._adjustBodyPtFollowingSpacing(body, paraIndex+1, lastPosBottom)
+
+            // adjust parent following spacing
+            lastPosBottom = state.mutations._adjustBodyParentFollowingSpacing(body, lastPosBottom)
 
             return lastPosBottom
         },
@@ -576,13 +672,7 @@ var state = {
 
             run.text = leftText + text + rightText
         },
-        _updatePara(body, paraIndex){
-            
-            // skip previous page paragraphs
-            var lastPosBottom = body.doc.grid.marginTop
-            for(let i = 0 ; i < paraIndex; ++i){
-                lastPosBottom += body.doc.pts[i].paraHeight
-            }
+        _updatePara(body, paraIndex, lastPosBottom){
 
             // recreate current page paragraphs
             var oldPara = body.pts[paraIndex]
@@ -597,50 +687,156 @@ var state = {
             newPara.obj = newPagePara
             window.goog.dom.replaceNode(newPagePara.render(), oldPagePara)
             
-            // adjust following page paragraph spacing
             lastPosBottom += newPara.paraHeight
-            lastPosBottom = state.mutations._adjustFollowingParaSpacing(body, paraIndex+1, lastPosBottom)
+            
+            return lastPosBottom
+        },
+        _adjustParaLineFollowingSpacing(body, paraIndex, lineIndex, lastPosBottom){
+            var pagePara = body.pts[paraIndex]
+            var paraHeight = 0
+
+            for(let i = 0; i < lineIndex; ++i){
+                var ls = pagePara.lines[i]
+                if(ls.type == 'line'){
+                    paraHeight += ls.spacingHeight + ls.lineHeight
+                }
+            }
+            
+            for(let i = lineIndex; i < pagePara.lines.length; ++i){
+                var ls = pagePara.lines[i]
+                if(ls.type == 'line'){
+                    // check paragraph height
+                    var leftHeight = getPageLeftHeight(lastPosBottom, body.doc.grid.marginBottom, body.doc.grid.pageHeight, body.doc.grid.pageSpacingHeight)
+                    if(ls.lineHeight > leftHeight){
+                        // create new page spacing
+                        var spacingHeight = leftHeight + body.doc.grid.marginBottom + body.doc.grid.pageSpacingHeight + body.doc.grid.marginTop
+                        
+                        lastPosBottom += spacingHeight
+                        paraHeight += spacingHeight
+
+                        ls.spacingHeight = spacingHeight
+                        ls.obj.el.style.marginTop = spacingHeight+'px'
+                    }else{
+                        ls.spacingHeight = 0
+                        ls.obj.el.style.marginTop = '0px'
+                    }
+                    
+                    lastPosBottom += ls.lineHeight
+                    paraHeight += ls.lineHeight
+                }
+            }
+
+            pagePara.paraHeight = paraHeight
 
             return lastPosBottom
         },
-        _adjustFollowingParaSpacing(body, paraIndex, lastPosBottom){
-            for(let i = paraIndex; i < body.pts.length; ++i){
-                var pagePara = body.pts[i]
-                var paraHeight = 0
-                
-                for(let j = 0; j < pagePara.lines.length; ++j){
-                    var ls = pagePara.lines[j]
-                    if(ls.type == 'line'){
-                        // check paragraph height
-                        var leftHeight = getPageLeftHeight(lastPosBottom, body.doc.grid.marginBottom, body.doc.grid.pageHeight, body.doc.grid.pageSpacingHeight)
-                        if(ls.lineHeight > leftHeight){
-                            // create new page spacing
-                            var spacingHeight = leftHeight + body.doc.grid.marginBottom + body.doc.grid.pageSpacingHeight + body.doc.grid.marginTop
-                            
-                            lastPosBottom += spacingHeight
-                            paraHeight += spacingHeight
+        _adjustTableRowFollowingSpacing(body, tableIndex, rowIndex, lastPosBottom){
+            var pageTable = body.pts[tableIndex]
+            var tableHeight = 0
 
-                            ls.spacingHeight = spacingHeight
-                            ls.obj.el.style.marginTop = spacingHeight+'px'
-                        }else{
-                            ls.spacingHeight = 0
-                            ls.obj.el.style.marginTop = '0px'
+            for(let i = 0; i < rowIndex; ++i){
+                let row = pageTable.cells[i]
+                let colHeights = []
+                for(let j = 0; j < row.length; ++j){
+                    let col = row[j]
+                    colHeights.push(col.bodyHeight)
+                }
+                let colHeight = Math.max(...colHeights)
+                tableHeight += colHeight
+            }
+
+            for(let i = rowIndex; i < pageTable.cells.length; ++i){
+                let row = pageTable.cells[i]
+                let lpbs = []
+                for(let j = 0; j < row.length; ++j){
+                    let col = row[j]
+
+                    let lpb = state.mutations._adjustBodyPtFollowingSpacing(col, 0, lastPosBottom)
+                    lpbs.push(lpb)
+                }
+                let maxLpb = Math.max(...lpbs)
+                let colHeight = maxLpb - lastPosBottom
+
+                for(let j = 0; j < row.length; ++j){
+                    let col = row[j]
+                    let td = goog.dom.getParentElement(col.obj.el)
+                    td.style.height = colHeight+'px'
+                }
+                
+                tableHeight += colHeight
+                lastPosBottom = maxLpb
+            }
+
+            pageTable.tableHeight = tableHeight
+
+            return lastPosBottom
+        },
+        _adjustBodyPtFollowingSpacing(body, ptIndex, lastPosBottom){
+            let bodyHeight = 0
+            for(let i = 0; i < ptIndex; ++i){
+                var pagePt = body.pts[i]
+                if(pagePt.type == 'para'){
+                    bodyHeight += pagePt.paraHeight
+                }else if(pagePt.type == 'table'){
+                    bodyHeight += pagePt.tableHeight
+                }
+            }
+
+            for(let i = ptIndex; i < body.pts.length; ++i){
+                var pagePt = body.pts[i]
+                if(pagePt.type == 'para'){
+                    lastPosBottom = state.mutations._adjustParaLineFollowingSpacing(body, i, 0, lastPosBottom)
+                    bodyHeight += pagePt.paraHeight
+                }else if(pagePt.type == 'table'){
+                    lastPosBottom = state.mutations._adjustTableRowFollowingSpacing(body, i, 0, lastPosBottom)
+                    bodyHeight += pagePt.tableHeight
+                }
+            }
+
+            body.bodyHeight = bodyHeight
+
+            return lastPosBottom
+        },
+        _adjustBodyParentFollowingSpacing(body, lastPosBottom){
+            let bodyParent = body.parent
+            let tableIndex = -1
+            while(bodyParent){
+                if(bodyParent.type == 'table'){
+                    let rowIndex = -1
+                    for(let i = 0; i < bodyParent.cells.length; ++i){
+                        let row = bodyParent.cells[i]
+                        for(let j = 0; j< row.length; ++j){
+                            let col = row[j]
+                            if(col == body){
+                                rowIndex = i
+                                break
+                            }
                         }
-                        
-                        lastPosBottom += ls.lineHeight
-                        paraHeight += ls.lineHeight
+                    }
+
+                    if(rowIndex >= 0){
+                        let tableParent = bodyParent.parent
+                        tableIndex = tableParent.pts.indexOf(bodyParent)
+
+                        lastPosBottom = state.mutations._getParaLastPosBottom(body, 0)
+                        lastPosBottom = state.mutations._adjustTableRowFollowingSpacing(tableParent, tableIndex, rowIndex, lastPosBottom)
+                    }
+                }else if(bodyParent.type == 'body'){
+                    if(tableIndex >= 0){
+                        lastPosBottom = state.mutations._adjustBodyPtFollowingSpacing(bodyParent, tableIndex+1, lastPosBottom)
                     }
                 }
 
-                pagePara.paraHeight = paraHeight
+                bodyParent = bodyParent.parent
             }
 
             return lastPosBottom
         },
-        _updatePageBackground(bodyDoc, lastPosBottom){
-            var pageNo = getPageNo(lastPosBottom, bodyDoc.grid.pageHeight, bodyDoc.grid.pageSpacingHeight)
-            var bgWrap = document.getElementsByClassName('page-bgs-wrap')[0]
-            var oldBgs = document.getElementsByClassName('page-bg')
+        _updatePageBackground(lastPosBottom){
+            let bodyDoc = state.document.body.doc
+            let pageNo = getPageNo(lastPosBottom, bodyDoc.grid.pageHeight, bodyDoc.grid.pageSpacingHeight)
+            let bgWrap = document.getElementsByClassName('page-bgs-wrap')[0]
+            let oldBgs = document.getElementsByClassName('page-bg')
             if(pageNo > oldBgs.length){
                 for(let i = 0; i < pageNo - oldBgs.length; ++i){
                     var pageBg = new PageBackground(bodyDoc.grid.pageWidth, bodyDoc.grid.pageHeight, bodyDoc.grid.pageSpacingHeight, bodyDoc.grid.marginTop, 

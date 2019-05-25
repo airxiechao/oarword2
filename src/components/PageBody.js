@@ -14,7 +14,6 @@ class PageBody{
         this.marginBottom = body.doc.grid.marginBottom
         this.marginLeft = body.doc.grid.marginLeft
         this.body = body
-        this.bodyHeight = 0
         this.lastPosBottom = lastPosBottom
 
         state.mutations.setDocumentObj(this)
@@ -31,13 +30,11 @@ class PageBody{
                 para.obj = pagePara
     
                 pageParas.push(pagePara.render())
-                this.bodyHeight += para.paraHeight;
             }else if(para.type == 'table'){
                 let pageTable = new PageTable(this.marginLeft, para)
                 para.obj = pageTable
 
                 pageParas.push(pageTable.render())
-                this.bodyHeight += para.tableHeight
             }
             
         }

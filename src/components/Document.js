@@ -26,8 +26,8 @@ class Document{
         var lastPosBottom = this.marginTop;
 
         var pageBody = new PageBody(lastPosBottom, this.body)
-        var pageBodyEl = pageBody.render()
-        lastPosBottom += pageBody.bodyHeight
+        this.body.obj = pageBody
+        lastPosBottom += this.body.bodyHeight
         var pageNo = getPageNo(lastPosBottom, this.pageHeight, this.pageSpacingHeight)
         
         // render page backgrounds
@@ -61,7 +61,7 @@ class Document{
                 position: 'absolute',
                 marginTop: this.pageSpacingHeight+'px',
             },
-        }, [ pageBgsWrap, pageBodyEl, docInputBox.render(), docCursor.render() ])
+        }, [ pageBgsWrap, pageBody.render(), docInputBox.render(), docCursor.render() ])
 
         this.el = createElement('div', {
             class: 'doc-wrap',

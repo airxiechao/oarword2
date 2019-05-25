@@ -209,7 +209,7 @@ var doc = {
     type: 'body',
     grid: {
         pageWidth: 800,
-        pageHeight: 400 * Math.sqrt(2),
+        pageHeight: 300 * Math.sqrt(2),
         pageSpacingHeight: 5,
         marginTop: 100,
         marginRight: 100,
@@ -347,6 +347,141 @@ var doc = {
                         ],
                     }
                 ]
+            ],
+        },
+        {
+            type: 'para',
+            runs: [
+                {
+                    type: 'run',
+                    text: 'eee',
+                    textStyle: {},
+                },
+                {
+                    type: 'run',
+                    text: 'fff',
+                    textStyle: {},
+                }
+            ],
+        },
+        {
+            type: 'para',
+            runs: [
+                {
+                    type: 'run',
+                    text: 'eee',
+                    textStyle: {},
+                },
+                {
+                    type: 'run',
+                    text: 'fff',
+                    textStyle: {},
+                }
+            ],
+        },
+        {
+            type: 'para',
+            runs: [
+                {
+                    type: 'run',
+                    text: 'eee',
+                    textStyle: {},
+                },
+                {
+                    type: 'run',
+                    text: 'fff',
+                    textStyle: {},
+                }
+            ],
+        },
+        {
+            type: 'para',
+            runs: [
+                {
+                    type: 'run',
+                    text: 'eee',
+                    textStyle: {},
+                },
+                {
+                    type: 'run',
+                    text: 'fff',
+                    textStyle: {},
+                }
+            ],
+        },
+        {
+            type: 'para',
+            runs: [
+                {
+                    type: 'run',
+                    text: 'eee',
+                    textStyle: {},
+                },
+                {
+                    type: 'run',
+                    text: 'fff',
+                    textStyle: {},
+                }
+            ],
+        },
+        {
+            type: 'para',
+            runs: [
+                {
+                    type: 'run',
+                    text: 'eee',
+                    textStyle: {},
+                },
+                {
+                    type: 'run',
+                    text: 'fff',
+                    textStyle: {},
+                }
+            ],
+        },
+        {
+            type: 'para',
+            runs: [
+                {
+                    type: 'run',
+                    text: 'eee',
+                    textStyle: {},
+                },
+                {
+                    type: 'run',
+                    text: 'fff',
+                    textStyle: {},
+                }
+            ],
+        },
+        {
+            type: 'para',
+            runs: [
+                {
+                    type: 'run',
+                    text: 'eee',
+                    textStyle: {},
+                },
+                {
+                    type: 'run',
+                    text: 'fff',
+                    textStyle: {},
+                }
+            ],
+        },
+        {
+            type: 'para',
+            runs: [
+                {
+                    type: 'run',
+                    text: 'eee',
+                    textStyle: {},
+                },
+                {
+                    type: 'run',
+                    text: 'fff',
+                    textStyle: {},
+                }
             ],
         },
     ],
