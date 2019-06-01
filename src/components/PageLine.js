@@ -11,7 +11,7 @@ class PageLine{
         var inlineBlocks = []
         for(var i = 0; i < this.ls.inlineBlocks.length; ++i){
             var ib = this.ls.inlineBlocks[i]
-            if(ib.type == 'inline-block'){
+            if(ib.type == 'text' || ib.type == 'image' ){
                 var inlineBlock = new PageInlineBlock(ib)
                 ib.obj = inlineBlock
     

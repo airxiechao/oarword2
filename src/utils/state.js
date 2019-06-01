@@ -28,7 +28,7 @@ var state = {
                 body: bi.body,
                 paraIndex: bi.paraIndex,
                 runIndex: bi.runIndex,
-                startIndex: bi.startIndex,
+                startIndex: bi.startIndex + state.document.cursor.inlineStartIndex,
             }
         },
         cursorPos: function(){
@@ -62,18 +62,26 @@ var state = {
         leftMoveCursor: function(){
             let ci = state.getters.cursorBodyIndex()
             let runIndex = ci.runIndex
+            let ib = state.document.cursor.inlineBlock
 
-            if(!state.document.cursor.front && state.document.cursor.inlineBlock.text.length > 0){
+            if(!state.document.cursor.front && (
+                (ib.type == 'text' && ib.text.length > 0) ||
+                ib.type == 'image'
+            )){
                 state.document.cursor.front = true
             }else{
                 if(state.document.cursor.inlineStartIndex > 0){
                     state.document.cursor.inlineStartIndex -= 1
                 }else{
                     // get left inline block of body
-                    let lastib = getPreviousInlineOfBody(state.document.cursor.inlineBlock)
+                    let lastib = getPreviousInlineOfBody(ib)
                     if(lastib){
                         state.document.cursor.inlineBlock = lastib
-                        state.document.cursor.inlineStartIndex = lastib.text.length > 0 ? lastib.text.length - 1 : 0
+                        if(lastib.type == 'text'){
+                            state.document.cursor.inlineStartIndex = lastib.text.length > 0 ? lastib.text.length - 1 : 0
+                        }else if(lastib.type == 'image'){
+                            state.document.cursor.inlineStartIndex = 0
+                        }
                         state.document.cursor.front = runIndex == 0 ? false : true
                     }
                 }
@@ -82,14 +90,18 @@ var state = {
             state.mutations._updateCursorAndInputBoxPos()
         },
         rightMoveCursor: function(){
-            if(state.document.cursor.front && state.document.cursor.inlineBlock.text.length > 0){
+            let ib = state.document.cursor.inlineBlock
+            if(state.document.cursor.front && (
+                (ib.type == 'text' && ib.text.length > 0) ||
+                ib.type == 'image'
+            )){
                 state.document.cursor.front = false
             }else{
-                if(state.document.cursor.inlineStartIndex < state.document.cursor.inlineBlock.text.length - 1){
+                if((ib.type == 'text' && state.document.cursor.inlineStartIndex < ib.text.length - 1)){
                     state.document.cursor.inlineStartIndex += 1
                 }else{
                     // get right inline block of body
-                    let nextib = getNextInlineOfBody(state.document.cursor.inlineBlock)
+                    let nextib = getNextInlineOfBody(ib)
                     if(nextib){
                         let ci = getInlineBlockBodyIndex(nextib)
                         let runIndex = ci.runIndex
@@ -116,38 +128,56 @@ var state = {
                     let lxy = measureEleDocXY(ib.obj.el)
                     let lx = lxy.x
                     let lw = ib.obj.el.offsetWidth
-
-                    if(cx >= lx && cx <= lx + lw){
-                        let lastw = 0
-                        for(let j = 1; j <= ib.text.length; ++j){
-                            let t = ib.text.substr(0, j)
-                            let wh = measureFontTextWH(t, '', '', '')
-                
-                            if(wh.w + lx > cx ){
-                                si = j - 1
-
-                                if( lx + lastw + (wh.w - lastw) / 2 > cx ){
-                                    front = true
-                                }else{
-                                    front = false
+                    
+                    if(ib.type == 'text'){
+                        if(cx >= lx && cx <= lx + lw){
+                            let lastw = 0
+                            for(let j = 1; j <= ib.text.length; ++j){
+                                let t = ib.text.substr(0, j)
+                                let wh = measureFontTextWH(t, '', '', '')
+                    
+                                if(wh.w + lx > cx ){
+                                    si = j - 1
+    
+                                    if( lx + lastw + (wh.w - lastw) / 2 > cx ){
+                                        front = true
+                                    }else{
+                                        front = false
+                                    }
+    
+                                    break
                                 }
-
+    
+                                lastw = wh.w
+                            }
+    
+                            if(si >= 0){
                                 break
                             }
-
-                            lastw = wh.w
                         }
-
-                        if(si >= 0){
+                    }else if(ib.type == 'image'){
+                        if(cx >= lx && cx <= lx + lw){
+                            if(cx <= lx + ib.imageStyle.width / 2){
+                                front = true
+                            }else{
+                                front = false
+                            }
+                            
+                            si = 0
                             break
                         }
                     }
                 }
 
                 if(si < 0){
-                    if(ib.text.length > 0){
-                        si = ib.text.length - 1
-                    }else{
+                    if(ib.type == 'text'){
+                        if(ib.text.length > 0){
+                            si = ib.text.length - 1
+                        }else{
+                            si = 0
+                            front = true
+                        }
+                    }else if(ib.type == 'image'){
                         si = 0
                         front = true
                     }
@@ -174,40 +204,60 @@ var state = {
                     let lx = lxy.x
                     let lw = ib.obj.el.offsetWidth
 
-                    if(cx >= lx && cx <= lx + lw){
-                        let lastw = 0
-                        for(let j = 1; j <= ib.text.length; ++j){
-                            let t = ib.text.substr(0, j)
-                            let wh = measureFontTextWH(t, '', '', '')
-                
-                            if(wh.w + lx > cx ){
-                                si = j - 1
-
-                                if( lx + lastw + (wh.w - lastw) / 2 > cx ){
-                                    front = true
-                                }else{
-                                    front = false
+                    if(ib.type == 'text'){
+                        if(cx >= lx && cx <= lx + lw){
+                            let lastw = 0
+                            for(let j = 1; j <= ib.text.length; ++j){
+                                let t = ib.text.substr(0, j)
+                                let wh = measureFontTextWH(t, '', '', '')
+                    
+                                if(wh.w + lx > cx ){
+                                    si = j - 1
+    
+                                    if( lx + lastw + (wh.w - lastw) / 2 > cx ){
+                                        front = true
+                                    }else{
+                                        front = false
+                                    }
+    
+                                    break
                                 }
-
+    
+                                lastw = wh.w
+                            }
+    
+                            if(si >= 0){
                                 break
                             }
-
-                            lastw = wh.w
                         }
-
-                        if(si >= 0){
+                    }else if(ib.type == 'image'){
+                        if(cx >= lx && cx <= lx + lw){
+                            if(cx <= lx + ib.imageStyle.width / 2){
+                                front = true
+                            }else{
+                                front = false
+                            }
+                            
+                            si = 0
                             break
                         }
                     }
+                    
                 }
 
                 if(si < 0){
-                    if(ib.text.length > 0){
-                        si = ib.text.length - 1
-                    }else{
+                    if(ib.type == 'text'){
+                        if(ib.text.length > 0){
+                            si = ib.text.length - 1
+                        }else{
+                            si = 0
+                            front = true
+                        }
+                    }else if(ib.type == 'image'){
                         si = 0
                         front = true
                     }
+                    
                 }
 
                 state.document.cursor.inlineBlock = ib
@@ -222,9 +272,7 @@ var state = {
             cursor.updateVisibility(!imeStatus)
         },
         addToParaRun: function(payload){
-            let text = payload.text
-            let textStyle = payload.textStyle
-
+            let ib = state.document.cursor.inlineBlock
             let ci = state.getters.cursorBodyIndex()
             let body = ci.body
             let paraIndex = ci.paraIndex
@@ -232,8 +280,15 @@ var state = {
             let startIndex = ci.startIndex
             let front = state.document.cursor.front
             
-            // update run text
-            state.mutations._spliceRunText(body.doc, paraIndex, runIndex, front ? startIndex : startIndex + 1, text, textStyle)
+            let text = payload.text
+            let textStyle = payload.textStyle
+
+            // update run
+            if(ib.type == 'text'){
+                state.mutations._spliceRunText(body.doc, paraIndex, runIndex, front ? startIndex : startIndex + 1, text, textStyle)
+            }else if(ib.type == 'image'){
+                state.mutations._addRunTextAfter(body.doc, paraIndex, front ? runIndex : runIndex + 1, text, textStyle)
+            }
 
             // get last position bottom
             let lastPosBottom = state.mutations._getParaLastPosBottom(body, paraIndex)
@@ -251,16 +306,22 @@ var state = {
             state.mutations._updatePageBackground(lastPosBottom)
 
             // update cursor
-            let si = startIndex + text.length
-            let len = body.doc.pts[paraIndex].runs[runIndex].text.length
-            if(si >= len){
-                state.mutations._updateCursor(body, paraIndex, runIndex, Math.max(len - 1, 0), false)
-            }else{
-                state.mutations._updateCursor(body, paraIndex, runIndex, si)
+            if(ib.type == 'text'){
+                let si = startIndex + text.length
+                let len = body.doc.pts[paraIndex].runs[runIndex].text.length
+                if(si >= len){
+                    state.mutations._updateCursor(body, paraIndex, runIndex, Math.max(len - 1, 0), false)
+                }else{
+                    state.mutations._updateCursor(body, paraIndex, runIndex, si)
+                }
+            }else if(ib.type == 'image'){
+                state.mutations._updateCursor(body, paraIndex, front ? runIndex : runIndex+1, text.length, false)
             }
+            
         },
         deleteFromParaRun: function(){
             let ci = state.getters.cursorBodyIndex()
+            let ib = state.document.cursor.inlineBlock
             let front = state.document.cursor.front
             let body = ci.body
             let paraIndex = ci.paraIndex
@@ -270,66 +331,98 @@ var state = {
             let run = para.runs[runIndex]
 
             if(!front){
-                state.mutations._deleteRunText(body.doc, paraIndex, runIndex, startIndex)
+                if(ib.type == 'text'){
+                    state.mutations._deleteRunText(body.doc, paraIndex, runIndex, startIndex)
                 
-                if(run.text == ''){
-                    if(runIndex >= 1 || (runIndex == 0 && para.runs.length > 1)){
-                        para.runs.splice(runIndex, 1)
-
-                        if(runIndex == 0){
-                            startIndex = 0
-                            front = true
+                    if(run.text == ''){
+                        if(runIndex >= 1 || (runIndex == 0 && para.runs.length > 1)){
+                            para.runs.splice(runIndex, 1)
+    
+                            if(runIndex == 0){
+                                startIndex = 0
+                                front = true
+                            }else{
+                                let lastib = getPreviousInlineOfBody(ib)
+                                let bi = getInlineBlockBodyIndex(lastib)
+                                paraIndex = bi.paraIndex
+                                runIndex = bi.runIndex
+                                if(lastib.type == 'text'){
+                                    startIndex = lastib.text.length - 1
+                                    front = false
+                                }else if(lastib.type == 'image'){
+                                    startIndex = 0
+                                    front = false
+                                }
+                            }
                         }else{
-                            let lastib = getPreviousInlineOfBody(state.document.cursor.inlineBlock)
-                            let bi = getInlineBlockBodyIndex(lastib)
-                            paraIndex = bi.paraIndex
-                            runIndex = bi.runIndex
-                            startIndex = lastib.text.length - 1
-                            front = false
+                            front = true
                         }
                     }else{
-                        front = true
+                        if(startIndex > 0){
+                            startIndex -= 1
+                        }else{
+                            front = true
+                        }
                     }
-                }else{
-                    if(startIndex > 0){
-                        startIndex -= 1
-                    }else{
-                        front = true
-                    }
+                }else if(ib.type == 'image'){
+                    state.mutations._deleteRunImage(body.doc, paraIndex, runIndex)
+                    front = true
                 }
+                
             }else{
                 if(startIndex > 0){
-                    startIndex -= 1
-                    state.mutations._deleteRunText(body.doc, paraIndex, runIndex, startIndex)
+                    if(ib.type == 'text'){
+                        startIndex -= 1
+                        state.mutations._deleteRunText(body.doc, paraIndex, runIndex, startIndex)
+                    }
                 }else{
                     if(runIndex == 0){
                         if(paraIndex > 0){
                             // merge to previous paragraph
                             let pi = paraIndex - 1
                             let ri = body.doc.pts[pi].runs.length - 1
-                            let si = body.doc.pts[pi].runs[ri].text.length - 1
+                            let preParaRun = body.doc.pts[pi].runs[ri]
 
                             state.mutations._mergePreviousPara(body, paraIndex)
                             paraIndex = pi
                             runIndex = ri
-                            startIndex = si
-                            if(startIndex < 0){
+                            
+                            if(preParaRun.type == 'text'){
+                                let si = preParaRun.text.length - 1
+                                startIndex = si
+                                if(startIndex < 0){
+                                    startIndex = 0
+                                }
+                                front = false
+                                if(si < 0){
+                                    front = true
+                                }
+                            }else if(preParaRun.type == 'image'){
                                 startIndex = 0
+                                front = false
                             }
-                            front = false
-                            if(si < 0){
-                                front = true
-                            }
+                            
                         }
                     }else{
-                        runIndex -= 1
-                        startIndex = body.doc.pts[paraIndex].runs[runIndex].text.length - 1
+                        let preRun = body.doc.pts[paraIndex].runs[runIndex-1]
+                        if(preRun.type == 'text'){
+                            startIndex = preRun.text.length - 1
 
-                        // delete previous inline block's text
-                        state.mutations._deleteRunText(body.doc, paraIndex, runIndex, startIndex)
+                            // delete previous inline block's text
+                            state.mutations._deleteRunText(body.doc, paraIndex, runIndex-1, startIndex)
 
-                        startIndex -= 1
-                        front = false
+                            runIndex -= 1
+                            startIndex -= 1
+                            front = false
+                        }else if(preRun.type == 'image'){
+                            // delete previous inline block's image
+                            state.mutations._deleteRunImage(body.doc, paraIndex, runIndex-1)
+
+                            runIndex -= 1
+                            startIndex = 0
+                            front = true
+                        }
+                        
                     }
                 }
             }
@@ -353,14 +446,15 @@ var state = {
             state.mutations._updateCursor(body, paraIndex, runIndex, startIndex, front)
         },
         splitParaRun: function(){
-            var ci = state.getters.cursorBodyIndex()
-            var body = ci.body
-            var paraIndex = ci.paraIndex
-            var runLen = body.doc.pts[paraIndex].runs.length
-            var runIndex = ci.runIndex
-            var textLen = body.doc.pts[paraIndex].runs[runIndex].text.length
-            var startIndex = ci.startIndex
-            var front = state.document.cursor.front
+            let ci = state.getters.cursorBodyIndex()
+            let body = ci.body
+            let paraIndex = ci.paraIndex
+            let runLen = body.doc.pts[paraIndex].runs.length
+            let runIndex = ci.runIndex
+            let runDoc = body.doc.pts[paraIndex].runs[runIndex]
+            let contentLen = runDoc.type == 'text' ? runDoc.text.length : 1
+            let startIndex = ci.startIndex
+            let front = state.document.cursor.front
             
             if(runIndex == 0 && startIndex == 0 && front){
                 // add paragraph before
@@ -371,7 +465,7 @@ var state = {
 
                 // update cursor
                 state.mutations._updateCursor(body, paraIndex+1, 0, 0)
-            }else if(runIndex == runLen - 1 && startIndex == textLen - 1 && !front){
+            }else if(runIndex == runLen - 1 && startIndex == contentLen - 1 && !front){
                 // add paragraph after
                 let lastPosBottom = state.mutations._addEmptyParaAfter(body, paraIndex)
 
@@ -455,17 +549,6 @@ var state = {
             }
             
             // split paragraph
-            var para = body.doc.pts[paraIndex]
-            var oldRun = para.runs[runIndex]
-            var leftRun = {
-                text: oldRun.text.substr(0, startIndex),
-                textStyle : oldRun.textStyle,
-            }
-            var rightRun = {
-                text: oldRun.text.substr(startIndex),
-                textStyle : oldRun.textStyle,
-            }
-
             var leftPara = {
                 runs: [],
                 type: 'para',
@@ -474,14 +557,62 @@ var state = {
                 runs: [],
                 type: 'para',
             }
+
+            var para = body.doc.pts[paraIndex]
+            var oldRun = para.runs[runIndex]
+            if(oldRun.type == 'text'){
+                var leftRun = {
+                    type: 'text',
+                    text: oldRun.text.substr(0, startIndex),
+                    textStyle : oldRun.textStyle,
+                }
+                var rightRun = {
+                    type: 'text',
+                    text: oldRun.text.substr(startIndex),
+                    textStyle : oldRun.textStyle,
+                }
+            }else if(oldRun.type == 'image'){
+                if(startIndex == 0){
+                    var leftRun = {
+                        type: 'text',
+                        text: '',
+                        textStyle : {},
+                    }
+                    var rightRun = {
+                        type: 'image',
+                        image: oldRun.image,
+                        imageStyle : oldRun.imageStyle,
+                    }
+                }else{
+                    var leftRun = {
+                        type: 'image',
+                        image: oldRun.image,
+                        imageStyle : oldRun.imageStyle,
+                    }
+                    var rightRun = {
+                        type: 'text',
+                        text: '',
+                        textStyle : {},
+                    }
+                }
+            }
+
             for(let i = 0; i < para.runs.length; ++i){
                 if(i < runIndex){
                     leftPara.runs.push(para.runs[i])
                 }else if(i == runIndex){
-                    if(leftRun.text != ''){
+                    if(leftRun.type == 'text'){
+                        if(leftRun.text != ''){
+                            leftPara.runs.push(leftRun)
+                        }
+                    }else if(leftRun.type == 'image'){
                         leftPara.runs.push(leftRun)
                     }
-                    if(rightRun.text != ''){
+                    if(rightRun.type == 'text'){
+                        if(rightRun.text != ''){
+                            rightPara.runs.push(rightRun)
+                        }
+                    }else if(rightRun.type == 'image'){
                         rightPara.runs.push(rightRun)
                     }
                 }else{
@@ -493,7 +624,7 @@ var state = {
                 leftPara = rightPara
                 rightPara.runs = []
             }
-
+            
             // replace by left paragraph
             body.doc.pts.splice(paraIndex, 1, leftPara)
 
@@ -551,12 +682,12 @@ var state = {
                 }
                 
             }
-
+            
             // create new empty paragraph
             var emptyPara = {
                 runs: [
                     {
-                        type: 'run',
+                        type: 'text',
                         text: '',
                         textStyle: {},
                     }
@@ -605,7 +736,7 @@ var state = {
             var emptyPara = {
                 runs: [
                     {
-                        type: 'run',
+                        type: 'text',
                         text: '',
                         textStyle: {},
                     }
@@ -659,6 +790,10 @@ var state = {
             }
             
         },
+        _deleteRunImage(bodyDoc, paraIndex, runIndex){
+            var para = bodyDoc.pts[paraIndex]
+            para.runs.splice(runIndex, 1)
+        },
         _deleteRunText(bodyDoc, paraIndex, runIndex, startIndex){
             var para = bodyDoc.pts[paraIndex]
             var run = para.runs[runIndex]
@@ -666,6 +801,15 @@ var state = {
             var rightText = run.text.substr(startIndex+1)
 
             run.text = leftText + rightText
+        },
+        _addRunTextAfter(bodyDoc, paraIndex, runIndex, text, textStyle){
+            let r = {
+                type: 'text',
+                text: text,
+                textStyle: textStyle,
+            }
+
+            bodyDoc.pts[paraIndex].runs.splice(runIndex, 0, r)
         },
         _spliceRunText(bodyDoc, paraIndex, runIndex, startIndex, text, textStyle){
             var run = bodyDoc.pts[paraIndex].runs[runIndex]
@@ -864,14 +1008,23 @@ var state = {
                     let ibRunIndex = para.doc.runs.indexOf(ib.doc)
                     
                     if(ibRunIndex == runIndex){
-                        if(nextStartIndex >= ib.startIndex && nextStartIndex <= ib.startIndex + ib.text.length ){
+                        if(ib.type == 'text'){
+                            if(nextStartIndex >= ib.startIndex && nextStartIndex <= ib.startIndex + ib.text.length ){
+                                state.document.cursor.inlineBlock = body.pts[paraIndex].lines[i].inlineBlocks[j]
+                                state.document.cursor.inlineStartIndex = nextStartIndex - ib.startIndex
+                                if(front !== undefined){
+                                    state.document.cursor.front = front
+                                }
+                                
+                            } 
+                        }else if(ib.type == 'image'){
                             state.document.cursor.inlineBlock = body.pts[paraIndex].lines[i].inlineBlocks[j]
-                            state.document.cursor.inlineStartIndex = nextStartIndex - ib.startIndex
-                            if(front !== undefined){
-                                state.document.cursor.front = front
-                            }
-                            
-                        } 
+                                state.document.cursor.inlineStartIndex =0
+                                if(front !== undefined){
+                                    state.document.cursor.front = front
+                                }
+                        }
+                        
                     }
                 }
             }

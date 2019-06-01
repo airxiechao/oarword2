@@ -21,27 +21,68 @@ var doc = {
             type: 'para',
             runs: [
                 {
-                    type: 'run',
+                    type: 'text',
                     text: 'aaa',
                     textStyle: {},
                 },
                 {
-                    type: 'run',
+                    type: 'text',
                     text: 'bbb',
                     textStyle: {},
-                }
+                },
+                {
+                    type: 'image',
+                    image: 'http://www.xinhuanet.com/photo/2019-05/31/1124569534_15593006741411n.jpg',
+                    imageStyle: {
+                        width: 100,
+                        height: 50,
+                    },
+                },
+                {
+                    type: 'text',
+                    text: 'ccc',
+                    textStyle: {},
+                },
             ],
         },
         {
             type: 'para',
             runs: [
                 {
-                    type: 'run',
+                    type: 'text',
+                    text: 'aaa',
+                    textStyle: {},
+                },
+                {
+                    type: 'text',
+                    text: 'bbb',
+                    textStyle: {},
+                },
+                {
+                    type: 'image',
+                    image: 'http://www.xinhuanet.com/photo/2019-05/31/1124569534_15593006741411n.jpg',
+                    imageStyle: {
+                        width: 100,
+                        height: 50,
+                    },
+                },
+                {
+                    type: 'text',
+                    text: 'ccc',
+                    textStyle: {},
+                },
+            ],
+        },
+        {
+            type: 'para',
+            runs: [
+                {
+                    type: 'text',
                     text: 'ccc',
                     textStyle: {},
                 },
                 {
-                    type: 'run',
+                    type: 'text',
                     text: 'ddd',
                     textStyle: {},
                 }
@@ -62,12 +103,12 @@ var doc = {
                                 type: 'para',
                                 runs: [
                                     {
-                                        type: 'run',
+                                        type: 'text',
                                         text: '111',
                                         textStyle: {},
                                     },
                                     {
-                                        type: 'run',
+                                        type: 'text',
                                         text: '222',
                                         textStyle: {},
                                     }
@@ -85,12 +126,12 @@ var doc = {
                                 type: 'para',
                                 runs: [
                                     {
-                                        type: 'run',
+                                        type: 'text',
                                         text: 'aaa',
                                         textStyle: {},
                                     },
                                     {
-                                        type: 'run',
+                                        type: 'text',
                                         text: 'bbb',
                                         textStyle: {},
                                     }
@@ -110,12 +151,12 @@ var doc = {
                                 type: 'para',
                                 runs: [
                                     {
-                                        type: 'run',
+                                        type: 'text',
                                         text: '333',
                                         textStyle: {},
                                     },
                                     {
-                                        type: 'run',
+                                        type: 'text',
                                         text: '444',
                                         textStyle: {},
                                     }
@@ -133,12 +174,12 @@ var doc = {
                                 type: 'para',
                                 runs: [
                                     {
-                                        type: 'run',
+                                        type: 'text',
                                         text: 'ccc',
                                         textStyle: {},
                                     },
                                     {
-                                        type: 'run',
+                                        type: 'text',
                                         text: 'ddd',
                                         textStyle: {},
                                     }
@@ -153,12 +194,12 @@ var doc = {
             type: 'para',
             runs: [
                 {
-                    type: 'run',
+                    type: 'text',
                     text: 'eee',
                     textStyle: {},
                 },
                 {
-                    type: 'run',
+                    type: 'text',
                     text: 'fff',
                     textStyle: {},
                 }
@@ -168,12 +209,12 @@ var doc = {
             type: 'para',
             runs: [
                 {
-                    type: 'run',
+                    type: 'text',
                     text: 'eee',
                     textStyle: {},
                 },
                 {
-                    type: 'run',
+                    type: 'text',
                     text: 'fff',
                     textStyle: {},
                 }
@@ -183,12 +224,12 @@ var doc = {
             type: 'para',
             runs: [
                 {
-                    type: 'run',
+                    type: 'text',
                     text: 'eee',
                     textStyle: {},
                 },
                 {
-                    type: 'run',
+                    type: 'text',
                     text: 'fff',
                     textStyle: {},
                 }
@@ -198,12 +239,12 @@ var doc = {
             type: 'para',
             runs: [
                 {
-                    type: 'run',
+                    type: 'text',
                     text: 'eee',
                     textStyle: {},
                 },
                 {
-                    type: 'run',
+                    type: 'text',
                     text: 'fff',
                     textStyle: {},
                 }
@@ -213,12 +254,12 @@ var doc = {
             type: 'para',
             runs: [
                 {
-                    type: 'run',
+                    type: 'text',
                     text: 'eee',
                     textStyle: {},
                 },
                 {
-                    type: 'run',
+                    type: 'text',
                     text: 'fff',
                     textStyle: {},
                 }
@@ -228,12 +269,12 @@ var doc = {
             type: 'para',
             runs: [
                 {
-                    type: 'run',
+                    type: 'text',
                     text: 'eee',
                     textStyle: {},
                 },
                 {
-                    type: 'run',
+                    type: 'text',
                     text: 'fff',
                     textStyle: {},
                 }
@@ -243,12 +284,12 @@ var doc = {
             type: 'para',
             runs: [
                 {
-                    type: 'run',
+                    type: 'text',
                     text: 'eee',
                     textStyle: {},
                 },
                 {
-                    type: 'run',
+                    type: 'text',
                     text: 'fff',
                     textStyle: {},
                 }
@@ -258,12 +299,12 @@ var doc = {
             type: 'para',
             runs: [
                 {
-                    type: 'run',
+                    type: 'text',
                     text: 'eee',
                     textStyle: {},
                 },
                 {
-                    type: 'run',
+                    type: 'text',
                     text: 'fff',
                     textStyle: {},
                 }
@@ -273,12 +314,12 @@ var doc = {
             type: 'para',
             runs: [
                 {
-                    type: 'run',
+                    type: 'text',
                     text: 'eee',
                     textStyle: {},
                 },
                 {
-                    type: 'run',
+                    type: 'text',
                     text: 'fff',
                     textStyle: {},
                 }

@@ -48,42 +48,50 @@ function measureEleDocXY(ele){
 }
 
 function getCursorPos(cursorInlineBlock, inlineStartIndex, front){
-    var cursorPosX = 0
-    var cursorPosY = 0
-    var cursorHeight = 0
+    let cursorPosX = 0
+    let cursorPosY = 0
+    let cursorHeight = 0
     
-    var cb = cursorInlineBlock
+    let cb = cursorInlineBlock
     if(cb && cb.obj && cb.obj.el){
-        var ibp = measureEleDocXY(cb.obj.el)
-        var inlineBlockLeft = ibp.x
-        var inlineBlocktTop = ibp.y
+        let ibp = measureEleDocXY(cb.obj.el)
+        let inlineBlockLeft = ibp.x
+        let inlineBlocktTop = ibp.y
+
+        let w = 0
+        let h = cb.inlineHeight
         
-        var text = cb.text
-        var h = cb.inlineHeight
-
-        var w = 0
-        var w1 = 0
-        var w2 = 0
-        if( inlineStartIndex > 0 ){
-            let t1 = text.substr(0, inlineStartIndex)
-            w1 = measureFontTextWH(t1, '', '', '').w
-
-            let t2 = text.substr(0, inlineStartIndex+1)
-            w2 = measureFontTextWH(t2, '', '', '').w
-
-            if(front){
-                w = w1
+        if(cb.type == 'text'){
+            let text = cb.text
+            let w1 = 0
+            let w2 = 0
+            if( inlineStartIndex > 0 ){
+                let t1 = text.substr(0, inlineStartIndex)
+                w1 = measureFontTextWH(t1, '', '', '').w
+    
+                let t2 = text.substr(0, inlineStartIndex+1)
+                w2 = measureFontTextWH(t2, '', '', '').w
+    
+                if(front){
+                    w = w1
+                }else{
+                    w = w2
+                }
             }else{
-                w = w2
+                let t1 = text.substr(0, 1)
+                w1 = measureFontTextWH(t1, '', '', '').w
+    
+                if(front){
+                    w = 0
+                }else{
+                    w = w1
+                }
             }
-        }else{
-            let t1 = text.substr(0, 1)
-            w1 = measureFontTextWH(t1, '', '', '').w
-
+        }else if(cb.type == 'image'){
             if(front){
                 w = 0
             }else{
-                w = w1
+                w = cb.imageStyle.width
             }
         }
 

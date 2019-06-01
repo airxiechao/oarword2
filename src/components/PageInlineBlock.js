@@ -9,38 +9,68 @@ class PageInlineBlock{
     }
 
     render(){
-        var text = this.ib.text
-        var textStyle = this.ib.textStyle
+        if(this.ib.type == 'text'){
+            let text = this.ib.text
+            let textStyle = this.ib.textStyle
+    
+            let t = window.goog.dom.createTextNode(text)
+            this.el = createElement('div', {
+                class: 'page-inline-block-text',
+                style: {
+                    display: 'inline-block',
+                    height: this.ib.inlineHeight + 'px',
+                }
+            }, [
+                t
+            ])
 
-        var t = window.goog.dom.createTextNode(text)
-        this.el = createElement('div', {
-            class: 'page-inline-block',
-            style: {
-                display: 'inline-block',
-                height: this.ib.inlineHeight + 'px',
-            }
-        }, [
-            t
-        ])
+            window.goog.events.listen(this.el, window.goog.events.EventType.CLICK, this.clickTextHandler.bind(this));
+        }else if(this.ib.type == 'image'){
+            let image = this.ib.image
+            let imageStyle = this.ib.imageStyle
 
-        window.goog.events.listen(this.el, window.goog.events.EventType.CLICK, this.clickHandler.bind(this));
+            let img = createElement('img', {
+                attrs: {
+                    src: image,
+                },
+                style: {
+                    display: 'inline-block',
+                    width: imageStyle.width + 'px',
+                    height: imageStyle.height + 'px',
+                    cursor: 'text',
+                }
+            })
+
+            this.el = createElement('div', {
+                class: 'page-inline-block-image',
+                style: {
+                    display: 'inline-block',
+                    height: this.ib.inlineHeight + 'px',
+                }
+            }, [
+                img
+            ])
+
+            window.goog.events.listen(this.el, window.goog.events.EventType.CLICK, this.clickImageHandler.bind(this));
+        }
+        
 
         return this.el
     }
 
-    clickHandler(e){
-        var docXY = measureElePageXY(document.getElementsByClassName('doc')[0])
-        var elXY = measureEleDocXY(this.el)
-        var pointLeft = e.clientX - docXY.x - elXY.x
+    clickTextHandler(e){
+        let docXY = measureElePageXY(document.getElementsByClassName('doc')[0])
+        let elXY = measureEleDocXY(this.el)
+        let pointLeft = e.clientX - docXY.x - elXY.x
         
-        var front = false
-        var lastw = 0
+        let front = false
+        let lastw = 0
         for(var i = 1; i <= this.ib.text.length; ++i){
-            var t = this.ib.text.substr(0, i)
-            var wh = measureFontTextWH(t, '', '', '')
+            let t = this.ib.text.substr(0, i)
+            let wh = measureFontTextWH(t, '', '', '')
 
             if(wh.w > pointLeft){
-                var cw = wh.w - lastw
+                let cw = wh.w - lastw
 
                 if(pointLeft < lastw + cw / 2){
                     front = true
@@ -55,6 +85,24 @@ class PageInlineBlock{
         state.mutations.setCursorInlineBlock({
                 inlineBlock: this.ib,
                 inlineStartIndex: i-1,
+                front: front,
+            }
+        )
+    }
+
+    clickImageHandler(e){
+        let docXY = measureElePageXY(document.getElementsByClassName('doc')[0])
+        let elXY = measureEleDocXY(this.el)
+        let pointLeft = e.clientX - docXY.x - elXY.x
+        
+        let front = true
+        if(this.ib.imageStyle.width / 2 < pointLeft){
+            front = false
+        }
+        
+        state.mutations.setCursorInlineBlock({
+                inlineBlock: this.ib,
+                inlineStartIndex: 0,
                 front: front,
             }
         )
