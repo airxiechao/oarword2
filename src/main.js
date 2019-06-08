@@ -28,7 +28,15 @@ var doc = {
                 {
                     type: 'text',
                     text: 'bbb',
-                    textStyle: {},
+                    textStyle: {
+                        fontFamily: 'arial',
+                        fontSize: 26,
+                        color: '#f00',
+                        fontWeight: 'bold',
+                        fontStyle: 'italic',
+                        textDecoration: 'underline',
+                        verticalAlign: '',
+                    },
                 },
                 {
                     type: 'image',

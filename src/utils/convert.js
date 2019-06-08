@@ -77,7 +77,7 @@ function getLineInlineBlocksAndHeightFromQueue(runsQueue, lineWidth){
             let wh = {w:0,h:0}
             let i = 0
             if(run.text.length == 0){
-                wh.h = measureFontTextWH('|', '', '', '').h
+                wh.h = measureFontTextWH('|', {}).h
                 maxHeight = Math.max(maxHeight, wh.h)
             }else{
                 let iwh = getWidthFontTextPos(run.text, run.textStyle, lineWidth - totalWidth)

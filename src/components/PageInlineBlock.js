@@ -19,6 +19,13 @@ class PageInlineBlock{
                 style: {
                     display: 'inline-block',
                     height: this.ib.inlineHeight + 'px',
+                    fontFamily: textStyle.fontFamily ? textStyle.fontFamily : 'unset',
+                    fontSize: textStyle.fontSize ? textStyle.fontSize + 'px' : 'unset',
+                    color: textStyle.color ? textStyle.color : 'unset',
+                    fontWeight: textStyle.fontWeight ? textStyle.fontWeight : 'unset',
+                    fontStyle: textStyle.fontStyle ? textStyle.fontStyle : 'unset',
+                    textDecoration: textStyle.textDecoration ? textStyle.textDecoration : 'unset',
+                    verticalAlign: textStyle.verticalAlign ? textStyle.verticalAlign : 'unset',
                 }
             }, [
                 t
@@ -67,7 +74,7 @@ class PageInlineBlock{
         let lastw = 0
         for(var i = 1; i <= this.ib.text.length; ++i){
             let t = this.ib.text.substr(0, i)
-            let wh = measureFontTextWH(t, '', '', '')
+            let wh = measureFontTextWH(t, this.ib.textStyle)
 
             if(wh.w > pointLeft){
                 let cw = wh.w - lastw

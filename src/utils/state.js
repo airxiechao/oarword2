@@ -134,7 +134,7 @@ var state = {
                             let lastw = 0
                             for(let j = 1; j <= ib.text.length; ++j){
                                 let t = ib.text.substr(0, j)
-                                let wh = measureFontTextWH(t, '', '', '')
+                                let wh = measureFontTextWH(t, ib.textStyle)
                     
                                 if(wh.w + lx > cx ){
                                     si = j - 1
@@ -209,7 +209,7 @@ var state = {
                             let lastw = 0
                             for(let j = 1; j <= ib.text.length; ++j){
                                 let t = ib.text.substr(0, j)
-                                let wh = measureFontTextWH(t, '', '', '')
+                                let wh = measureFontTextWH(t, ib.textStyle)
                     
                                 if(wh.w + lx > cx ){
                                     si = j - 1

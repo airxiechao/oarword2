@@ -1,17 +1,22 @@
 
-function measureFontTextWH(text, fontFamily, fontSize, fontWeight){
-    var dummy = document.createElement('div');
+function measureFontTextWH(text, textStyle){
+    let fontFamily = textStyle.fontFamily ? textStyle.fontFamily : ''
+    let fontSize = textStyle.fontSize ? textStyle.fontSize + 'px' : ''
+    let fontWeight = textStyle.fontWeight ? textStyle.fontWeight : ''
+    
+    let dummy = document.createElement('div');
     dummy.style.fontFamily = fontFamily;
     dummy.style.fontSize = fontSize;
     dummy.style.fontWeight = fontWeight;
+
     dummy.style.visibility = 'hidden';
     dummy.style.display = 'inline-block';
     dummy.style.whiteSpace = 'nowrap';
     dummy.textContent = text;
 
     document.body.appendChild(dummy)
-    var w = dummy.offsetWidth;
-    var h = dummy.offsetHeight;
+    let w = dummy.offsetWidth;
+    let h = dummy.offsetHeight;
     document.body.removeChild(dummy);
 
     return {w:w, h:h};
@@ -63,14 +68,15 @@ function getCursorPos(cursorInlineBlock, inlineStartIndex, front){
         
         if(cb.type == 'text'){
             let text = cb.text
+            let textStyle = cb.textStyle
             let w1 = 0
             let w2 = 0
             if( inlineStartIndex > 0 ){
                 let t1 = text.substr(0, inlineStartIndex)
-                w1 = measureFontTextWH(t1, '', '', '').w
+                w1 = measureFontTextWH(t1, textStyle).w
     
                 let t2 = text.substr(0, inlineStartIndex+1)
-                w2 = measureFontTextWH(t2, '', '', '').w
+                w2 = measureFontTextWH(t2, textStyle).w
     
                 if(front){
                     w = w1
@@ -79,7 +85,7 @@ function getCursorPos(cursorInlineBlock, inlineStartIndex, front){
                 }
             }else{
                 let t1 = text.substr(0, 1)
-                w1 = measureFontTextWH(t1, '', '', '').w
+                w1 = measureFontTextWH(t1, textStyle).w
     
                 if(front){
                     w = 0
@@ -119,7 +125,7 @@ function getPageLeftHeight(posTop, marginBottom, pageHeight, pageSpacingHeight){
 }
 
 function getWidthFontTextPos(text, textStyle, width){
-    var twh = measureFontTextWH(text, '', '', '')
+    var twh = measureFontTextWH(text, textStyle)
     if(twh.w <= width){
         return {
             i: text.length - 1,
@@ -128,7 +134,7 @@ function getWidthFontTextPos(text, textStyle, width){
     }
     var mw = twh.w / text.length
     var i0 = parseInt(width / mw)
-    var wh0 = measureFontTextWH(text.substr(0, i0+1), '', '', '')
+    var wh0 = measureFontTextWH(text.substr(0, i0+1), textStyle)
 
     var i = i0
     var maxHeight = wh0.h;
@@ -139,7 +145,7 @@ function getWidthFontTextPos(text, textStyle, width){
     }else if(wh0.w < width){
         for(i = i0+1; i<text.length; ++i){
             let t = text.substr(0,i+1)
-            let wh = measureFontTextWH(t, '', '', '')
+            let wh = measureFontTextWH(t, textStyle)
             maxHeight = Math.max(maxHeight, wh.h)
             maxWidth = wh.w
 
@@ -156,7 +162,7 @@ function getWidthFontTextPos(text, textStyle, width){
     }else{
         for(i = i0-1; i>=0; --i){
             let t = text.substr(0,i+1)
-            let wh = measureFontTextWH(t, '', '', '')
+            let wh = measureFontTextWH(t, textStyle)
             maxHeight = Math.max(maxHeight, wh.h)
             maxWidth = wh.w
 
