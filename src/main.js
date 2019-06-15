@@ -5,6 +5,17 @@ import state from './utils/state'
 
 Vue.config.productionTip = false
 
+var defaultTextStyle = {
+    fontFamily: '宋体',
+    fontSize: 14,
+    color: '#000',
+    backgroundColor: 'unset',
+    fontWeight: 'unset',
+    fontStyle: 'unset',
+    textDecoration: 'unset',
+    verticalAlign: 'unset',
+}
+
 var doc = {
     type: 'body',
     grid: {
@@ -23,7 +34,7 @@ var doc = {
                 {
                     type: 'text',
                     text: 'aaa',
-                    textStyle: {},
+                    textStyle: defaultTextStyle,
                 },
                 {
                     type: 'text',
@@ -32,10 +43,11 @@ var doc = {
                         fontFamily: 'arial',
                         fontSize: 26,
                         color: '#f00',
+                        backgroundColor: '#00f',
                         fontWeight: 'bold',
                         fontStyle: 'italic',
                         textDecoration: 'underline',
-                        verticalAlign: '',
+                        verticalAlign: 'unset',
                     },
                 },
                 {
@@ -49,7 +61,7 @@ var doc = {
                 {
                     type: 'text',
                     text: 'ccc',
-                    textStyle: {},
+                    textStyle: defaultTextStyle,
                 },
             ],
         },
@@ -59,12 +71,12 @@ var doc = {
                 {
                     type: 'text',
                     text: 'aaa',
-                    textStyle: {},
+                    textStyle: defaultTextStyle,
                 },
                 {
                     type: 'text',
                     text: 'bbb',
-                    textStyle: {},
+                    textStyle: defaultTextStyle,
                 },
                 {
                     type: 'image',
@@ -77,7 +89,7 @@ var doc = {
                 {
                     type: 'text',
                     text: 'ccc',
-                    textStyle: {},
+                    textStyle: defaultTextStyle,
                 },
             ],
         },
@@ -87,12 +99,12 @@ var doc = {
                 {
                     type: 'text',
                     text: 'ccc',
-                    textStyle: {},
+                    textStyle: defaultTextStyle,
                 },
                 {
                     type: 'text',
                     text: 'ddd',
-                    textStyle: {},
+                    textStyle: defaultTextStyle,
                 }
             ],
         },
@@ -113,12 +125,12 @@ var doc = {
                                     {
                                         type: 'text',
                                         text: '111',
-                                        textStyle: {},
+                                        textStyle: defaultTextStyle,
                                     },
                                     {
                                         type: 'text',
                                         text: '222',
-                                        textStyle: {},
+                                        textStyle: defaultTextStyle,
                                     }
                                 ],
                             },
@@ -136,12 +148,12 @@ var doc = {
                                     {
                                         type: 'text',
                                         text: 'aaa',
-                                        textStyle: {},
+                                        textStyle: defaultTextStyle,
                                     },
                                     {
                                         type: 'text',
                                         text: 'bbb',
-                                        textStyle: {},
+                                        textStyle: defaultTextStyle,
                                     }
                                 ],
                             },
@@ -161,12 +173,12 @@ var doc = {
                                     {
                                         type: 'text',
                                         text: '333',
-                                        textStyle: {},
+                                        textStyle: defaultTextStyle,
                                     },
                                     {
                                         type: 'text',
                                         text: '444',
-                                        textStyle: {},
+                                        textStyle: defaultTextStyle,
                                     }
                                 ],
                             },
@@ -184,12 +196,12 @@ var doc = {
                                     {
                                         type: 'text',
                                         text: 'ccc',
-                                        textStyle: {},
+                                        textStyle: defaultTextStyle,
                                     },
                                     {
                                         type: 'text',
                                         text: 'ddd',
-                                        textStyle: {},
+                                        textStyle: defaultTextStyle,
                                     }
                                 ],
                             },
@@ -204,12 +216,12 @@ var doc = {
                 {
                     type: 'text',
                     text: 'eee',
-                    textStyle: {},
+                    textStyle: defaultTextStyle,
                 },
                 {
                     type: 'text',
                     text: 'fff',
-                    textStyle: {},
+                    textStyle: defaultTextStyle,
                 }
             ],
         },
@@ -219,12 +231,12 @@ var doc = {
                 {
                     type: 'text',
                     text: 'eee',
-                    textStyle: {},
+                    textStyle: defaultTextStyle,
                 },
                 {
                     type: 'text',
                     text: 'fff',
-                    textStyle: {},
+                    textStyle: defaultTextStyle,
                 }
             ],
         },
@@ -234,12 +246,12 @@ var doc = {
                 {
                     type: 'text',
                     text: 'eee',
-                    textStyle: {},
+                    textStyle: defaultTextStyle,
                 },
                 {
                     type: 'text',
                     text: 'fff',
-                    textStyle: {},
+                    textStyle: defaultTextStyle,
                 }
             ],
         },
@@ -249,12 +261,12 @@ var doc = {
                 {
                     type: 'text',
                     text: 'eee',
-                    textStyle: {},
+                    textStyle: defaultTextStyle,
                 },
                 {
                     type: 'text',
                     text: 'fff',
-                    textStyle: {},
+                    textStyle: defaultTextStyle,
                 }
             ],
         },
@@ -264,12 +276,12 @@ var doc = {
                 {
                     type: 'text',
                     text: 'eee',
-                    textStyle: {},
+                    textStyle: defaultTextStyle,
                 },
                 {
                     type: 'text',
                     text: 'fff',
-                    textStyle: {},
+                    textStyle: defaultTextStyle,
                 }
             ],
         },
@@ -279,12 +291,12 @@ var doc = {
                 {
                     type: 'text',
                     text: 'eee',
-                    textStyle: {},
+                    textStyle: defaultTextStyle,
                 },
                 {
                     type: 'text',
                     text: 'fff',
-                    textStyle: {},
+                    textStyle: defaultTextStyle,
                 }
             ],
         },
@@ -294,12 +306,12 @@ var doc = {
                 {
                     type: 'text',
                     text: 'eee',
-                    textStyle: {},
+                    textStyle: defaultTextStyle,
                 },
                 {
                     type: 'text',
                     text: 'fff',
-                    textStyle: {},
+                    textStyle: defaultTextStyle,
                 }
             ],
         },
@@ -309,12 +321,12 @@ var doc = {
                 {
                     type: 'text',
                     text: 'eee',
-                    textStyle: {},
+                    textStyle: defaultTextStyle,
                 },
                 {
                     type: 'text',
                     text: 'fff',
-                    textStyle: {},
+                    textStyle: defaultTextStyle,
                 }
             ],
         },
@@ -324,12 +336,12 @@ var doc = {
                 {
                     type: 'text',
                     text: 'eee',
-                    textStyle: {},
+                    textStyle: defaultTextStyle,
                 },
                 {
                     type: 'text',
                     text: 'fff',
-                    textStyle: {},
+                    textStyle: defaultTextStyle,
                 }
             ],
         },

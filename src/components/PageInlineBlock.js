@@ -22,6 +22,7 @@ class PageInlineBlock{
                     fontFamily: textStyle.fontFamily ? textStyle.fontFamily : 'unset',
                     fontSize: textStyle.fontSize ? textStyle.fontSize + 'px' : 'unset',
                     color: textStyle.color ? textStyle.color : 'unset',
+                    backgroundColor: textStyle.color ? textStyle.backgroundColor : 'unset',
                     fontWeight: textStyle.fontWeight ? textStyle.fontWeight : 'unset',
                     fontStyle: textStyle.fontStyle ? textStyle.fontStyle : 'unset',
                     textDecoration: textStyle.textDecoration ? textStyle.textDecoration : 'unset',
@@ -53,6 +54,7 @@ class PageInlineBlock{
                 style: {
                     display: 'inline-block',
                     height: this.ib.inlineHeight + 'px',
+                    verticalAlign: 'bottom',
                 }
             }, [
                 img
@@ -89,12 +91,20 @@ class PageInlineBlock{
             lastw = wh.w
         }
         
+        // update cursor
         state.mutations.setCursorInlineBlock({
                 inlineBlock: this.ib,
                 inlineStartIndex: i-1,
                 front: front,
             }
         )
+
+        // update toolbar
+        let textStyle = this.ib.textStyle
+        Object.keys(textStyle).forEach((key)=>{
+            state.mutations.setToolbarTextStyle(key, textStyle[key], true)
+        })
+
     }
 
     clickImageHandler(e){

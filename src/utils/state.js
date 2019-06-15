@@ -16,6 +16,18 @@ var state = {
         inputBox: {},
         body: null,
     },
+    toolbar:{
+        textStyle: {
+            fontFamily: 'unset',
+            fontSize: 'unset',
+            color: 'unset',
+            backgroundColor: 'unset',
+            fontWeight: 'unset',
+            fontStyle: 'unset',
+            textDecoration: 'unset',
+            verticalAlign: 'unset',
+        },
+    },
     getters: {
         cursorInlineBlock: function(){
             return state.document.cursor.inlineBlock
@@ -58,6 +70,63 @@ var state = {
             state.document.cursor.front = payload.front
 
             state.mutations._updateCursorAndInputBoxPos()
+        },
+        setToolbarObj: function(obj){
+            state.toolbar.obj = obj
+        },
+        setToolbarTextStyle: function(key, value, updateUi){
+            switch(key){
+                case 'fontFamily':
+                    state.toolbar.textStyle[key] = value
+                    if(updateUi){
+                        state.toolbar.obj.updateFontFamily(value)
+                    }
+                    break;
+                case 'fontSize':
+                        state.toolbar.textStyle[key] = value
+                        if(updateUi){
+                            state.toolbar.obj.updateFontSize(value)
+                        }
+                        break;
+                case 'color':
+                        state.toolbar.textStyle[key] = value
+                        if(updateUi){
+                            state.toolbar.obj.updateColor(value)
+                        }
+                        break;
+                case 'backgroundColor':
+                        state.toolbar.textStyle[key] = value
+                        if(updateUi){
+                            state.toolbar.obj.updateBackgroundColor(value)
+                        }
+                        break;
+                case 'fontWeight':
+                        state.toolbar.textStyle[key] = value
+                        if(updateUi){
+                            state.toolbar.obj.updateFontWeight(value)
+                        }
+                        break;
+                case 'textStyle':
+                        state.toolbar.textStyle[key] = value
+                        if(updateUi){
+                            state.toolbar.obj.updateTextStyle(value)
+                        }
+                        break;
+                case 'textDecoration':
+                        state.toolbar.textStyle[key] = value
+                        if(updateUi){
+                            state.toolbar.obj.updateTextDecoration(value)
+                        }
+                        break;
+                case 'verticalAlign':
+                        state.toolbar.textStyle[key] = value
+                        if(updateUi){
+                            state.toolbar.obj.updateVerticalAlign(value)
+                        }
+                        break;
+                default:
+                    break;
+            }
         },
         leftMoveCursor: function(){
             let ci = state.getters.cursorBodyIndex()

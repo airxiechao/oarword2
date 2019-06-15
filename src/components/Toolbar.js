@@ -1,16 +1,19 @@
 import { createElement } from '../utils/renderer'
+import state from '../utils/state'
 
 class Toolbar{
     constructor(){
-
+        state.mutations.setToolbarObj(this)
     }
 
     mounted(){
-        var toolbar = new goog.ui.Toolbar();
-        toolbar.render(this.el);
+        var that = this;
+
+        this.toolbar = new goog.ui.Toolbar();
+        this.toolbar.render(this.el);
 
         var tbSep0 = new goog.ui.ToolbarSeparator();
-        toolbar.addChild(tbSep0, true);
+        this.toolbar.addChild(tbSep0, true);
         tbSep0.getElement().style.height = '100%';
 
         // font family
@@ -24,13 +27,16 @@ class Toolbar{
                 fontMenu.addChild(new goog.ui.MenuSeparator(), true);
             }
         });
-        var fontSelector = new goog.ui.ToolbarSelect('宋体', fontMenu);
-        toolbar.addChild(fontSelector, true);
+        var fontFamily = '宋体'
+        var fontSelector = new goog.ui.ToolbarSelect(fontFamily, fontMenu);
+        state.mutations.setToolbarTextStyle('fontFamily', fontFamily)
+        this.toolbar.fontSelector = fontSelector
+        this.toolbar.addChild(fontSelector, true);
         fontSelector.getElement().getElementsByClassName('goog-toolbar-menu-button-caption')[0].style.width = '70px';
-        //goog.events.listen(fontSelector, 'change', toolbar.fontChange);
+        goog.events.listen(fontSelector, 'change', this.fontFamilyChanged);
 
         var tbSep1 = new goog.ui.ToolbarSeparator();
-        toolbar.addChild(tbSep1, true);
+        this.toolbar.addChild(tbSep1, true);
         tbSep1.getElement().style.marginLeft = '0px';
 
         // font size
@@ -41,24 +47,28 @@ class Toolbar{
             item.getElement().style.paddingRight = '3.5em';
             item.getElement().getElementsByClassName('goog-menuitem-content')[0].style.fontSize = size + 'px';
         });
-        var sizeSelector = new goog.ui.ToolbarSelect('14', sizeMenu);
-        toolbar.sizeSelector = sizeSelector;
-        toolbar.addChild(sizeSelector, true);
+        var fontSize = '14'
+        var sizeSelector = new goog.ui.ToolbarSelect(fontSize, sizeMenu);
+        state.mutations.setToolbarTextStyle('fontSize', fontSize)
+        this.toolbar.sizeSelector = sizeSelector;
+        this.toolbar.addChild(sizeSelector, true);
         sizeSelector.getElement().getElementsByClassName('goog-toolbar-menu-button-caption')[0].style.width = '10px';
         sizeMenu.getElement().style.height = '300px';
         sizeMenu.getElement().style.overflowY = 'scroll';
-        //goog.events.listen(sizeSelector, 'change', toolbar.sizeChange);
+        goog.events.listen(sizeSelector, 'change', this.fontSizeChanged);
 
         var tbSep2 = new goog.ui.ToolbarSeparator();
-        toolbar.addChild(tbSep2, true);
+        this.toolbar.addChild(tbSep2, true);
         tbSep2.getElement().style.marginLeft = '0px';
 
         // font color
         var fontColorSelector = new goog.ui.ColorMenuButton('A', goog.ui.ColorMenuButton.newColorMenu(), goog.ui.ToolbarColorMenuButtonRenderer.getInstance());
 
-        toolbar.addChild(fontColorSelector, true);
-        toolbar.fontColorSelector = fontColorSelector;
-        fontColorSelector.setSelectedColor('#000000');
+        this.toolbar.addChild(fontColorSelector, true);
+        this.toolbar.fontColorSelector = fontColorSelector;
+        var color = '#000000'
+        fontColorSelector.setSelectedColor(color);
+        state.mutations.setToolbarTextStyle('color', color)
         var fontColorCap = fontColorSelector.getElement().getElementsByClassName('goog-toolbar-menu-button-caption')[0];
         var fontColorDrop = fontColorSelector.getElement().getElementsByClassName('goog-toolbar-menu-button-dropdown')[0];
         fontColorCap.style.padding = '0px';
@@ -66,8 +76,7 @@ class Toolbar{
         fontColorCap.style.width = '16px';
         fontColorCap.style.textAlign = 'center';
         fontColorDrop.style.marginRight = '1px';
-
-        //goog.events.listen(fontColorSelector, goog.ui.Component.EventType.ACTION, toolbar.colorChange);
+        goog.events.listen(fontColorSelector, goog.ui.Component.EventType.ACTION, this.colorChanged);
 
         // background color
         var bgColorMenu = goog.ui.ColorMenuButton.newColorMenu();
@@ -79,8 +88,9 @@ class Toolbar{
 
         var bgColorSelector = new goog.ui.ColorMenuButton('A', bgColorMenu, goog.ui.ToolbarColorMenuButtonRenderer.getInstance());
 
-        toolbar.addChild(bgColorSelector, true);
-        toolbar.bgColorSelector = bgColorSelector;
+        this.toolbar.addChild(bgColorSelector, true);
+        this.toolbar.bgColorSelector = bgColorSelector;
+        state.mutations.setToolbarTextStyle('backgroundColor', 'unset')
         var bgColorCap = bgColorSelector.getElement().getElementsByClassName('goog-toolbar-menu-button-caption')[0];
         var bgColorDrop = bgColorSelector.getElement().getElementsByClassName('goog-toolbar-menu-button-dropdown')[0];
         bgColorCap.style.padding = '0px';
@@ -90,31 +100,33 @@ class Toolbar{
         bgColorCap.style.color = '#FFF';
         bgColorCap.style.backgroundColor = '#000';
         bgColorDrop.style.marginRight = '1px';
-
-        //goog.events.listen(bgColorSelector, goog.ui.Component.EventType.ACTION, toolbar.bgColorChange);
+        goog.events.listen(bgColorSelector, goog.ui.Component.EventType.ACTION, this.backgroundColorChanged);
 
         // bold toggle
         var boldSet = new goog.ui.ToolbarToggleButton('B');
-        toolbar.boldSet = boldSet;
-        toolbar.addChild(boldSet, true);
+        this.toolbar.boldSet = boldSet;
+        state.mutations.setToolbarTextStyle('fongWeight', 'unset')
+        this.toolbar.addChild(boldSet, true);
         boldSet.getElement().style.fontFamily = 'Times New Roman';
-        //goog.events.listen(boldSet, goog.ui.Component.EventType.ACTION, toolbar.WSDSChange);
+        goog.events.listen(boldSet, goog.ui.Component.EventType.ACTION, this.fontWeightChanged.bind(this));
 
         // italic
         var italicSet = new goog.ui.ToolbarToggleButton('I');
-        toolbar.italicSet = italicSet;
-        toolbar.addChild(italicSet, true);
+        this.toolbar.italicSet = italicSet;
+        state.mutations.setToolbarTextStyle('textStyle', 'unset')
+        this.toolbar.addChild(italicSet, true);
         italicSet.getElement().style.fontFamily = 'Times New Roman';
         italicSet.getElement().style.fontStyle = 'italic';
-        //goog.events.listen(italicSet, goog.ui.Component.EventType.ACTION, toolbar.WSDSChange);
+        goog.events.listen(italicSet, goog.ui.Component.EventType.ACTION, this.textStyleChanged.bind(this));
 
         // underline
         var underlineSet = new goog.ui.ToolbarToggleButton('U');
-        toolbar.underlineSet = underlineSet;
-        toolbar.addChild(underlineSet, true);
+        this.toolbar.underlineSet = underlineSet;
+        state.mutations.setToolbarTextStyle('textDecoration', 'unset')
+        this.toolbar.addChild(underlineSet, true);
         underlineSet.getElement().style.fontFamily = 'Times New Roman';
         underlineSet.getElement().getElementsByClassName('goog-toolbar-button-inner-box')[0].style.textDecoration = 'underline';
-        //goog.events.listen(underlineSet, goog.ui.Component.EventType.ACTION, toolbar.WSDSChange);
+        goog.events.listen(underlineSet, goog.ui.Component.EventType.ACTION, this.textDecorationChanged.bind(this));
 
         // superscript
         var spsIcon = goog.dom.createDom('div');
@@ -122,18 +134,18 @@ class Toolbar{
         spsIcon.style.width = '14px';
         spsIcon.style.height = '16px';
         var superScriptSet = new goog.ui.ToolbarToggleButton(spsIcon);
-        toolbar.superScriptSet = superScriptSet;
-        toolbar.addChild(superScriptSet, true);
-        /*
+        this.toolbar.superScriptSet = superScriptSet;
+        state.mutations.setToolbarTextStyle('verticalAlign', 'unset')
+        this.toolbar.addChild(superScriptSet, true);
         goog.events.listen(superScriptSet,
             goog.ui.Component.EventType.ACTION,
             function(e) {
                 if( this.isChecked() ) {
                     subScriptSet.setChecked(false);
                 }
-                toolbar.WSDSChange(e);
+                that.verticalAlignChanged.call(that);
             }
-        );*/
+        );
 
         // subscript
         var sbsIcon = goog.dom.createDom('div');
@@ -141,21 +153,21 @@ class Toolbar{
         sbsIcon.style.width = '14px';
         sbsIcon.style.height = '16px';
         var subScriptSet = new goog.ui.ToolbarToggleButton(sbsIcon);
-        toolbar.subScriptSet = subScriptSet;
-        toolbar.addChild(subScriptSet, true);
-        /*
+        this.toolbar.subScriptSet = subScriptSet;
+        state.mutations.setToolbarTextStyle('verticalAlign', 'unset')
+        this.toolbar.addChild(subScriptSet, true);
         goog.events.listen(subScriptSet,
             goog.ui.Component.EventType.ACTION,
             function(e) {
                 if( this.isChecked() ) {
                     superScriptSet.setChecked(false);
                 }
-                toolbar.WSDSChange(e);
+                that.verticalAlignChanged.call(that);
             }
-        );*/
+        );
 
         var tbSepFont = new goog.ui.ToolbarSeparator();
-        toolbar.addChild(tbSepFont, true);
+        this.toolbar.addChild(tbSepFont, true);
         tbSepFont.getElement().style.marginLeft = '0px';
 
         // paragraph align left
@@ -164,8 +176,8 @@ class Toolbar{
         alignLeftIcon.style.width = '14px';
         alignLeftIcon.style.height = '16px';
         var alignLeftSet = new goog.ui.ToolbarToggleButton(alignLeftIcon);
-        toolbar.alignLeftSet = alignLeftSet;
-        toolbar.addChild(alignLeftSet, true);
+        this.toolbar.alignLeftSet = alignLeftSet;
+        this.toolbar.addChild(alignLeftSet, true);
         /*
         goog.events.listen(alignLeftSet,
             goog.ui.Component.EventType.ACTION,
@@ -175,7 +187,7 @@ class Toolbar{
                     alignCenterSet.setChecked(false);
                     alignRightSet.setChecked(false);
 
-                    toolbar.paraAlignChange(e);
+                    this.toolbar.paraAlignChange(e);
                     G.cursor.refreshTarget();
                 }
                 G.inputbox.focus();
@@ -188,8 +200,8 @@ class Toolbar{
         alignCenterIcon.style.width = '14px';
         alignCenterIcon.style.height = '16px';
         var alignCenterSet = new goog.ui.ToolbarToggleButton(alignCenterIcon);
-        toolbar.alignCenterSet = alignCenterSet;
-        toolbar.addChild(alignCenterSet, true);
+        this.toolbar.alignCenterSet = alignCenterSet;
+        this.toolbar.addChild(alignCenterSet, true);
         /*
         goog.events.listen(alignCenterSet,
             goog.ui.Component.EventType.ACTION,
@@ -199,7 +211,7 @@ class Toolbar{
                     //alignCenterSet.setChecked(false);
                     alignRightSet.setChecked(false);
 
-                    toolbar.paraAlignChange(e);
+                    this.toolbar.paraAlignChange(e);
                     G.cursor.refreshTarget();
                 }
                 G.inputbox.focus();
@@ -212,8 +224,8 @@ class Toolbar{
         alignRightIcon.style.width = '14px';
         alignRightIcon.style.height = '16px';
         var alignRightSet = new goog.ui.ToolbarToggleButton(alignRightIcon);
-        toolbar.alignRightSet = alignRightSet;
-        toolbar.addChild(alignRightSet, true);
+        this.toolbar.alignRightSet = alignRightSet;
+        this.toolbar.addChild(alignRightSet, true);
         /*
         goog.events.listen(alignRightSet,
             goog.ui.Component.EventType.ACTION,
@@ -223,7 +235,7 @@ class Toolbar{
                     alignCenterSet.setChecked(false);
                     //alignRightSet.setChecked(false);
 
-                    toolbar.paraAlignChange(e);
+                    this.toolbar.paraAlignChange(e);
                     G.cursor.refreshTarget();
                 }
                 G.inputbox.focus();
@@ -231,7 +243,7 @@ class Toolbar{
         );*/
 
         var tbSepAlign = new goog.ui.ToolbarSeparator();
-        toolbar.addChild(tbSepAlign, true);
+        this.toolbar.addChild(tbSepAlign, true);
         tbSepAlign.getElement().style.marginLeft = '0px';
 
         // insert picture button
@@ -241,7 +253,7 @@ class Toolbar{
         insertImgIcon.style.height = '16px';
 
         var insertImgBtn = new goog.ui.ToolbarButton(insertImgIcon);
-        toolbar.addChild(insertImgBtn, true);
+        this.toolbar.addChild(insertImgBtn, true);
         /*
         goog.events.listen(insertImgBtn.getElement(),
             goog.events.EventType.CLICK,
@@ -270,12 +282,12 @@ class Toolbar{
         insertTableIcon.style.height = '16px';
 
         var insertTableBtn = new goog.ui.ToolbarMenuButton(insertTableIcon, tableDimensionMenu);
-        toolbar.addChild(insertTableBtn, true);
+        this.toolbar.addChild(insertTableBtn, true);
         insertTableBtn.getElement().getElementsByClassName('goog-toolbar-menu-button-caption')[0].style.paddingRight = '0px';
         insertTableBtn.getElement().getElementsByClassName('goog-toolbar-menu-button-dropdown')[0].style.marginRight = '1px';
 
         var tbSepInsert = new goog.ui.ToolbarSeparator();
-        toolbar.addChild(tbSepInsert, true);
+        this.toolbar.addChild(tbSepInsert, true);
         tbSepInsert.getElement().style.marginLeft = '0px';
     }
 
@@ -295,6 +307,119 @@ class Toolbar{
         })
         
         return this.el
+    }
+
+    fontFamilyChanged(){
+        let fontFamily = this.getValue()
+        state.mutations.setToolbarTextStyle('fontFamily', fontFamily)
+    }
+
+    fontSizeChanged(){
+        let fontSize = this.getValue()
+        state.mutations.setToolbarTextStyle('fontSize', fontSize)
+    }
+
+    colorChanged(){
+        let color = this.getValue()
+        state.mutations.setToolbarTextStyle('color', color)
+    }
+
+    backgroundColorChanged(){
+        let backgroundColor = this.getValue()
+        state.mutations.setToolbarTextStyle('backgroundColor', backgroundColor ? backgroundColor : 'unset')
+    }
+
+    fontWeightChanged(){
+        let fontWeight = "unset";
+        if( this.toolbar.boldSet.isChecked() ) {
+            fontWeight = 'bold';
+        } else {
+            fontWeight = 'normal';
+        }
+        state.mutations.setToolbarTextStyle('fontWeight', fontWeight)
+    }
+
+    textStyleChanged(){
+        let textStyle = "unset";
+        if( this.toolbar.italicSet.isChecked() ) {
+            textStyle = 'italic';
+        } else {
+            textStyle = 'normal';
+        }
+        state.mutations.setToolbarTextStyle('textStyle', textStyle)
+    }
+
+    textDecorationChanged(){
+        let textDecoration = "unset";
+        if( this.toolbar.underlineSet.isChecked() ) {
+            textDecoration =  'underline';
+        } else {
+            textDecoration = 'none';
+        }
+        state.mutations.setToolbarTextStyle('textDecoration', textDecoration)
+    }
+
+    verticalAlignChanged(){
+        let verticalAlign = "unset";
+        if( this.toolbar.superScriptSet.isChecked() ) {
+            verticalAlign = 'super';
+        } else if ( this.toolbar.subScriptSet.isChecked() ) {
+            verticalAlign = 'sub';
+        }
+        state.mutations.setToolbarTextStyle('verticalAlign', verticalAlign)
+    }
+
+    updateFontFamily(fontFamily){
+        this.toolbar.fontSelector.setValue(fontFamily)
+    }
+
+    updateFontSize(fontSize){
+        this.toolbar.sizeSelector.setValue(fontSize)
+    }
+
+    updateColor(color){
+        this.toolbar.fontColorSelector.setSelectedColor(color)
+    }
+
+    updateBackgroundColor(backgroundColor){
+        this.toolbar.bgColorSelector.setSelectedColor(backgroundColor)
+    }
+
+    updateFontWeight(fontWeight){
+        if(fontWeight == 'bold'){
+            this.toolbar.boldSet.setChecked(true)
+        }else{
+            this.toolbar.boldSet.setChecked(false)
+        }
+    }
+
+    updateTextStyle(textStyle){
+        if(textStyle == 'italic'){
+            this.toolbar.italicSet.setChecked(true)
+        }else{
+            this.toolbar.italicSet.setChecked(false)
+        }
+    }
+
+    updateTextDecoration(textDecoration){
+        if(textDecoration == 'underline'){
+            this.toolbar.underlineSet.setChecked(true)
+        }else{
+            this.toolbar.underlineSet.setChecked(false)
+        }
+    }
+
+    updateVerticalAlign(verticalAlign){
+        if(verticalAlign == 'super'){
+            this.toolbar.superScriptSet.setChecked(true)
+            this.toolbar.subScriptSet.setChecked(false)
+        }else if(verticalAlign == 'sub'){
+            this.toolbar.superScriptSet.setChecked(false)
+            this.toolbar.subScriptSet.setChecked(true)
+        }else{
+            this.toolbar.superScriptSet.setChecked(false)
+            this.toolbar.subScriptSet.setChecked(false)
+        }
     }
 }
 
