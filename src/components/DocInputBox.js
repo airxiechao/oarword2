@@ -90,21 +90,30 @@ class DocInputBox{
                 window.goog.dom.createTextNode(midText)
             ])
 
-            var rightDummy = createElement('div',  {
-                style: leftTextStyleCss
-            }, [
-                window.goog.dom.createTextNode(rightText)
-            ])
+            let dummyComponents = []
+            if(rightText){
+                var rightDummy = createElement('div',  {
+                    style: leftTextStyleCss
+                }, [
+                    window.goog.dom.createTextNode(rightText)
+                ])
 
+                dummyComponents =  [
+                    leftDummy, midDummy, rightDummy
+                ]
+            }else{
+                dummyComponents =  [
+                    leftDummy, midDummy
+                ]
+            }
+            
             var dummy = createElement('div', {
                 style: {
                     class: 'input-dummy',
                     display: 'inline-block',
                     height: ib.inlineHeight + 'px',
                 }
-            }, [
-                leftDummy, midDummy, rightDummy
-            ])
+            }, dummyComponents)
 
             if(this.dummy){
                 this.dummy.remove()
