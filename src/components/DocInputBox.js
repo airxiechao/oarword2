@@ -63,65 +63,97 @@ class DocInputBox{
         }else{
             var ib = state.document.cursor.inlineBlock
             var front = state.document.cursor.front
-            var si = state.document.cursor.inlineStartIndex + (front ? 0 : 1)
+            if(ib.type == 'text'){
+                var si = state.document.cursor.inlineStartIndex + (front ? 0 : 1)
             
-            var text = ib.text
-            var leftText = text.substr(0, si)
-            var rightText = text.substr(si)
-            var midText = this.el.textContent
-            var leftTextStyle = ib.textStyle
-            var midTextStyle = state.getters.cloneToolbarTextStyle()
-
-            var leftTextStyleCss = buildTextStyleCss(leftTextStyle)
-            leftTextStyleCss['display'] = 'inline-block'
-            leftTextStyleCss['height'] = ib.inlineHeight + 'px'
-            var leftDummy = createElement('div', {
-                style: leftTextStyleCss
-            }, [
-                window.goog.dom.createTextNode(leftText)
-            ])
-
-            var midTextStyleCss = buildTextStyleCss(midTextStyle)
-            midTextStyleCss['textDecoration'] = 'underline'
-            midTextStyleCss['display'] = 'inline-block'
-            var midDummy = createElement('div', {
-                style: midTextStyleCss
-            }, [
-                window.goog.dom.createTextNode(midText)
-            ])
-
-            let dummyComponents = []
-            if(rightText){
-                var rightDummy = createElement('div',  {
+                var text = ib.text
+                var leftText = text.substr(0, si)
+                var rightText = text.substr(si)
+                var midText = this.el.textContent
+                var leftTextStyle = ib.textStyle
+                var midTextStyle = state.getters.cloneToolbarTextStyle()
+    
+                var leftTextStyleCss = buildTextStyleCss(leftTextStyle)
+                leftTextStyleCss['display'] = 'inline-block'
+                leftTextStyleCss['height'] = ib.inlineHeight + 'px'
+                var leftDummy = createElement('div', {
                     style: leftTextStyleCss
                 }, [
-                    window.goog.dom.createTextNode(rightText)
+                    window.goog.dom.createTextNode(leftText)
                 ])
-
-                dummyComponents =  [
-                    leftDummy, midDummy, rightDummy
-                ]
-            }else{
-                dummyComponents =  [
-                    leftDummy, midDummy
-                ]
+    
+                var midTextStyleCss = buildTextStyleCss(midTextStyle)
+                midTextStyleCss['textDecoration'] = 'underline'
+                midTextStyleCss['display'] = 'inline-block'
+                var midDummy = createElement('div', {
+                    style: midTextStyleCss
+                }, [
+                    window.goog.dom.createTextNode(midText)
+                ])
+    
+                let dummyComponents = []
+                if(rightText){
+                    var rightDummy = createElement('div',  {
+                        style: leftTextStyleCss
+                    }, [
+                        window.goog.dom.createTextNode(rightText)
+                    ])
+    
+                    dummyComponents =  [
+                        leftDummy, midDummy, rightDummy
+                    ]
+                }else{
+                    dummyComponents =  [
+                        leftDummy, midDummy
+                    ]
+                }
+                
+                var dummy = createElement('div', {
+                    style: {
+                        class: 'input-dummy',
+                        display: 'inline-block',
+                        height: ib.inlineHeight + 'px',
+                    }
+                }, dummyComponents)
+    
+                if(this.dummy){
+                    this.dummy.remove()
+                }
+                this.dummy = dummy
+    
+                ib.obj.el.style.display = 'none'
+                goog.dom.insertSiblingAfter(this.dummy, ib.obj.el)
+            }else if(ib.type == 'image'){
+                var midText = this.el.textContent
+                var midTextStyle = state.getters.cloneToolbarTextStyle()
+                
+                var midTextStyleCss = buildTextStyleCss(midTextStyle)
+                midTextStyleCss['textDecoration'] = 'underline'
+                midTextStyleCss['display'] = 'inline-block'
+                var midDummy = createElement('div', {
+                    style: midTextStyleCss
+                }, [
+                    window.goog.dom.createTextNode(midText)
+                ])
+    
+                let dummyComponents = [midDummy]
+                
+                var dummy = createElement('div', {
+                    style: {
+                        class: 'input-dummy',
+                        display: 'inline-block',
+                        //height: ib.inlineHeight + 'px',
+                    }
+                }, dummyComponents)
+    
+                if(this.dummy){
+                    this.dummy.remove()
+                }
+                this.dummy = dummy
+                
+                goog.dom.insertSiblingBefore(this.dummy, ib.obj.el)
             }
             
-            var dummy = createElement('div', {
-                style: {
-                    class: 'input-dummy',
-                    display: 'inline-block',
-                    height: ib.inlineHeight + 'px',
-                }
-            }, dummyComponents)
-
-            if(this.dummy){
-                this.dummy.remove()
-            }
-            this.dummy = dummy
-
-            ib.obj.el.style.display = 'none'
-            goog.dom.insertSiblingAfter(this.dummy, ib.obj.el)
         }
     }
 
