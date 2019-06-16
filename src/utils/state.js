@@ -396,7 +396,7 @@ var state = {
                     }
                 }
             }else if(ib.type == 'image'){
-                state.mutations._updateCursor(body, paraIndex, front ? runIndex : runIndex+1, text.length, false)
+                state.mutations._updateCursor(body, paraIndex, front ? runIndex : runIndex+1, Math.max(text.length - 1, 0), false)
             }
             
         },
@@ -450,7 +450,7 @@ var state = {
                     let runsLen = para.runs.length
 
                     if(runsLen > 0){
-                        if(runIndex >  - 1){
+                        if(runIndex > runsLen - 1){
                             runIndex = runsLen - 1
                             startIndex = para.runs[runIndex].text ? para.runs[runIndex].text.length - 1 : 0
                             front = false
