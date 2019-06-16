@@ -151,7 +151,12 @@ class DocInputBox{
                 }
                 this.dummy = dummy
                 
-                goog.dom.insertSiblingBefore(this.dummy, ib.obj.el)
+                if(front){
+                    goog.dom.insertSiblingBefore(this.dummy, ib.obj.el)
+                }else{
+                    goog.dom.insertSiblingAfter(this.dummy, ib.obj.el)
+                }
+                
             }
             
         }
