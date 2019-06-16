@@ -461,28 +461,30 @@ var state = {
                         if(paraIndex > 0){
                             // merge to previous paragraph
                             let pi = paraIndex - 1
-                            let ri = body.doc.pts[pi].runs.length - 1
-                            let preParaRun = body.doc.pts[pi].runs[ri]
-
-                            state.mutations._mergePreviousPara(body, paraIndex)
-                            paraIndex = pi
-                            runIndex = ri
-                            
-                            if(preParaRun.type == 'text'){
-                                let si = preParaRun.text.length - 1
-                                startIndex = si
-                                if(startIndex < 0){
+                            let pt = body.doc.pts[pi]
+                            if(pt.type == 'para'){
+                                let ri = pt.runs.length - 1
+                                let preParaRun = pt.runs[ri]
+    
+                                state.mutations._mergePreviousPara(body, paraIndex)
+                                paraIndex = pi
+                                runIndex = ri
+                                
+                                if(preParaRun.type == 'text'){
+                                    let si = preParaRun.text.length - 1
+                                    startIndex = si
+                                    if(startIndex < 0){
+                                        startIndex = 0
+                                    }
+                                    front = false
+                                    if(si < 0){
+                                        front = true
+                                    }
+                                }else if(preParaRun.type == 'image'){
                                     startIndex = 0
+                                    front = false
                                 }
-                                front = false
-                                if(si < 0){
-                                    front = true
-                                }
-                            }else if(preParaRun.type == 'image'){
-                                startIndex = 0
-                                front = false
                             }
-                            
                         }
                     }else{
                         let preRun = body.doc.pts[paraIndex].runs[runIndex-1]
@@ -770,7 +772,7 @@ var state = {
                     {
                         type: 'text',
                         text: '',
-                        textStyle: {},
+                        textStyle: state.getters.cloneToolbarTextStyle(),
                     }
                 ],
                 type: 'para',
@@ -819,7 +821,7 @@ var state = {
                     {
                         type: 'text',
                         text: '',
-                        textStyle: {},
+                        textStyle: state.getters.cloneToolbarTextStyle(),
                     }
                 ],
                 type: 'para',
@@ -898,7 +900,7 @@ var state = {
             let rightText = run.text.substr(startIndex)
             let oldTextStyle = run.textStyle
             let textStyleEqual = textStyle ? isTextStyleEqual(oldTextStyle, textStyle) : false
-
+            
             if(textStyle){
                 if(textStyleEqual){
                     run.text = leftText + text + rightText
@@ -914,14 +916,12 @@ var state = {
                     }
                     bodyDoc.pts[paraIndex].runs.splice(runIndex+1, 0, newRun)
         
-                    if(rightText){
-                        let rightRun = {
-                            type: 'text',
-                            text: rightText,
-                            textStyle: oldTextStyle,
-                        }
-                        bodyDoc.pts[paraIndex].runs.splice(runIndex+2, 0, rightRun)
+                    let rightRun = {
+                        type: 'text',
+                        text: rightText,
+                        textStyle: oldTextStyle,
                     }
+                    bodyDoc.pts[paraIndex].runs.splice(runIndex+2, 0, rightRun)
 
                     return true
                 }
