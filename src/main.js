@@ -87,6 +87,14 @@ var doc = {
                     },
                 },
                 {
+                    type: 'image',
+                    image: 'http://www.xinhuanet.com/photo/2019-05/31/1124569534_15593006741411n.jpg',
+                    imageStyle: {
+                        width: 100,
+                        height: 50,
+                    },
+                },
+                {
                     type: 'text',
                     text: 'ccc',
                     textStyle: defaultTextStyle,

@@ -447,7 +447,30 @@ var state = {
                     }
                 }else if(ib.type == 'image'){
                     state.mutations._deleteRunImage(body.doc, paraIndex, runIndex)
-                    front = true
+                    let runsLen = para.runs.length
+
+                    if(runsLen > 0){
+                        if(runIndex >  - 1){
+                            runIndex = runsLen - 1
+                            startIndex = para.runs[runIndex].text ? para.runs[runIndex].text.length - 1 : 0
+                            front = false
+                        }else{
+                            front = true
+                        }
+                    }else{
+                        // add empty text run to para
+                        let emptyRun = {
+                            type: 'text',
+                            text: '',
+                            textStyle: state.getters.cloneToolbarTextStyle(),
+                        }
+
+                        para.runs.splice(0, 0, emptyRun)
+                        runIndex = 0
+                        startIndex = 0
+                        front = true
+                    }
+                    
                 }
                 
             }else{
@@ -916,12 +939,14 @@ var state = {
                     }
                     bodyDoc.pts[paraIndex].runs.splice(runIndex+1, 0, newRun)
         
-                    let rightRun = {
-                        type: 'text',
-                        text: rightText,
-                        textStyle: oldTextStyle,
+                    if(rightText){
+                        let rightRun = {
+                            type: 'text',
+                            text: rightText,
+                            textStyle: oldTextStyle,
+                        }
+                        bodyDoc.pts[paraIndex].runs.splice(runIndex+2, 0, rightRun)
                     }
-                    bodyDoc.pts[paraIndex].runs.splice(runIndex+2, 0, rightRun)
 
                     return true
                 }
