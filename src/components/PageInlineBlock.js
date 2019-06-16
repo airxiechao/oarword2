@@ -1,4 +1,5 @@
 import { createElement } from '../utils/renderer'
+import { buildTextStyleCss } from '../utils/convert'
 import { measureFontTextWH, measureElePageXY, measureEleDocXY } from '../utils/measure.js'
 
 import state from '../utils/state'
@@ -14,20 +15,12 @@ class PageInlineBlock{
             let textStyle = this.ib.textStyle
     
             let t = window.goog.dom.createTextNode(text)
+            let textStyleCss = buildTextStyleCss(textStyle)
+            textStyleCss['display'] = 'inline-block'
+            textStyleCss['height'] = this.ib.inlineHeight + 'px'
             this.el = createElement('div', {
                 class: 'page-inline-block-text',
-                style: {
-                    display: 'inline-block',
-                    height: this.ib.inlineHeight + 'px',
-                    fontFamily: textStyle.fontFamily ? textStyle.fontFamily : 'unset',
-                    fontSize: textStyle.fontSize ? textStyle.fontSize + 'px' : 'unset',
-                    color: textStyle.color ? textStyle.color : 'unset',
-                    backgroundColor: textStyle.color ? textStyle.backgroundColor : 'unset',
-                    fontWeight: textStyle.fontWeight ? textStyle.fontWeight : 'unset',
-                    fontStyle: textStyle.fontStyle ? textStyle.fontStyle : 'unset',
-                    textDecoration: textStyle.textDecoration ? textStyle.textDecoration : 'unset',
-                    verticalAlign: textStyle.verticalAlign ? textStyle.verticalAlign : 'unset',
-                }
+                style: textStyleCss
             }, [
                 t
             ])

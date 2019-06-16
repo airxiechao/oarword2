@@ -394,6 +394,34 @@ function getInlineBlockBodyIndex(inlineBlock){
     }
 }
 
+function isTextStyleEqual(textStyle1, textStyle2){
+    let keys = ['fontFamily', 'fontSize', 'color', 'backgroundColor', 'fontWeight', 'fontStyle', 'textDecoration', 'verticalAlign']
+    let equal = true
+    keys.forEach((key)=>{
+        if(textStyle1[key] != textStyle2[key]){
+            equal = false
+        }
+    })
+
+    return equal
+}
+
+function buildTextStyleCss(textStyle){
+    let styleCss = {
+        fontFamily: textStyle.fontFamily ? textStyle.fontFamily : 'unset',
+        fontSize: textStyle.fontSize ? textStyle.fontSize + 'px' : 'unset',
+        color: textStyle.color ? textStyle.color : 'unset',
+        backgroundColor: textStyle.color ? textStyle.backgroundColor : 'unset',
+        fontWeight: textStyle.fontWeight ? textStyle.fontWeight : 'unset',
+        fontStyle: textStyle.fontStyle ? textStyle.fontStyle : 'unset',
+        textDecoration: textStyle.textDecoration ? textStyle.textDecoration : 'unset',
+        verticalAlign: textStyle.verticalAlign ? textStyle.verticalAlign : 'unset',
+    }
+
+    return styleCss
+}
+
 export { paraRunsToLines, getLineInlineBlocksAndHeightFromQueue, getPageLeftHeight, 
          getPagePara, getPageBody, getPreviousInlineOfBody, getNextInlineOfBody,
-         getPreviousLineOfBody, getNextLineOfBody, getInlineBlockBodyIndex, getPageTable }
+         getPreviousLineOfBody, getNextLineOfBody, getInlineBlockBodyIndex, getPageTable,
+         isTextStyleEqual, buildTextStyleCss }

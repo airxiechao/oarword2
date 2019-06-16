@@ -40,8 +40,8 @@ var doc = {
                     type: 'text',
                     text: 'bbb',
                     textStyle: {
-                        fontFamily: 'arial',
-                        fontSize: 26,
+                        fontFamily: '宋体',
+                        fontSize: 24,
                         color: '#f00',
                         backgroundColor: '#00f',
                         fontWeight: 'bold',

@@ -1,6 +1,7 @@
 import { measureFontTextWH, getCursorPos, getPageLeftHeight } from './measure'
 import { getPagePara, getPageBody, getPreviousInlineOfBody, 
-    getNextInlineOfBody, getPreviousLineOfBody, getNextLineOfBody, getInlineBlockBodyIndex } from './convert'
+    getNextInlineOfBody, getPreviousLineOfBody, getNextLineOfBody, getInlineBlockBodyIndex,
+    isTextStyleEqual } from './convert'
 import { getPageNo, measureEleDocXY } from '../utils/measure'
 
 import PageParagraph from '../components/PageParagraph'
@@ -48,6 +49,9 @@ var state = {
             let pos = getCursorPos(cursorInlineBlock, state.document.cursor.inlineStartIndex, state.document.cursor.front)
             return pos
         },
+        cloneToolbarTextStyle: function(){
+            return Object.assign({}, state.toolbar.textStyle)
+        }
     },
     mutations: {
         setDocumentObj: function(obj){
@@ -106,10 +110,10 @@ var state = {
                             state.toolbar.obj.updateFontWeight(value)
                         }
                         break;
-                case 'textStyle':
+                case 'fontStyle':
                         state.toolbar.textStyle[key] = value
                         if(updateUi){
-                            state.toolbar.obj.updateTextStyle(value)
+                            state.toolbar.obj.updateFontStyle(value)
                         }
                         break;
                 case 'textDecoration':
@@ -127,6 +131,8 @@ var state = {
                 default:
                     break;
             }
+
+            state.mutations._updateCursorAndInputBoxPos()
         },
         leftMoveCursor: function(){
             let ci = state.getters.cursorBodyIndex()
@@ -353,8 +359,9 @@ var state = {
             let textStyle = payload.textStyle
 
             // update run
+            let textRunInserted = false
             if(ib.type == 'text'){
-                state.mutations._spliceRunText(body.doc, paraIndex, runIndex, front ? startIndex : startIndex + 1, text, textStyle)
+                textRunInserted = state.mutations._spliceRunText(body.doc, paraIndex, runIndex, front ? startIndex : startIndex + 1, text, textStyle)
             }else if(ib.type == 'image'){
                 state.mutations._addRunTextAfter(body.doc, paraIndex, front ? runIndex : runIndex + 1, text, textStyle)
             }
@@ -376,12 +383,17 @@ var state = {
 
             // update cursor
             if(ib.type == 'text'){
-                let si = startIndex + text.length
-                let len = body.doc.pts[paraIndex].runs[runIndex].text.length
-                if(si >= len){
-                    state.mutations._updateCursor(body, paraIndex, runIndex, Math.max(len - 1, 0), false)
+                if(textRunInserted){
+                    let len = body.doc.pts[paraIndex].runs[runIndex+1].text.length
+                    state.mutations._updateCursor(body, paraIndex, runIndex+1, Math.max(len - 1, 0), false)
                 }else{
-                    state.mutations._updateCursor(body, paraIndex, runIndex, si)
+                    let si = startIndex + text.length
+                    let len = body.doc.pts[paraIndex].runs[runIndex].text.length
+                    if(si >= len){
+                        state.mutations._updateCursor(body, paraIndex, runIndex, Math.max(len - 1, 0), false)
+                    }else{
+                        state.mutations._updateCursor(body, paraIndex, runIndex, si)
+                    }
                 }
             }else if(ib.type == 'image'){
                 state.mutations._updateCursor(body, paraIndex, front ? runIndex : runIndex+1, text.length, false)
@@ -881,11 +893,43 @@ var state = {
             bodyDoc.pts[paraIndex].runs.splice(runIndex, 0, r)
         },
         _spliceRunText(bodyDoc, paraIndex, runIndex, startIndex, text, textStyle){
-            var run = bodyDoc.pts[paraIndex].runs[runIndex]
-            var leftText = run.text.substr(0, startIndex)
-            var rightText = run.text.substr(startIndex)
+            let run = bodyDoc.pts[paraIndex].runs[runIndex]
+            let leftText = run.text.substr(0, startIndex)
+            let rightText = run.text.substr(startIndex)
+            let oldTextStyle = run.textStyle
+            let textStyleEqual = textStyle ? isTextStyleEqual(oldTextStyle, textStyle) : false
 
-            run.text = leftText + text + rightText
+            if(textStyle){
+                if(textStyleEqual){
+                    run.text = leftText + text + rightText
+
+                    return false
+                }else{
+                    run.text = leftText
+    
+                    let newRun = {
+                        type: 'text',
+                        text: text,
+                        textStyle: textStyle,
+                    }
+                    bodyDoc.pts[paraIndex].runs.splice(runIndex+1, 0, newRun)
+        
+                    if(rightText){
+                        let rightRun = {
+                            type: 'text',
+                            text: rightText,
+                            textStyle: oldTextStyle,
+                        }
+                        bodyDoc.pts[paraIndex].runs.splice(runIndex+2, 0, rightRun)
+                    }
+
+                    return true
+                }
+            }else{
+                run.text = leftText + text + rightText
+
+                return false
+            }
         },
         _updatePara(body, paraIndex, lastPosBottom){
 
@@ -1105,11 +1149,15 @@ var state = {
             var cursor = state.document.cursor.obj
             var pos = state.getters.cursorPos()
             
-            cursor.updatePos(pos.cursorPosX, pos.cursorPosY, pos.cursorHeight)
-
+            if(cursor){
+                cursor.updatePos(pos.cursorPosX, pos.cursorPosY, pos.cursorHeight)
+            }
+            
             // update inputbox ui
             var inputBox = state.document.inputBox.obj
-            inputBox.updatePos(pos.cursorPosX, pos.cursorPosY)
+            if(inputBox){
+                inputBox.updatePos(pos.cursorPosX, pos.cursorPosY)
+            }
         },
     },
 }

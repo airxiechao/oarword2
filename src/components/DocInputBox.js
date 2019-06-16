@@ -1,4 +1,5 @@
 import { createElement, updateElement } from '../utils/renderer'
+import { buildTextStyleCss } from '../utils/convert'
 import state from '../utils/state'
 
 class DocInputBox{
@@ -55,7 +56,7 @@ class DocInputBox{
             if(this.el.textContent != ''){
                 state.mutations.addToParaRun({
                     text: this.el.textContent,
-                    textStyle: {},
+                    textStyle: state.getters.cloneToolbarTextStyle(),
                 })
                 this.el.textContent = ''
             }
@@ -68,20 +69,33 @@ class DocInputBox{
             var leftText = text.substr(0, si)
             var rightText = text.substr(si)
             var midText = this.el.textContent
+            var leftTextStyle = ib.textStyle
+            var midTextStyle = state.getters.cloneToolbarTextStyle()
 
-            var leftDummy = createElement('span', {}, [
+            var leftTextStyleCss = buildTextStyleCss(leftTextStyle)
+            leftTextStyleCss['display'] = 'inline-block'
+            leftTextStyleCss['height'] = ib.inlineHeight + 'px'
+            var leftDummy = createElement('div', {
+                style: leftTextStyleCss
+            }, [
                 window.goog.dom.createTextNode(leftText)
             ])
-            var midDummy = createElement('span', {
-                style: {
-                    textDecoration: 'underline',
-                }
+
+            var midTextStyleCss = buildTextStyleCss(midTextStyle)
+            midTextStyleCss['textDecoration'] = 'underline'
+            midTextStyleCss['display'] = 'inline-block'
+            var midDummy = createElement('div', {
+                style: midTextStyleCss
             }, [
                 window.goog.dom.createTextNode(midText)
             ])
-            var rightDummy = createElement('span',  {}, [
+
+            var rightDummy = createElement('div',  {
+                style: leftTextStyleCss
+            }, [
                 window.goog.dom.createTextNode(rightText)
             ])
+
             var dummy = createElement('div', {
                 style: {
                     class: 'input-dummy',
@@ -110,7 +124,7 @@ class DocInputBox{
         } else if(e.type == 'endIme' ) {
             state.mutations.addToParaRun({
                 text: this.el.textContent,
-                textStyle: {},
+                textStyle: state.getters.cloneToolbarTextStyle(),
             })
             this.el.textContent = ''
 

@@ -47,8 +47,8 @@ class Toolbar{
             item.getElement().style.paddingRight = '3.5em';
             item.getElement().getElementsByClassName('goog-menuitem-content')[0].style.fontSize = size + 'px';
         });
-        var fontSize = '14'
-        var sizeSelector = new goog.ui.ToolbarSelect(fontSize, sizeMenu);
+        var fontSize = 14
+        var sizeSelector = new goog.ui.ToolbarSelect(fontSize+'', sizeMenu);
         state.mutations.setToolbarTextStyle('fontSize', fontSize)
         this.toolbar.sizeSelector = sizeSelector;
         this.toolbar.addChild(sizeSelector, true);
@@ -117,7 +117,7 @@ class Toolbar{
         this.toolbar.addChild(italicSet, true);
         italicSet.getElement().style.fontFamily = 'Times New Roman';
         italicSet.getElement().style.fontStyle = 'italic';
-        goog.events.listen(italicSet, goog.ui.Component.EventType.ACTION, this.textStyleChanged.bind(this));
+        goog.events.listen(italicSet, goog.ui.Component.EventType.ACTION, this.fontStyleChanged.bind(this));
 
         // underline
         var underlineSet = new goog.ui.ToolbarToggleButton('U');
@@ -316,7 +316,7 @@ class Toolbar{
 
     fontSizeChanged(){
         let fontSize = this.getValue()
-        state.mutations.setToolbarTextStyle('fontSize', fontSize)
+        state.mutations.setToolbarTextStyle('fontSize', Number(fontSize))
     }
 
     colorChanged(){
@@ -339,14 +339,14 @@ class Toolbar{
         state.mutations.setToolbarTextStyle('fontWeight', fontWeight)
     }
 
-    textStyleChanged(){
-        let textStyle = "unset";
+    fontStyleChanged(){
+        let fontStyle = "unset";
         if( this.toolbar.italicSet.isChecked() ) {
-            textStyle = 'italic';
+            fontStyle = 'italic';
         } else {
-            textStyle = 'normal';
+            fontStyle = 'normal';
         }
-        state.mutations.setToolbarTextStyle('textStyle', textStyle)
+        state.mutations.setToolbarTextStyle('fontStyle', fontStyle)
     }
 
     textDecorationChanged(){
@@ -374,7 +374,7 @@ class Toolbar{
     }
 
     updateFontSize(fontSize){
-        this.toolbar.sizeSelector.setValue(fontSize)
+        this.toolbar.sizeSelector.setValue(fontSize+'')
     }
 
     updateColor(color){
@@ -393,8 +393,8 @@ class Toolbar{
         }
     }
 
-    updateTextStyle(textStyle){
-        if(textStyle == 'italic'){
+    updateFontStyle(fontStyle){
+        if(fontStyle == 'italic'){
             this.toolbar.italicSet.setChecked(true)
         }else{
             this.toolbar.italicSet.setChecked(false)
