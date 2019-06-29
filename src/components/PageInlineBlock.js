@@ -92,12 +92,6 @@ class PageInlineBlock{
             }
         )
 
-        // update toolbar
-        let textStyle = this.ib.textStyle
-        Object.keys(textStyle).forEach((key)=>{
-            state.mutations.setToolbarTextStyle(key, textStyle[key], true)
-        })
-
     }
 
     clickImageHandler(e){

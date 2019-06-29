@@ -254,14 +254,12 @@ class Toolbar{
 
         var insertImgBtn = new goog.ui.ToolbarButton(insertImgIcon);
         this.toolbar.addChild(insertImgBtn, true);
-        /*
         goog.events.listen(insertImgBtn.getElement(),
             goog.events.EventType.CLICK,
             function(e) {
-                var insertImgDialog = new InsertImgDialog();
-                insertImgDialog.setVisible(true);
+                
             }
-        );*/
+        );
 
         // insert table button
         var tableDimensionMenu = new goog.ui.Menu();

@@ -74,6 +74,7 @@ var state = {
             state.document.cursor.front = payload.front
 
             state.mutations._updateCursorAndInputBoxPos()
+            state.mutations._updateCursorToolbarTextStyle()
         },
         setToolbarObj: function(obj){
             state.toolbar.obj = obj
@@ -163,6 +164,7 @@ var state = {
             }
 
             state.mutations._updateCursorAndInputBoxPos()
+            state.mutations._updateCursorToolbarTextStyle()
         },
         rightMoveCursor: function(){
             let ib = state.document.cursor.inlineBlock
@@ -189,6 +191,7 @@ var state = {
             }
 
             state.mutations._updateCursorAndInputBoxPos()
+            state.mutations._updateCursorToolbarTextStyle()
         },
         upMoveCursor: function(){
             let cx = state.document.cursor.obj.el.offsetLeft
@@ -264,6 +267,7 @@ var state = {
             }
 
             state.mutations._updateCursorAndInputBoxPos()
+            state.mutations._updateCursorToolbarTextStyle()
         },
         downMoveCursor: function(){
             let cx = state.document.cursor.obj.el.offsetLeft
@@ -341,6 +345,7 @@ var state = {
             }
 
             state.mutations._updateCursorAndInputBoxPos()
+            state.mutations._updateCursorToolbarTextStyle()
         },
         setImeStatus: function(imeStatus){
             var cursor = state.document.cursor.obj
@@ -1168,6 +1173,7 @@ var state = {
             }
 
             state.mutations._updateCursorAndInputBoxPos()
+            state.mutations._updateCursorToolbarTextStyle()
         },
         _updateCursorAndInputBoxPos: function(){
             // update cursor ui
@@ -1184,6 +1190,16 @@ var state = {
                 inputBox.updatePos(pos.cursorPosX, pos.cursorPosY)
             }
         },
+        _updateCursorToolbarTextStyle: function(){
+            let ib = state.document.cursor.inlineBlock
+            
+            if(ib.type == 'text'){
+                let textStyle = ib.textStyle
+                Object.keys(textStyle).forEach((key)=>{
+                    state.mutations.setToolbarTextStyle(key, textStyle[key], true)
+                })
+            }
+        }
     },
 }
 
