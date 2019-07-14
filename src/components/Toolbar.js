@@ -1,5 +1,6 @@
 import { createElement } from '../utils/renderer'
 import state from '../utils/state'
+import InsertImageDialog from './InsertImageDialog';
 
 class Toolbar{
     constructor(){
@@ -257,7 +258,7 @@ class Toolbar{
         goog.events.listen(insertImgBtn.getElement(),
             goog.events.EventType.CLICK,
             function(e) {
-                
+                let insertImagedialog = new InsertImageDialog()
             }
         );
 
