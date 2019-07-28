@@ -76,6 +76,14 @@ var state = {
             state.mutations._updateCursorAndInputBoxPos()
             state.mutations._updateCursorToolbarTextStyle()
         },
+        resetCursorInlineBlock: function(){
+            state.document.cursor.inlineBlock = state.document.body.pts[0].lines[0].inlineBlocks[0]
+            state.document.cursor.inlineStartIndex = 0
+            state.document.cursor.front = true
+
+            state.mutations._updateCursorAndInputBoxPos()
+            state.mutations._updateCursorToolbarTextStyle()
+        },
         setToolbarObj: function(obj){
             state.toolbar.obj = obj
         },
@@ -351,7 +359,11 @@ var state = {
             var cursor = state.document.cursor.obj
             cursor.updateVisibility(!imeStatus)
         },
-        addToParaRun: function(payload){
+        addTextToParaRun: function(payload){
+            if(!state.getters.cursorInlineBlock()){
+                return
+            }
+
             let ib = state.document.cursor.inlineBlock
             let ci = state.getters.cursorBodyIndex()
             let body = ci.body
@@ -404,6 +416,47 @@ var state = {
                 state.mutations._updateCursor(body, paraIndex, front ? runIndex : runIndex+1, Math.max(text.length - 1, 0), false)
             }
             
+        },
+        addImageToParaRun: function(payload){
+            if(!state.getters.cursorInlineBlock()){
+                return
+            }
+
+            let ib = state.document.cursor.inlineBlock
+            let ci = state.getters.cursorBodyIndex()
+            let body = ci.body
+            let paraIndex = ci.paraIndex
+            let runIndex = ci.runIndex
+            let startIndex = ci.startIndex
+            let front = state.document.cursor.front
+            
+            let image = payload.image
+            let imageStyle = payload.imageStyle
+
+            // update run
+            if(ib.type == 'text'){
+                state.mutations._spliceRunImage(body.doc, paraIndex, runIndex, front ? startIndex : startIndex + 1, image, imageStyle)
+            }else if(ib.type == 'image'){
+                state.mutations._addRunImageAfter(body.doc, paraIndex, front ? runIndex : runIndex + 1, image, imageStyle)
+            }
+
+            // get last position bottom
+            let lastPosBottom = state.mutations._getParaLastPosBottom(body, paraIndex)
+
+            // update document paragraph
+            lastPosBottom = state.mutations._updatePara(body, paraIndex, lastPosBottom)
+
+            // adjust following spacing
+            lastPosBottom = state.mutations._adjustBodyPtFollowingSpacing(body, paraIndex+1, lastPosBottom)
+
+            // adjust parent following spacing
+            lastPosBottom = state.mutations._adjustBodyParentFollowingSpacing(body, lastPosBottom)
+            
+            // update page background
+            state.mutations._updatePageBackground(lastPosBottom)
+
+            // update cursor
+            state.mutations._updateCursor(body, paraIndex, runIndex+1, 0, false)
         },
         deleteFromParaRun: function(){
             let ci = state.getters.cursorBodyIndex()
@@ -922,6 +975,15 @@ var state = {
 
             bodyDoc.pts[paraIndex].runs.splice(runIndex, 0, r)
         },
+        _addRunImageAfter(bodyDoc, paraIndex, runIndex, image, imageStyle){
+            let r = {
+                type: 'image',
+                image: image,
+                imageStyle: imageStyle,
+            }
+
+            bodyDoc.pts[paraIndex].runs.splice(runIndex, 0, r)
+        },
         _spliceRunText(bodyDoc, paraIndex, runIndex, startIndex, text, textStyle){
             let run = bodyDoc.pts[paraIndex].runs[runIndex]
             let leftText = run.text.substr(0, startIndex)
@@ -959,6 +1021,30 @@ var state = {
                 run.text = leftText + text + rightText
 
                 return false
+            }
+        },
+        _spliceRunImage(bodyDoc, paraIndex, runIndex, startIndex, image, imageStyle){
+            let run = bodyDoc.pts[paraIndex].runs[runIndex]
+            let leftText = run.text.substr(0, startIndex)
+            let rightText = run.text.substr(startIndex)
+            let oldTextStyle = run.textStyle
+            
+            run.text = leftText
+    
+            let newRun = {
+                type: 'image',
+                image: image,
+                imageStyle: imageStyle,
+            }
+            bodyDoc.pts[paraIndex].runs.splice(runIndex+1, 0, newRun)
+
+            if(rightText){
+                let rightRun = {
+                    type: 'text',
+                    text: rightText,
+                    textStyle: oldTextStyle,
+                }
+                bodyDoc.pts[paraIndex].runs.splice(runIndex+2, 0, rightRun)
             }
         },
         _updatePara(body, paraIndex, lastPosBottom){

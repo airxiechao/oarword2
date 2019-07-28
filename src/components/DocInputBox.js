@@ -54,7 +54,7 @@ class DocInputBox{
     inputHandler(e){
         if(!this.imeStatus){
             if(this.el.textContent != ''){
-                state.mutations.addToParaRun({
+                state.mutations.addTextToParaRun({
                     text: this.el.textContent,
                     textStyle: state.getters.cloneToolbarTextStyle(),
                 })
@@ -168,7 +168,7 @@ class DocInputBox{
             state.mutations.setImeStatus(this.imeStatus)
 
         } else if(e.type == 'endIme' ) {
-            state.mutations.addToParaRun({
+            state.mutations.addTextToParaRun({
                 text: this.el.textContent,
                 textStyle: state.getters.cloneToolbarTextStyle(),
             })

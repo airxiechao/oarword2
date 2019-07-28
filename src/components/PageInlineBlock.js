@@ -25,7 +25,7 @@ class PageInlineBlock{
                 t
             ])
 
-            window.goog.events.listen(this.el, window.goog.events.EventType.CLICK, this.clickTextHandler.bind(this));
+            //window.goog.events.listen(this.el, window.goog.events.EventType.CLICK, this.clickTextHandler.bind(this));
         }else if(this.ib.type == 'image'){
             let image = this.ib.image
             let imageStyle = this.ib.imageStyle
@@ -53,7 +53,7 @@ class PageInlineBlock{
                 img
             ])
 
-            window.goog.events.listen(this.el, window.goog.events.EventType.CLICK, this.clickImageHandler.bind(this));
+            //window.goog.events.listen(this.el, window.goog.events.EventType.CLICK, this.clickImageHandler.bind(this));
         }
         
 
@@ -71,7 +71,7 @@ class PageInlineBlock{
             let t = this.ib.text.substr(0, i)
             let wh = measureFontTextWH(t, this.ib.textStyle)
 
-            if(wh.w > pointLeft){
+            if(wh.w >= pointLeft){
                 let cw = wh.w - lastw
 
                 if(pointLeft < lastw + cw / 2){

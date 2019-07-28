@@ -13,10 +13,12 @@ export default {
         toolbar.mounted()
 
         // add doc
-        var doc = new Document(state.document.body);
-                               
+        var doc = new Document(state.document.body);   
         window.goog.dom.appendChild(this.$el, doc.render())
         doc.resizeHandler()
+
+        // set cursor
+        state.mutations.resetCursorInlineBlock()
     },
     render: function(createElement){
         var app = createElement('div', {

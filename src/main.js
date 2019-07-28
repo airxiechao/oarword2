@@ -42,7 +42,7 @@ var doc = {
                     textStyle: {
                         fontFamily: '宋体',
                         fontSize: 24,
-                        color: '#f00',
+                        color: '#fff',
                         backgroundColor: '#00f',
                         fontWeight: 'bold',
                         fontStyle: 'italic',
@@ -52,7 +52,7 @@ var doc = {
                 },
                 {
                     type: 'image',
-                    image: 'http://www.xinhuanet.com/photo/2019-05/31/1124569534_15593006741411n.jpg',
+                    image: 'https://tse2-mm.cn.bing.net/th?id=OIP.BA5H2AVw2JS8syKy1LIOmwHaEK&w=300&h=168&c=7&o=5&dpr=1.25&pid=1.7',
                     imageStyle: {
                         width: 100,
                         height: 50,
@@ -80,7 +80,7 @@ var doc = {
                 },
                 {
                     type: 'image',
-                    image: 'http://www.xinhuanet.com/photo/2019-05/31/1124569534_15593006741411n.jpg',
+                    image: 'https://tse3-mm.cn.bing.net/th?id=OIP.kQG710SGTOHsEfVsVqlx8gHaEK&w=295&h=165&c=7&o=5&dpr=1.25&pid=1.7',
                     imageStyle: {
                         width: 100,
                         height: 50,
@@ -88,10 +88,10 @@ var doc = {
                 },
                 {
                     type: 'image',
-                    image: 'http://www.xinhuanet.com/photo/2019-05/31/1124569534_15593006741411n.jpg',
+                    image: 'https://tse1-mm.cn.bing.net/th?id=OIP.lWx94unPoPI_x1R09pYM6wHaJ8&w=128&h=170&c=7&o=5&dpr=1.25&pid=1.7',
                     imageStyle: {
-                        width: 100,
-                        height: 50,
+                        width: 80,
+                        height: 100,
                     },
                 },
                 {

@@ -1,4 +1,7 @@
 import { createElement } from '../utils/renderer'
+import { measureImageWH } from '../utils/measure'
+import state from '../utils/state'
+
 import interact from 'interactjs'
 
 class InsertImageDialog{
@@ -254,6 +257,7 @@ class InsertImageDialog{
                     this.showMessage('请选择图片文件！')
                 }else{
                     this.clearMessage()
+                    this.close()
                 }
                 break;
             case 'url':
@@ -261,7 +265,18 @@ class InsertImageDialog{
                 if(!url){
                     this.showMessage('请输入图片网址！')
                 }else{
+                    measureImageWH(url, function(w, h){
+                        state.mutations.addImageToParaRun({
+                            image: url,
+                            imageStyle: {
+                                width: w,
+                                height: h,
+                            },
+                        })
+                    })
+
                     this.clearMessage()
+                    this.close()
                 }
                 break;
         }

@@ -22,6 +22,29 @@ function measureFontTextWH(text, textStyle){
     return {w:w, h:h};
 }
 
+function measureImageWH(image, f_success, f_error){
+    let dummy = document.createElement('img');
+    dummy.style.visibility = 'hidden';
+    dummy.style.display = 'inline-block';
+    dummy.src = image
+    dummy.onload = function(){
+        let w = dummy.offsetWidth;
+        let h = dummy.offsetHeight;
+        document.body.removeChild(dummy);
+
+        if(f_success){
+            f_success(w, h)
+        }
+    }
+    dummy.onerror = function(){
+        if(f_error){
+            f_error(w, h)
+        }
+    }
+
+    document.body.appendChild(dummy)
+}
+
 function measureElePageXY(ele){
     var x = 0, y = 0;
 
@@ -186,5 +209,5 @@ function getWidthFontTextPos(text, textStyle, width){
     }
 }
 
-export { measureFontTextWH, measureElePageXY, measureEleDocXY, getCursorPos, getPageNo, getPageLeftHeight,
+export { measureFontTextWH, measureImageWH, measureElePageXY, measureEleDocXY, getCursorPos, getPageNo, getPageLeftHeight,
          getWidthFontTextPos }
