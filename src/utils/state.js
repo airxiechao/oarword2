@@ -632,7 +632,7 @@ var state = {
             }else if(runIndex == runLen - 1 && startIndex == contentLen - 1 && !front){
                 // add paragraph after
                 let lastPosBottom = state.mutations._addEmptyParaAfter(body, paraIndex)
-
+                
                 // update page background
                 state.mutations._updatePageBackground(lastPosBottom)
 
@@ -886,16 +886,15 @@ var state = {
 
             // skip previous page paragraphs
             var lastPosBottom = body.doc.grid.marginTop
-            for(let i = 0 ; i < paraIndex; ++i){
+            for(let i = 0 ; i < paraIndex+1; ++i){
                 let pt = body.pts[i]
                 if(pt.type == 'para'){
                     lastPosBottom += body.pts[i].paraHeight
                 }else if(pt.type == 'table'){
                     lastPosBottom += body.pts[i].tableHeight
                 }
-                
             }
-
+            
             // create new empty paragraph
             var emptyPara = {
                 runs: [
@@ -907,7 +906,7 @@ var state = {
                 ],
                 type: 'para',
             }
-
+            
             body.doc.pts.splice(paraIndex+1, 0, emptyPara)
 
             var oldPara = body.pts[paraIndex]
@@ -923,12 +922,11 @@ var state = {
             window.goog.dom.insertSiblingAfter(newPagePara.render(), oldPagePara)
 
             // adjust following page paragraph spacing
-            lastPosBottom += newPara.paraHeight
             lastPosBottom = state.mutations._adjustBodyPtFollowingSpacing(body, paraIndex+1, lastPosBottom)
-
+            
             // adjust parent following spacing
             lastPosBottom = state.mutations._adjustBodyParentFollowingSpacing(body, lastPosBottom)
-
+            
             return lastPosBottom
         },
         _mergePreviousPara(body, paraIndex){
