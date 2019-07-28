@@ -266,14 +266,15 @@ class Toolbar{
         var tableDimensionMenu = new goog.ui.Menu();
         var dimensionPicker = new goog.ui.DimensionPicker();
         tableDimensionMenu.addChild(dimensionPicker, true);
-        /*
+        
         goog.events.listen(dimensionPicker, goog.ui.Component.EventType.ACTION,
             function(e) {
                 var picker = e.target;
                 var size = picker.getValue();
 
-                G.cursor.addTable(size);
-            });*/
+                state.mutations.addTableToBody(size)
+            }
+        );
 
         var insertTableIcon = goog.dom.createDom('div');
         insertTableIcon.style.background = 'url(img/components-toolbar-icons.png) no-repeat -336px -16px';

@@ -1,10 +1,11 @@
 import { measureFontTextWH, getCursorPos, getPageLeftHeight } from './measure'
-import { getPagePara, getPageBody, getPreviousInlineOfBody, 
+import { getPagePara, getPageTable, getPageBody, getPreviousInlineOfBody, 
     getNextInlineOfBody, getPreviousLineOfBody, getNextLineOfBody, getInlineBlockBodyIndex,
-    isTextStyleEqual } from './convert'
+    isTextStyleEqual, defaultTextStyle } from './convert'
 import { getPageNo, measureEleDocXY } from '../utils/measure'
 
 import PageParagraph from '../components/PageParagraph'
+import PageTable from '../components/PageTable'
 import PageBackground from '../components/PageBackground'
 
 var state = {
@@ -385,13 +386,13 @@ var state = {
 
             // get last position bottom
             let lastPosBottom = state.mutations._getParaLastPosBottom(body, paraIndex)
-
+            
             // update document paragraph
             lastPosBottom = state.mutations._updatePara(body, paraIndex, lastPosBottom)
-
+            
             // adjust following spacing
             lastPosBottom = state.mutations._adjustBodyPtFollowingSpacing(body, paraIndex+1, lastPosBottom)
-
+            
             // adjust parent following spacing
             lastPosBottom = state.mutations._adjustBodyParentFollowingSpacing(body, lastPosBottom)
             
@@ -457,6 +458,24 @@ var state = {
 
             // update cursor
             state.mutations._updateCursor(body, paraIndex, runIndex+1, 0, false)
+        },
+        addTableToBody: function(payload){
+            let rows = payload.height
+            let cols = payload.width
+
+            state.mutations.splitParaRun()
+
+            let ci = state.getters.cursorBodyIndex()
+            let body = ci.body
+            let paraIndex = ci.paraIndex
+            let lastPosBottom = state.mutations._addTableAfter(body, paraIndex-1, rows, cols)
+
+            // update page background
+            state.mutations._updatePageBackground(lastPosBottom)
+
+            // update cursor
+            body = body.pts[paraIndex].cells[0][0]
+            state.mutations._updateCursor(body, 0, 0, 0, true)
         },
         deleteFromParaRun: function(){
             let ci = state.getters.cursorBodyIndex()
@@ -929,6 +948,75 @@ var state = {
             
             return lastPosBottom
         },
+        _addTableAfter(body, paraIndex, rows, cols){
+
+            // skip previous page paragraphs
+            var lastPosBottom = body.doc.grid.marginTop
+            for(let i = 0 ; i < paraIndex+1; ++i){
+                let pt = body.pts[i]
+                if(pt.type == 'para'){
+                    lastPosBottom += body.pts[i].paraHeight
+                }else if(pt.type == 'table'){
+                    lastPosBottom += body.pts[i].tableHeight
+                }
+            }
+            
+            // create new table
+            var table = {
+                type: 'table',
+                grid: [],
+                cells: [],
+            }
+            var cw = (body.doc.grid.pageWidth-body.doc.grid.marginLeft-body.doc.grid.marginRight)/cols
+            for(let i = 0; i < cols; ++i){
+                table.grid.push(cw)
+            }
+            for(let i = 0; i < rows; ++i){
+                let row = []
+                table.cells.push(row)
+                for(let j = 0; j < cols; ++j){
+                    let col = {
+                        type: 'body',
+                        rowspan: 1,
+                        colspan: 1,
+                        grid: {},
+                        pts: [
+                            {
+                                type: 'para',
+                                runs: [
+                                    {
+                                        type: 'text',
+                                        text: '',
+                                        textStyle: defaultTextStyle,
+                                    },
+                                ],
+                            },
+                        ],
+                    }
+                    row.push(col)
+                }
+            }
+            
+            body.doc.pts.splice(paraIndex+1, 0, table)
+
+            var oldPara = body.pts[paraIndex]
+            var newTable = getPageTable(body.doc, body.doc.pts[paraIndex+1], lastPosBottom)
+            newTable.parent = body
+            body.pts.splice(paraIndex+1, 0, newTable)
+
+            var newPageTable = new PageTable(body.doc.grid.marginLeft, newTable)
+            var oldPagePara = oldPara.obj.el
+            newTable.obj = newPageTable
+            window.goog.dom.insertSiblingAfter(newPageTable.render(), oldPagePara)
+
+            // adjust following page paragraph spacing
+            lastPosBottom = state.mutations._adjustBodyPtFollowingSpacing(body, paraIndex+1, lastPosBottom)
+            
+            // adjust parent following spacing
+            lastPosBottom = state.mutations._adjustBodyParentFollowingSpacing(body, lastPosBottom)
+            
+            return lastPosBottom
+        },
         _mergePreviousPara(body, paraIndex){
             let bodyDoc = body.doc
             if(paraIndex > 0){
@@ -1186,7 +1274,7 @@ var state = {
                             }
                         }
                     }
-
+                    
                     if(rowIndex >= 0){
                         let tableParent = bodyParent.parent
                         tableIndex = tableParent.pts.indexOf(bodyParent)
@@ -1198,6 +1286,8 @@ var state = {
                     if(tableIndex >= 0){
                         lastPosBottom = state.mutations._adjustBodyPtFollowingSpacing(bodyParent, tableIndex+1, lastPosBottom)
                     }
+                    
+                    body = bodyParent
                 }
 
                 bodyParent = bodyParent.parent

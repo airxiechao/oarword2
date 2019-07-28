@@ -192,7 +192,7 @@ class InsertImageDialog{
             },
         }, [dialogTitle, dialogMessageBar, dialogBody, dialogToolbar])
         let dialogX0, dialogY0
-        interact(dialog).draggable({
+        interact(dialogTitle).draggable({
             onstart(event){
                 dialogX0 = dialog.offsetLeft
                 dialogY0 = dialog.offsetTop

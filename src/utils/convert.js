@@ -421,7 +421,18 @@ function buildTextStyleCss(textStyle){
     return styleCss
 }
 
+const defaultTextStyle = {
+    fontFamily: '宋体',
+    fontSize: 14,
+    color: '#000',
+    backgroundColor: 'unset',
+    fontWeight: 'unset',
+    fontStyle: 'unset',
+    textDecoration: 'unset',
+    verticalAlign: 'unset',
+}
+
 export { paraRunsToLines, getLineInlineBlocksAndHeightFromQueue, getPageLeftHeight, 
          getPagePara, getPageBody, getPreviousInlineOfBody, getNextInlineOfBody,
          getPreviousLineOfBody, getNextLineOfBody, getInlineBlockBodyIndex, getPageTable,
-         isTextStyleEqual, buildTextStyleCss }
+         isTextStyleEqual, buildTextStyleCss, defaultTextStyle }
