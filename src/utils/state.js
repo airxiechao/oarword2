@@ -460,6 +460,10 @@ var state = {
             state.mutations._updateCursor(body, paraIndex, runIndex+1, 0, false)
         },
         addTableToBody: function(payload){
+            if(!state.getters.cursorInlineBlock()){
+                return
+            }
+            
             let rows = payload.height
             let cols = payload.width
 
@@ -1286,7 +1290,7 @@ var state = {
                     if(tableIndex >= 0){
                         lastPosBottom = state.mutations._adjustBodyPtFollowingSpacing(bodyParent, tableIndex+1, lastPosBottom)
                     }
-                    
+
                     body = bodyParent
                 }
 
