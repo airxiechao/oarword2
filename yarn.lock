@@ -667,6 +667,80 @@
     lodash "^4.17.11"
     to-fast-properties "^2.0.0"
 
+"@interactjs/actions@1.5.4":
+  version "1.5.4"
+  resolved "https://registry.yarnpkg.com/@interactjs/actions/-/actions-1.5.4.tgz#a577c9b077ceaa1d28960f605cf7471c2e345469"
+  integrity sha512-opzSOab2xLz/F5ghU40WCJLH8O7ohRykRnsnnNrJFk0hUTFyd9kQH58p5m3v/RHkTI7KwYzeWbm5XDF6hfzJKA==
+
+"@interactjs/auto-scroll@1.5.4":
+  version "1.5.4"
+  resolved "https://registry.yarnpkg.com/@interactjs/auto-scroll/-/auto-scroll-1.5.4.tgz#b2f9adb4b6fc8fe01c814a381cbe11b5a264c817"
+  integrity sha512-rSiMwjpEjVlMENThVf8a6hK2jYNdDRsgEkNbtCxv+2HrBaiDA/Bmyphyg7bGMUR4A17HObi5tAZTfxV8UZHJcQ==
+
+"@interactjs/auto-start@1.5.4":
+  version "1.5.4"
+  resolved "https://registry.yarnpkg.com/@interactjs/auto-start/-/auto-start-1.5.4.tgz#97e4bb6a43a27d4e73f8f0c281ef888eca78f8a4"
+  integrity sha512-eJOkVK13liwh59cFhG2VfxU2HIDmPb8FxKwHRoqdMJwxVzNuDxeSsFnLyrKPhB+3lFRAAxRjrPQ3LKulvMPfiw==
+
+"@interactjs/core@1.5.4":
+  version "1.5.4"
+  resolved "https://registry.yarnpkg.com/@interactjs/core/-/core-1.5.4.tgz#6315ad91f3500b4a1fbbaac511c4cdc28a7dd6f2"
+  integrity sha512-4ZXdh1SESBXx9Y/NFD3CTpHffnJ2meVhyLsjL13C9dZrOVbStI5mRgN8GaERoj0M3pK7SPbw29UpHANqK5Qhcw==
+
+"@interactjs/dev-tools@1.5.4":
+  version "1.5.4"
+  resolved "https://registry.yarnpkg.com/@interactjs/dev-tools/-/dev-tools-1.5.4.tgz#0eba63a63a7f9204774069eed6c1376a15b46bdf"
+  integrity sha512-sPPrPFDGoxAM9s4+4M1frvg4Mf1f6gYJg6qK3yStqCxyvHu09tSilu4UwY9ukKavOGLoH5IqAY9TxbjLayQ1Wg==
+  dependencies:
+    "@interactjs/utils" "1.5.4"
+
+"@interactjs/inertia@1.5.4":
+  version "1.5.4"
+  resolved "https://registry.yarnpkg.com/@interactjs/inertia/-/inertia-1.5.4.tgz#0934798c05f7876b7ecdc1ea39c0ed4d1f2bf140"
+  integrity sha512-HRdSGbkTwBKKf2RKGrHLfs7K4bslCZAdzTctQiCmxzmDxveBdPTDxeIKLaGGv4GA33xJsen4e9rOTqukEVKU8w==
+
+"@interactjs/interact@1.5.4":
+  version "1.5.4"
+  resolved "https://registry.yarnpkg.com/@interactjs/interact/-/interact-1.5.4.tgz#9188b97e8565e2f7241ec08a096da986c42d4656"
+  integrity sha512-b0Yf30J6uPO78DOuh882zlP/7jVQnwZiUSfdq3uuUYmy2LQJoOuv+F+ygEeXMTQk0kK6aVHqJPACIojRj/vyNg==
+
+"@interactjs/modifiers@1.5.4":
+  version "1.5.4"
+  resolved "https://registry.yarnpkg.com/@interactjs/modifiers/-/modifiers-1.5.4.tgz#a48234b0809bd208c19e0d0c142ae4633f2ed550"
+  integrity sha512-skQrQl2Yvreza+j5p5LhwwliUkVwpDPR3MNLEh+m7JHv1gJYJnDryjiQsHlaXdwM32p3QRG5JvBtomlTkILzRg==
+
+"@interactjs/pointer-events@1.5.4":
+  version "1.5.4"
+  resolved "https://registry.yarnpkg.com/@interactjs/pointer-events/-/pointer-events-1.5.4.tgz#c1c4ed4b2674ddc9d138d58a4125f58d33dace1a"
+  integrity sha512-SEO/amMaSf5jHOyne9erpQOJJtPLH4nY/zvvonT8BSAs70M1tDUe8nCZxtUqjnaYUMrixW4AJdzV40JYMt1lgg==
+
+"@interactjs/reflow@1.5.4":
+  version "1.5.4"
+  resolved "https://registry.yarnpkg.com/@interactjs/reflow/-/reflow-1.5.4.tgz#a1a2ae50d6c945a28bf1846af493b9ac02950935"
+  integrity sha512-0wJoMfBYOStaaqvPFz0rfkObd/v1EPG4FUJgQC8JZ6JbsHbbpIxU6m6XgDTlAwBSboZ4zqkGs18h+YOfEwvatw==
+
+"@interactjs/types@1.5.4":
+  version "1.5.4"
+  resolved "https://registry.yarnpkg.com/@interactjs/types/-/types-1.5.4.tgz#6eb3fe48a7f680a1e1177c45bd5a65083415e111"
+  integrity sha512-ADnnLE8nd6r+ljRpyLLV2jFV+h1WGGTVbqOAKUjRIBOogHLnVLHJj2kVo3Ctixz1oUbcN6bl+NjwJ8WiD50xLA==
+  dependencies:
+    "@interactjs/actions" "1.5.4"
+    "@interactjs/auto-scroll" "1.5.4"
+    "@interactjs/auto-start" "1.5.4"
+    "@interactjs/core" "1.5.4"
+    "@interactjs/dev-tools" "1.5.4"
+    "@interactjs/inertia" "1.5.4"
+    "@interactjs/interact" "1.5.4"
+    "@interactjs/modifiers" "1.5.4"
+    "@interactjs/pointer-events" "1.5.4"
+    "@interactjs/reflow" "1.5.4"
+    "@interactjs/utils" "1.5.4"
+
+"@interactjs/utils@1.5.4":
+  version "1.5.4"
+  resolved "https://registry.yarnpkg.com/@interactjs/utils/-/utils-1.5.4.tgz#392a03f14274be7288e342959d3bc4d140379f58"
+  integrity sha512-K+aQdl9ipkwxRduZxUMfUHxIqkEq0N62BG5/7FE+bCYXVPTFWcBEkykDGHS/ZN7I53QJJvI/tGsj9sxtaQHD8Q==
+
 "@intervolga/optimize-cssnano-plugin@^1.0.5":
   version "1.0.6"
   resolved "https://registry.npm.taobao.org/@intervolga/optimize-cssnano-plugin/download/@intervolga/optimize-cssnano-plugin-1.0.6.tgz#be7c7846128b88f6a9b1d1261a0ad06eb5c0fdf8"
@@ -4180,6 +4254,13 @@ inquirer@^6.2.2:
     string-width "^2.1.0"
     strip-ansi "^5.1.0"
     through "^2.3.6"
+
+interactjs@^1.5.4:
+  version "1.5.4"
+  resolved "https://registry.yarnpkg.com/interactjs/-/interactjs-1.5.4.tgz#bbe2f71834ea90ee38562fa1ac337f9b1282dd40"
+  integrity sha512-c+7AbYqkMc2D9aaEBch/mPhLb7qyjM/nnVI5jRIXOL+DfznAHeJlNFnHYPIj9jgqIMQ7IBT0ggLrcRI3XBvm9A==
+  dependencies:
+    "@interactjs/types" "1.5.4"
 
 internal-ip@^4.2.0:
   version "4.3.0"

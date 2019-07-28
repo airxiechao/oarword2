@@ -1,9 +1,10 @@
 import { createElement } from '../utils/renderer'
+import interact from 'interactjs'
 
 class InsertImageDialog{
     constructor(){
         this.render()
-        this.imageType = 'upload'
+        this.imageType = 'url'
     }
 
     render(){
@@ -33,8 +34,9 @@ class InsertImageDialog{
             class: 'dialog-messagebar',
             style: {
                 display: 'none',
-                color: 'rgb(255, 255, 255)',
-                backgroundColor: 'rgb(235, 130, 87)',
+                color: '#000',
+                backgroundColor: '#fff1f0',
+                borderBottom: '1px solid #ffa39e',
                 fontSize: '12px',
                 padding: '4px 8px',
             }
@@ -46,7 +48,6 @@ class InsertImageDialog{
             class: 'dialog-title',
             style: {
                 color: '#444',
-                cursor: 'default',
                 fontSize: '13px',
                 fontFamily: '黑体',
                 fontWeight: 'bold',
@@ -61,7 +62,6 @@ class InsertImageDialog{
                 type: 'radio',
                 name: 'image-type',
                 id: 'image-type-upload',
-                checked: 'true',
             }
         })
         goog.events.listen(uploadType,
@@ -76,7 +76,8 @@ class InsertImageDialog{
                 type: 'radio',
                 name: 'image-type',
                 id: 'image-type-url',
-            }
+                checked: 'true',
+            },
         })
         goog.events.listen(urlType,
             goog.events.EventType.CLICK,
@@ -98,6 +99,7 @@ class InsertImageDialog{
         let imageUpload = this.imageUpload = createElement('div', {
             style: {
                 padding: '8px',
+                display: 'none',
             }
         }, [
             createElement('form', {
@@ -116,12 +118,12 @@ class InsertImageDialog{
                 fontSize: 'inherit',
                 outline: 'none',
                 border: '1px solid #aaa',
+                width: '400px',
             }
         })
         let imageUrl = this.imageUrl = createElement('div', {
             style: {
                 padding: '8px',
-                display: 'none',
                 fontSize: 'inherit',
             }
         }, [
@@ -134,6 +136,7 @@ class InsertImageDialog{
             style: {
                 padding: '8px',
                 fontSize: '12px',
+                height: '55px',
             }
         }, [imageType, imageUpload, imageUrl])
 
@@ -185,6 +188,17 @@ class InsertImageDialog{
                 transform: 'translate(-50%, -50%)',
             },
         }, [dialogTitle, dialogMessageBar, dialogBody, dialogToolbar])
+        let dialogX0, dialogY0
+        interact(dialog).draggable({
+            onstart(event){
+                dialogX0 = dialog.offsetLeft
+                dialogY0 = dialog.offsetTop
+            },
+            onmove(event) {
+                dialog.style.left = (dialogX0 + (event.pageX - event.x0)) + 'px'
+                dialog.style.top = (dialogY0 + (event.pageY - event.y0)) + 'px'
+              }
+        })
 
         let dialogWrap = createElement('div', {
             class: 'insert-image-dialog-background',
@@ -196,6 +210,7 @@ class InsertImageDialog{
                 left: 0,
                 background: 'rgba(204, 204, 204, 0.2)',
                 zIndex: 9,
+                overflow: 'hidden',
             },
         }, [dialog])
 
