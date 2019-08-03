@@ -56,10 +56,12 @@ class PageLine{
             let ib = this.ls.inlineBlocks[this.ls.inlineBlocks.length-1]
             
             if(ib.type == 'text'){
+                let si = Math.max(0, ib.text.length-1)
+                let front = ib.text.length == 0 ? true : false;
                 state.mutations.setCursorInlineBlock({
                         inlineBlock: ib,
-                        inlineStartIndex: ib.text.length-1,
-                        front: false,
+                        inlineStartIndex: si,
+                        front: front,
                     }
                 )    
             }else if(ib.type == 'image'){
