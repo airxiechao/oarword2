@@ -45,6 +45,19 @@ var state = {
                 startIndex: bi.startIndex + state.document.cursor.inlineStartIndex,
             }
         },
+        cursorTable: function(){
+            let ci = state.getters.cursorInlineBlock()
+            if(ci){
+                let parent = ci.parent.parent.parent.parent
+                if(parent){
+                    if(parent.type == 'table'){
+                        return parent
+                    }
+                }
+            }
+
+            return null
+        },
         cursorPos: function(){
             let cursorInlineBlock = state.getters.cursorInlineBlock()
             let pos = getCursorPos(cursorInlineBlock, state.document.cursor.inlineStartIndex, state.document.cursor.front)
@@ -481,6 +494,20 @@ var state = {
             body = body.pts[paraIndex].cells[0][0]
             state.mutations._updateCursor(body, 0, 0, 0, true)
         },
+        deleteTableFromBody: function(){
+            let table = state.getters.cursorTable()
+            if(table){
+                let body = table.parent
+                let ptIndex = body.pts.indexOf(table)
+                let lastPosBottom = state.mutations._deletePt(body, ptIndex)
+
+                // update page background
+                state.mutations._updatePageBackground(lastPosBottom)
+
+                // update cursor
+                state.mutations._updateCursor(body, ptIndex, 0, 0, true)
+            }
+        },
         deleteFromParaRun: function(){
             let ci = state.getters.cursorBodyIndex()
             let ib = state.document.cursor.inlineBlock
@@ -670,6 +697,21 @@ var state = {
                 // update cursor
                 state.mutations._updateCursor(body, paraIndex+1, 0, 0, true)
             }
+        },
+        _deletePt(body, ptIndex){
+            let lastPosBottom = state.mutations._getParaLastPosBottom(body, ptIndex)
+
+            body.pts[ptIndex].obj.el.remove()
+            body.doc.pts.splice(ptIndex, 1)
+            body.pts.splice(ptIndex, 1)
+
+            // adjust following page paragraph spacing
+            lastPosBottom = state.mutations._adjustBodyPtFollowingSpacing(body, ptIndex, lastPosBottom)
+                                        
+            // adjust parent following spacing
+            lastPosBottom = state.mutations._adjustBodyParentFollowingSpacing(body, lastPosBottom)
+
+            return lastPosBottom
         },
         _getParaLastPosBottom(body, paraIndex){
             let lastPosBottom = 0
