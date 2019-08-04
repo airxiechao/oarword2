@@ -447,6 +447,22 @@ var state = {
             let image = payload.image
             let imageStyle = payload.imageStyle
 
+            // adjust image widht and height
+            let maxWidth = body.doc.grid.pageWidth - body.doc.grid.marginLeft - body.doc.grid.marginRight
+            let maxHeight = body.doc.grid.pageHeight - body.doc.grid.marginTop- body.doc.grid.marginBottom
+
+            if(imageStyle.width > maxWidth * .9){
+                let oldWidth = imageStyle.width
+                imageStyle.width = maxWidth * .9;
+                imageStyle.height = ( imageStyle.width  / oldWidth) * imageStyle.height
+            }
+
+            if(imageStyle.height > maxHeight * .9){
+                let oldHeight = imageStyle.height
+                imageStyle.height = maxHeight * .9;
+                imageStyle.width = ( imageStyle.height  / oldHeight) * imageStyle.width
+            }
+
             // update run
             if(ib.type == 'text'){
                 state.mutations._spliceRunImage(body.doc, paraIndex, runIndex, front ? startIndex : startIndex + 1, image, imageStyle)
@@ -456,13 +472,13 @@ var state = {
 
             // get last position bottom
             let lastPosBottom = state.mutations._getParaLastPosBottom(body, paraIndex)
-
+           
             // update document paragraph
             lastPosBottom = state.mutations._updatePara(body, paraIndex, lastPosBottom)
-
+           
             // adjust following spacing
             lastPosBottom = state.mutations._adjustBodyPtFollowingSpacing(body, paraIndex+1, lastPosBottom)
-
+            
             // adjust parent following spacing
             lastPosBottom = state.mutations._adjustBodyParentFollowingSpacing(body, lastPosBottom)
             
@@ -1346,14 +1362,16 @@ var state = {
             let pageNo = getPageNo(lastPosBottom, bodyDoc.grid.pageHeight, bodyDoc.grid.pageSpacingHeight)
             let bgWrap = document.getElementsByClassName('page-bgs-wrap')[0]
             let oldBgs = document.getElementsByClassName('page-bg')
-            if(pageNo > oldBgs.length){
-                for(let i = 0; i < pageNo - oldBgs.length; ++i){
+            let OldBgLen = oldBgs.length
+
+            if(pageNo > OldBgLen){
+                for(let i = 0; i < pageNo - OldBgLen; ++i){
                     var pageBg = new PageBackground(bodyDoc.grid.pageWidth, bodyDoc.grid.pageHeight, bodyDoc.grid.pageSpacingHeight, bodyDoc.grid.marginTop, 
-                        bodyDoc.grid.marginRight, bodyDoc.grid.marginBottom, bodyDoc.grid.marginLeft, oldBgs.length+i)
+                        bodyDoc.grid.marginRight, bodyDoc.grid.marginBottom, bodyDoc.grid.marginLeft, OldBgLen+i)
                     window.goog.dom.appendChild(bgWrap, pageBg.render())
                 }
-            }else if(pageNo < oldBgs.length){
-                for(let i = oldBgs.length; i > pageNo; --i){
+            }else if(pageNo < OldBgLen){
+                for(let i = OldBgLen; i > pageNo; --i){
                     oldBgs[i-1].remove()
                 }
             }
