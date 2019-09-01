@@ -8,12 +8,12 @@ export default {
     name: 'app',
     mounted: function(){
         // add toolbar
-        var toolbar = new Toolbar()
+        let toolbar = new Toolbar()
         window.goog.dom.appendChild(this.$el, toolbar.render())
         toolbar.mounted()
 
         // add doc
-        var doc = new Document(state.document.body);   
+        let doc = new Document(state.document.body);   
         window.goog.dom.appendChild(this.$el, doc.render())
         doc.resizeHandler()
 
@@ -21,7 +21,7 @@ export default {
         state.mutations.resetCursorInlineBlock()
     },
     render: function(createElement){
-        var app = createElement('div', {
+        let app = createElement('div', {
             class: 'app',
             style: {
                 position: 'relative',

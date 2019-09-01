@@ -2,6 +2,7 @@ import PageBackground from './PageBackground'
 import PageBody from './PageBody'
 import DocCursor from './DocCursor'
 import DocInputBox from './DocInputBox'
+import DocImageResizer from './DocImageResizer'
 
 import { getPageNo } from '../utils/measure'
 import { createElement } from '../utils/renderer'
@@ -55,13 +56,16 @@ class Document{
         // render inputbox
         var docInputBox = new DocInputBox()
 
+        // render image resizer
+        var docImageResizer = new DocImageResizer()
+
         this.docEl = createElement('div', {
             class: 'doc',
             style: {
                 position: 'absolute',
                 marginTop: this.pageSpacingHeight+'px',
             },
-        }, [ pageBgsWrap, pageBody.render(), docInputBox.render(), docCursor.render() ])
+        }, [ pageBgsWrap, pageBody.render(), docInputBox.render(), docImageResizer.render(), docCursor.render() ])
 
         this.el = createElement('div', {
             class: 'doc-wrap',

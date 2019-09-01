@@ -1,6 +1,6 @@
-import { createElement } from '../utils/renderer'
-import { buildTextStyleCss } from '../utils/convert'
 import { measureFontTextWH, measureElePageXY, measureEleDocXY } from '../utils/measure.js'
+import PageInlineBlockImage from './PageInlineBlockImage'
+import PageInlineBlockText from './PageInineBlockText'
 
 import state from '../utils/state'
 
@@ -11,47 +11,13 @@ class PageInlineBlock{
 
     render(){
         if(this.ib.type == 'text'){
-            let text = this.ib.text
-            let textStyle = this.ib.textStyle
-    
-            let t = window.goog.dom.createTextNode(text)
-            let textStyleCss = buildTextStyleCss(textStyle)
-            textStyleCss['display'] = 'inline-block'
-            textStyleCss['height'] = this.ib.inlineHeight + 'px'
-            this.el = createElement('div', {
-                class: 'page-inline-block-text',
-                style: textStyleCss
-            }, [
-                t
-            ])
+            let img = new PageInlineBlockText(this.ib)
+            this.el = img.render()
 
             //window.goog.events.listen(this.el, window.goog.events.EventType.CLICK, this.clickTextHandler.bind(this));
         }else if(this.ib.type == 'image'){
-            let image = this.ib.image
-            let imageStyle = this.ib.imageStyle
-
-            let img = createElement('img', {
-                attrs: {
-                    src: image,
-                },
-                style: {
-                    display: 'inline-block',
-                    width: imageStyle.width + 'px',
-                    height: imageStyle.height + 'px',
-                    cursor: 'text',
-                }
-            })
-
-            this.el = createElement('div', {
-                class: 'page-inline-block-image',
-                style: {
-                    display: 'inline-block',
-                    height: this.ib.inlineHeight + 'px',
-                    verticalAlign: 'bottom',
-                }
-            }, [
-                img
-            ])
+            let img = new PageInlineBlockImage(this.ib)
+            this.el = img.render()
 
             //window.goog.events.listen(this.el, window.goog.events.EventType.CLICK, this.clickImageHandler.bind(this));
         }

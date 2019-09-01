@@ -15,6 +15,7 @@ var state = {
             inlineStartIndex: -1,
             front: false,
         },
+        imageResizer: {},
         inputBox: {},
         body: null,
     },
@@ -76,6 +77,19 @@ var state = {
         },
         setInputBoxObj: function(obj){
             state.document.inputBox.obj = obj
+        },
+        setImageResizerObj: function(obj){
+            state.document.imageResizer.obj = obj
+        },
+        showImageResizer: function(targetObj){
+            state.document.imageResizer.obj.updateTarget(targetObj)
+            state.document.imageResizer.obj.show()
+        },
+        hideImageResizer: function(){
+            state.document.imageResizer.obj.hide()
+        },
+        updateImageResizer: function(){
+            state.document.imageResizer.obj.updateTarget()
         },
         setDocument: function(doc){
             var body = getPageBody(doc, doc.grid.marginTop)
@@ -429,6 +443,9 @@ var state = {
             }else if(ib.type == 'image'){
                 state.mutations._updateCursor(body, paraIndex, front ? runIndex : runIndex+1, Math.max(text.length - 1, 0), false)
             }
+
+            // update image resizer
+            state.mutations.updateImageResizer()
             
         },
         addImageToParaRun: function(payload){
@@ -487,6 +504,44 @@ var state = {
 
             // update cursor
             state.mutations._updateCursor(body, paraIndex, runIndex+1, 0, false)
+
+            // update image resizer
+            state.mutations.updateImageResizer()
+        },
+        updateImageStyle: function(payload){
+            
+            let ib = payload.ib
+            let imageStyle = payload.imageStyle
+
+            let bi = getInlineBlockBodyIndex(ib)
+            let body = bi.body
+            let paraIndex = bi.paraIndex
+            let runIndex = bi.runIndex
+
+            // update run
+            state.mutations._updateRunImageStyle(body.doc, paraIndex, runIndex, imageStyle)
+
+            // get last position bottom
+            let lastPosBottom = state.mutations._getParaLastPosBottom(body, paraIndex)
+           
+            // update document paragraph
+            lastPosBottom = state.mutations._updatePara(body, paraIndex, lastPosBottom)
+           
+            // adjust following spacing
+            lastPosBottom = state.mutations._adjustBodyPtFollowingSpacing(body, paraIndex+1, lastPosBottom)
+            
+            // adjust parent following spacing
+            lastPosBottom = state.mutations._adjustBodyParentFollowingSpacing(body, lastPosBottom)
+            
+            // update page background
+            state.mutations._updatePageBackground(lastPosBottom)
+
+            // update cursor
+            state.mutations._updateCursor(body, paraIndex, runIndex, 0, false)
+
+            // update image resizer
+            let cib = state.document.cursor.inlineBlock
+            state.mutations.showImageResizer(cib.obj)
         },
         addTableToBody: function(payload){
             if(!state.getters.cursorInlineBlock()){
@@ -509,6 +564,9 @@ var state = {
             // update cursor
             body = body.pts[paraIndex].cells[0][0]
             state.mutations._updateCursor(body, 0, 0, 0, true)
+
+            // update image resizer
+            state.mutations.updateImageResizer()
         },
         deleteTableFromBody: function(){
             let table = state.getters.cursorTable()
@@ -522,6 +580,9 @@ var state = {
 
                 // update cursor
                 state.mutations._updateCursor(body, ptIndex, 0, 0, true)
+
+                // update image resizer
+                state.mutations.updateImageResizer()
             }
         },
         deleteFromParaRun: function(){
@@ -674,6 +735,9 @@ var state = {
 
             // update cursor
             state.mutations._updateCursor(body, paraIndex, runIndex, startIndex, front)
+
+            // update image resizer
+            state.mutations.updateImageResizer()
         },
         splitParaRun: function(){
             let ci = state.getters.cursorBodyIndex()
@@ -695,6 +759,9 @@ var state = {
 
                 // update cursor
                 state.mutations._updateCursor(body, paraIndex+1, 0, 0)
+
+                // update image resizer
+                state.mutations.updateImageResizer()
             }else if(runIndex == runLen - 1 && startIndex == contentLen - 1 && !front){
                 // add paragraph after
                 let lastPosBottom = state.mutations._addEmptyParaAfter(body, paraIndex)
@@ -704,6 +771,9 @@ var state = {
 
                 // update cursor
                 state.mutations._updateCursor(body, paraIndex+1, 0, 0, true)
+
+                // update image resizer
+                state.mutations.updateImageResizer()
             }else{
                 let lastPosBottom = state.mutations._splitParaInner(body, paraIndex, runIndex, front ? startIndex : startIndex + 1)
                 
@@ -712,6 +782,9 @@ var state = {
 
                 // update cursor
                 state.mutations._updateCursor(body, paraIndex+1, 0, 0, true)
+
+                // update image resizer
+                state.mutations.updateImageResizer()
             }
         },
         _deletePt(body, ptIndex){
@@ -805,36 +878,38 @@ var state = {
 
             var para = body.doc.pts[paraIndex]
             var oldRun = para.runs[runIndex]
+            var leftRun = null
+            var rightRun = null
             if(oldRun.type == 'text'){
-                var leftRun = {
+                leftRun = {
                     type: 'text',
                     text: oldRun.text.substr(0, startIndex),
                     textStyle : oldRun.textStyle,
                 }
-                var rightRun = {
+                rightRun = {
                     type: 'text',
                     text: oldRun.text.substr(startIndex),
                     textStyle : oldRun.textStyle,
                 }
             }else if(oldRun.type == 'image'){
                 if(startIndex == 0){
-                    var leftRun = {
+                    leftRun = {
                         type: 'text',
                         text: '',
                         textStyle : {},
                     }
-                    var rightRun = {
+                    rightRun = {
                         type: 'image',
                         image: oldRun.image,
                         imageStyle : oldRun.imageStyle,
                     }
                 }else{
-                    var leftRun = {
+                    leftRun = {
                         type: 'image',
                         image: oldRun.image,
                         imageStyle : oldRun.imageStyle,
                     }
-                    var rightRun = {
+                    rightRun = {
                         type: 'text',
                         text: '',
                         textStyle : {},
@@ -1195,6 +1270,10 @@ var state = {
                 bodyDoc.pts[paraIndex].runs.splice(runIndex+2, 0, rightRun)
             }
         },
+        _updateRunImageStyle(bodyDoc, paraIndex, runIndex, imageStyle){
+            let run = bodyDoc.pts[paraIndex].runs[runIndex]
+            run.imageStyle = imageStyle
+        },
         _updatePara(body, paraIndex, lastPosBottom){
 
             // recreate current page paragraphs
@@ -1226,7 +1305,7 @@ var state = {
             }
             
             for(let i = lineIndex; i < pagePara.lines.length; ++i){
-                var ls = pagePara.lines[i]
+                let ls = pagePara.lines[i]
                 if(ls.type == 'line'){
                     // check paragraph height
                     var leftHeight = getPageLeftHeight(lastPosBottom, body.doc.grid.marginBottom, body.doc.grid.pageHeight, body.doc.grid.pageSpacingHeight)
@@ -1297,7 +1376,7 @@ var state = {
         _adjustBodyPtFollowingSpacing(body, ptIndex, lastPosBottom){
             let bodyHeight = 0
             for(let i = 0; i < ptIndex; ++i){
-                var pagePt = body.pts[i]
+                let pagePt = body.pts[i]
                 if(pagePt.type == 'para'){
                     bodyHeight += pagePt.paraHeight
                 }else if(pagePt.type == 'table'){
@@ -1306,7 +1385,7 @@ var state = {
             }
 
             for(let i = ptIndex; i < body.pts.length; ++i){
-                var pagePt = body.pts[i]
+                let pagePt = body.pts[i]
                 if(pagePt.type == 'para'){
                     lastPosBottom = state.mutations._adjustParaLineFollowingSpacing(body, i, 0, lastPosBottom)
                     bodyHeight += pagePt.paraHeight

@@ -27,7 +27,7 @@ class DocCursor{
 
         setInterval(function() {
             this.el.style.opacity = this.el.style.opacity ^ 1
-        }.bind(this), 500);
+        }.bind(this), 300);
 
         return this.el
     }
