@@ -161,10 +161,11 @@ function getPagePara(para, lastPosBottom,
     let lh = paraRunsToLines(para.runs, paraWidth, lastPosBottom, marginTop, marginBottom, pageHeight, pageSpacingHeight)
     let paraLines = lh.paraLines
     let paraHeight = lh.paraHeight
-
+    
     let pagePara = {
         type: 'para',
         doc: para,
+        paraStyle: para.paraStyle,
         paraHeight: paraHeight,
         paraWidth: paraWidth,
         lines: paraLines,
@@ -432,7 +433,11 @@ const defaultTextStyle = {
     verticalAlign: 'unset',
 }
 
+const defaultParaStyle = {
+    textAlign: 'left',
+}
+
 export { paraRunsToLines, getLineInlineBlocksAndHeightFromQueue, getPageLeftHeight, 
          getPagePara, getPageBody, getPreviousInlineOfBody, getNextInlineOfBody,
          getPreviousLineOfBody, getNextLineOfBody, getInlineBlockBodyIndex, getPageTable,
-         isTextStyleEqual, buildTextStyleCss, defaultTextStyle }
+         isTextStyleEqual, buildTextStyleCss, defaultTextStyle, defaultParaStyle }

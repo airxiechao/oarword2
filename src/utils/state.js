@@ -1,7 +1,7 @@
 import { measureFontTextWH, getCursorPos, getPageLeftHeight } from './measure'
 import { getPagePara, getPageTable, getPageBody, getPreviousInlineOfBody, 
     getNextInlineOfBody, getPreviousLineOfBody, getNextLineOfBody, getInlineBlockBodyIndex,
-    isTextStyleEqual, defaultTextStyle } from './convert'
+    isTextStyleEqual, defaultTextStyle, defaultParaStyle } from './convert'
 import { getPageNo, measureEleDocXY } from '../utils/measure'
 
 import PageParagraph from '../components/PageParagraph'
@@ -29,6 +29,9 @@ var state = {
             fontStyle: 'unset',
             textDecoration: 'unset',
             verticalAlign: 'unset',
+        },
+        paraStyle: {
+            textAlign: 'left',
         },
     },
     getters: {
@@ -103,6 +106,7 @@ var state = {
 
             state.mutations._updateCursorAndInputBoxPos()
             state.mutations._updateCursorToolbarTextStyle()
+            state.mutations._updateCursorToolbarParaStyle()
         },
         resetCursorInlineBlock: function(){
             state.document.cursor.inlineBlock = state.document.body.pts[0].lines[0].inlineBlocks[0]
@@ -111,6 +115,7 @@ var state = {
 
             state.mutations._updateCursorAndInputBoxPos()
             state.mutations._updateCursorToolbarTextStyle()
+            state.mutations._updateCursorToolbarParaStyle()
         },
         setToolbarObj: function(obj){
             state.toolbar.obj = obj
@@ -171,6 +176,23 @@ var state = {
 
             state.mutations._updateCursorAndInputBoxPos()
         },
+        setToolbarParaStyle: function(paraStyle, updateUi){
+            let textAlign = paraStyle.textAlign
+            state.toolbar.paraStyle['textAlign'] = textAlign
+            if(updateUi){
+                state.toolbar.obj.updateTextAlign(textAlign)
+            }
+        },
+        setCursorToolbarParaStyle: function(){
+            let ci = state.getters.cursorBodyIndex()
+            let body = ci.body
+            let paraIndex = ci.paraIndex
+
+            state.mutations._updateParaStyle(body, paraIndex, state.toolbar.paraStyle)
+
+            state.mutations._updateCursorAndInputBoxPos()
+            state.mutations.updateImageResizer()
+        },
         leftMoveCursor: function(){
             let ci = state.getters.cursorBodyIndex()
             let runIndex = ci.runIndex
@@ -201,6 +223,7 @@ var state = {
 
             state.mutations._updateCursorAndInputBoxPos()
             state.mutations._updateCursorToolbarTextStyle()
+            state.mutations._updateCursorToolbarParaStyle()
         },
         rightMoveCursor: function(){
             let ib = state.document.cursor.inlineBlock
@@ -228,6 +251,7 @@ var state = {
 
             state.mutations._updateCursorAndInputBoxPos()
             state.mutations._updateCursorToolbarTextStyle()
+            state.mutations._updateCursorToolbarParaStyle()
         },
         upMoveCursor: function(){
             let cx = state.document.cursor.obj.el.offsetLeft
@@ -304,6 +328,7 @@ var state = {
 
             state.mutations._updateCursorAndInputBoxPos()
             state.mutations._updateCursorToolbarTextStyle()
+            state.mutations._updateCursorToolbarParaStyle()
         },
         downMoveCursor: function(){
             let cx = state.document.cursor.obj.el.offsetLeft
@@ -382,6 +407,7 @@ var state = {
 
             state.mutations._updateCursorAndInputBoxPos()
             state.mutations._updateCursorToolbarTextStyle()
+            state.mutations._updateCursorToolbarParaStyle()
         },
         setImeStatus: function(imeStatus){
             var cursor = state.document.cursor.obj
@@ -865,18 +891,20 @@ var state = {
                 }
                 
             }
-            
+
+            var para = body.doc.pts[paraIndex]
             // split paragraph
             var leftPara = {
                 runs: [],
                 type: 'para',
+                paraStyle: para.paraStyle,
             }
             var rightPara = {
                 runs: [],
                 type: 'para',
+                paraStyle: para.paraStyle,
             }
 
-            var para = body.doc.pts[paraIndex]
             var oldRun = para.runs[runIndex]
             var leftRun = null
             var rightRun = null
@@ -1003,6 +1031,7 @@ var state = {
                 
             }
             
+            var oldPara = body.pts[paraIndex]
             // create new empty paragraph
             var emptyPara = {
                 runs: [
@@ -1010,14 +1039,14 @@ var state = {
                         type: 'text',
                         text: '',
                         textStyle: state.getters.cloneToolbarTextStyle(),
-                    }
+                    },
                 ],
                 type: 'para',
+                paraStyle: oldPara.paraStyle,
             }
 
             body.doc.pts.splice(paraIndex, 0, emptyPara)
-
-            var oldPara = body.pts[paraIndex]
+            
             var newPara = getPagePara(body.doc.pts[paraIndex], lastPosBottom,
                 body.doc.grid.pageWidth, body.doc.grid.pageHeight, body.doc.grid.pageSpacingHeight, 
                 body.doc.grid.marginTop, body.doc.grid.marginRight, body.doc.grid.marginBottom, body.doc.grid.marginLeft)
@@ -1051,6 +1080,7 @@ var state = {
                 }
             }
             
+            var oldPara = body.pts[paraIndex]
             // create new empty paragraph
             var emptyPara = {
                 runs: [
@@ -1061,11 +1091,11 @@ var state = {
                     }
                 ],
                 type: 'para',
+                paraStyle: oldPara.paraStyle,
             }
             
             body.doc.pts.splice(paraIndex+1, 0, emptyPara)
-
-            var oldPara = body.pts[paraIndex]
+            
             var newPara = getPagePara(body.doc.pts[paraIndex+1], lastPosBottom,
                 body.doc.grid.pageWidth, body.doc.grid.pageHeight, body.doc.grid.pageSpacingHeight, 
                 body.doc.grid.marginTop, body.doc.grid.marginRight, body.doc.grid.marginBottom, body.doc.grid.marginLeft)
@@ -1120,6 +1150,7 @@ var state = {
                         pts: [
                             {
                                 type: 'para',
+                                paraStyle: defaultParaStyle,
                                 runs: [
                                     {
                                         type: 'text',
@@ -1292,6 +1323,12 @@ var state = {
             lastPosBottom += newPara.paraHeight
             
             return lastPosBottom
+        },
+        _updateParaStyle: function(body, paraIndex, paraStyle){
+            var para = body.pts[paraIndex]
+            para.paraStyle = paraStyle
+            para.doc.paraStyle = paraStyle
+            para.obj.el.style['textAlign'] = paraStyle.textAlign
         },
         _adjustParaLineFollowingSpacing(body, paraIndex, lineIndex, lastPosBottom){
             var pagePara = body.pts[paraIndex]
@@ -1491,6 +1528,7 @@ var state = {
 
             state.mutations._updateCursorAndInputBoxPos()
             state.mutations._updateCursorToolbarTextStyle()
+            state.mutations._updateCursorToolbarParaStyle()
         },
         _updateCursorAndInputBoxPos: function(){
             // update cursor ui
@@ -1516,7 +1554,13 @@ var state = {
                     state.mutations.setToolbarTextStyle(key, textStyle[key], true)
                 })
             }
-        }
+        },
+        _updateCursorToolbarParaStyle: function(){
+            let ib = state.document.cursor.inlineBlock
+            let para = ib.parent.parent
+            
+            state.mutations.setToolbarParaStyle(para.paraStyle, true)
+        },
     },
 }
 

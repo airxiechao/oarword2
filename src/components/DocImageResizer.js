@@ -266,7 +266,12 @@ export default class DocImageResizer{
         this.w = this.targetObj ? this.targetObj.el.offsetWidth : 0
         this.h = this.targetObj ? this.targetObj.el.offsetHeight : 0
 
-        this.update()
+        if(this.x > 0 && this.y > 0){
+            this.update()
+        }else{
+            this.targetObj = null
+            this.hide()
+        }
     }
 
     update(){

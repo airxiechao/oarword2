@@ -179,7 +179,6 @@ class Toolbar{
         var alignLeftSet = new goog.ui.ToolbarToggleButton(alignLeftIcon);
         this.toolbar.alignLeftSet = alignLeftSet;
         this.toolbar.addChild(alignLeftSet, true);
-        /*
         goog.events.listen(alignLeftSet,
             goog.ui.Component.EventType.ACTION,
             function(e) {
@@ -187,13 +186,15 @@ class Toolbar{
                     //alignLeftSet.setChecked(false);
                     alignCenterSet.setChecked(false);
                     alignRightSet.setChecked(false);
-
-                    this.toolbar.paraAlignChange(e);
-                    G.cursor.refreshTarget();
                 }
-                G.inputbox.focus();
+
+                if(!alignLeftSet.isChecked() && !alignCenterSet.isChecked() && !alignRightSet.isChecked()){
+                    alignLeftSet.setChecked(true)
+                }
+
+                that.textAlignChanged.call(that);
             }
-        );*/
+        );
 
         // paragraph align center
         var alignCenterIcon = goog.dom.createDom('div');
@@ -203,7 +204,6 @@ class Toolbar{
         var alignCenterSet = new goog.ui.ToolbarToggleButton(alignCenterIcon);
         this.toolbar.alignCenterSet = alignCenterSet;
         this.toolbar.addChild(alignCenterSet, true);
-        /*
         goog.events.listen(alignCenterSet,
             goog.ui.Component.EventType.ACTION,
             function(e) {
@@ -211,13 +211,15 @@ class Toolbar{
                     alignLeftSet.setChecked(false);
                     //alignCenterSet.setChecked(false);
                     alignRightSet.setChecked(false);
-
-                    this.toolbar.paraAlignChange(e);
-                    G.cursor.refreshTarget();
                 }
-                G.inputbox.focus();
+                
+                if(!alignLeftSet.isChecked() && !alignCenterSet.isChecked() && !alignRightSet.isChecked()){
+                    alignLeftSet.setChecked(true)
+                }
+
+                that.textAlignChanged.call(that);
             }
-        );*/
+        );
 
         // paragraph align right
         var alignRightIcon = goog.dom.createDom('div');
@@ -227,7 +229,6 @@ class Toolbar{
         var alignRightSet = new goog.ui.ToolbarToggleButton(alignRightIcon);
         this.toolbar.alignRightSet = alignRightSet;
         this.toolbar.addChild(alignRightSet, true);
-        /*
         goog.events.listen(alignRightSet,
             goog.ui.Component.EventType.ACTION,
             function(e) {
@@ -235,13 +236,15 @@ class Toolbar{
                     alignLeftSet.setChecked(false);
                     alignCenterSet.setChecked(false);
                     //alignRightSet.setChecked(false);
-
-                    this.toolbar.paraAlignChange(e);
-                    G.cursor.refreshTarget();
                 }
-                G.inputbox.focus();
+
+                if(!alignLeftSet.isChecked() && !alignCenterSet.isChecked() && !alignRightSet.isChecked()){
+                    alignLeftSet.setChecked(true)
+                }
+
+                that.textAlignChanged.call(that);
             }
-        );*/
+        );
 
         var tbSepAlign = new goog.ui.ToolbarSeparator();
         this.toolbar.addChild(tbSepAlign, true);
@@ -369,6 +372,23 @@ class Toolbar{
         state.mutations.setToolbarTextStyle('verticalAlign', verticalAlign)
     }
 
+    textAlignChanged(){
+        let textAlign = 'left'
+        if(this.toolbar.alignLeftSet.isChecked()){
+            textAlign = 'left'
+        }else if(this.toolbar.alignCenterSet.isChecked()){
+            textAlign = 'center'
+        }else if(this.toolbar.alignRightSet.isChecked()){
+            textAlign = 'right'
+        }
+
+        state.mutations.setToolbarParaStyle({
+            textAlign: textAlign
+        })
+
+        state.mutations.setCursorToolbarParaStyle()
+    }
+
     updateFontFamily(fontFamily){
         this.toolbar.fontSelector.setValue(fontFamily)
     }
@@ -419,6 +439,22 @@ class Toolbar{
         }else{
             this.toolbar.superScriptSet.setChecked(false)
             this.toolbar.subScriptSet.setChecked(false)
+        }
+    }
+
+    updateTextAlign(textAlign){
+        if(textAlign == 'right'){
+            this.toolbar.alignLeftSet.setChecked(false)
+            this.toolbar.alignCenterSet.setChecked(false)
+            this.toolbar.alignRightSet.setChecked(true)
+        }else if(textAlign == 'center'){
+            this.toolbar.alignLeftSet.setChecked(false)
+            this.toolbar.alignCenterSet.setChecked(true)
+            this.toolbar.alignRightSet.setChecked(false)
+        }else{
+            this.toolbar.alignLeftSet.setChecked(true)
+            this.toolbar.alignCenterSet.setChecked(false)
+            this.toolbar.alignRightSet.setChecked(false)
         }
     }
 }

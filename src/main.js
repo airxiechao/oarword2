@@ -16,6 +16,10 @@ var defaultTextStyle = {
     verticalAlign: 'unset',
 }
 
+var defaultParaStyle = {
+    textAlign: 'left',
+}
+
 var doc = {
     type: 'body',
     grid: {
@@ -30,6 +34,7 @@ var doc = {
     pts: [
         {
             type: 'para',
+            paraStyle:defaultParaStyle,
             runs: [
                 {
                     type: 'text',
@@ -67,6 +72,9 @@ var doc = {
         },
         {
             type: 'para',
+            paraStyle: {
+                textAlign: 'center',
+            },
             runs: [
                 {
                     type: 'text',
@@ -103,6 +111,7 @@ var doc = {
         },
         {
             type: 'para',
+            paraStyle:defaultParaStyle,
             runs: [
                 {
                     type: 'text',
@@ -129,6 +138,7 @@ var doc = {
                         pts: [
                             {
                                 type: 'para',
+                                paraStyle:defaultParaStyle,
                                 runs: [
                                     {
                                         type: 'text',
@@ -152,6 +162,7 @@ var doc = {
                         pts: [
                             {
                                 type: 'para',
+                                paraStyle:defaultParaStyle,
                                 runs: [
                                     {
                                         type: 'text',
@@ -177,6 +188,7 @@ var doc = {
                         pts: [
                             {
                                 type: 'para',
+                                paraStyle:defaultParaStyle,
                                 runs: [
                                     {
                                         type: 'text',
@@ -200,6 +212,7 @@ var doc = {
                         pts: [
                             {
                                 type: 'para',
+                                paraStyle:defaultParaStyle,
                                 runs: [
                                     {
                                         type: 'text',
@@ -220,6 +233,7 @@ var doc = {
         },
         {
             type: 'para',
+            paraStyle:defaultParaStyle,
             runs: [
                 {
                     type: 'text',
@@ -235,6 +249,9 @@ var doc = {
         },
         {
             type: 'para',
+            paraStyle: {
+                textAlign: 'right',
+            },
             runs: [
                 {
                     type: 'text',
@@ -250,6 +267,7 @@ var doc = {
         },
         {
             type: 'para',
+            paraStyle:defaultParaStyle,
             runs: [
                 {
                     type: 'text',
@@ -259,96 +277,6 @@ var doc = {
                 {
                     type: 'text',
                     text: 'fff3',
-                    textStyle: defaultTextStyle,
-                }
-            ],
-        },
-        {
-            type: 'para',
-            runs: [
-                {
-                    type: 'text',
-                    text: 'eee',
-                    textStyle: defaultTextStyle,
-                },
-                {
-                    type: 'text',
-                    text: 'fff4',
-                    textStyle: defaultTextStyle,
-                }
-            ],
-        },
-        {
-            type: 'para',
-            runs: [
-                {
-                    type: 'text',
-                    text: 'eee',
-                    textStyle: defaultTextStyle,
-                },
-                {
-                    type: 'text',
-                    text: 'fff5',
-                    textStyle: defaultTextStyle,
-                }
-            ],
-        },
-        {
-            type: 'para',
-            runs: [
-                {
-                    type: 'text',
-                    text: 'eee',
-                    textStyle: defaultTextStyle,
-                },
-                {
-                    type: 'text',
-                    text: 'fff6',
-                    textStyle: defaultTextStyle,
-                }
-            ],
-        },
-        {
-            type: 'para',
-            runs: [
-                {
-                    type: 'text',
-                    text: 'eee',
-                    textStyle: defaultTextStyle,
-                },
-                {
-                    type: 'text',
-                    text: 'fff7',
-                    textStyle: defaultTextStyle,
-                }
-            ],
-        },
-        {
-            type: 'para',
-            runs: [
-                {
-                    type: 'text',
-                    text: 'eee',
-                    textStyle: defaultTextStyle,
-                },
-                {
-                    type: 'text',
-                    text: 'fff8',
-                    textStyle: defaultTextStyle,
-                }
-            ],
-        },
-        {
-            type: 'para',
-            runs: [
-                {
-                    type: 'text',
-                    text: 'eee',
-                    textStyle: defaultTextStyle,
-                },
-                {
-                    type: 'text',
-                    text: 'fff9',
                     textStyle: defaultTextStyle,
                 }
             ],

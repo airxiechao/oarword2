@@ -26,10 +26,11 @@ class PageParagraph{
         this.el =  createElement('div', {
             class: 'page-para',
             style: {
+                textAlign: this.para.paraStyle.textAlign,
                 marginLeft: this.posLeft+'px'
             }
         }, pageLines)
-
+        
         return this.el
     }
 }
