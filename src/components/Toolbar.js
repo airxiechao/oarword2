@@ -386,7 +386,7 @@ class Toolbar{
             textAlign: textAlign
         })
 
-        state.mutations.setCursorToolbarParaStyle()
+        state.mutations.setCursorParaStyleAsToolbar()
     }
 
     updateFontFamily(fontFamily){

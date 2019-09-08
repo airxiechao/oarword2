@@ -69,7 +69,10 @@ var state = {
         },
         cloneToolbarTextStyle: function(){
             return Object.assign({}, state.toolbar.textStyle)
-        }
+        },
+        cloneToolbarParaStyle: function(){
+            return Object.assign({}, state.toolbar.paraStyle)
+        },
     },
     mutations: {
         setDocumentObj: function(obj){
@@ -183,12 +186,12 @@ var state = {
                 state.toolbar.obj.updateTextAlign(textAlign)
             }
         },
-        setCursorToolbarParaStyle: function(){
+        setCursorParaStyleAsToolbar: function(){
             let ci = state.getters.cursorBodyIndex()
             let body = ci.body
             let paraIndex = ci.paraIndex
 
-            state.mutations._updateParaStyle(body, paraIndex, state.toolbar.paraStyle)
+            state.mutations._updateParaStyle(body, paraIndex, state.getters.cloneToolbarParaStyle())
 
             state.mutations._updateCursorAndInputBoxPos()
             state.mutations.updateImageResizer()
@@ -1031,7 +1034,7 @@ var state = {
                 
             }
             
-            var oldPara = body.pts[paraIndex]
+            
             // create new empty paragraph
             var emptyPara = {
                 runs: [
@@ -1042,9 +1045,10 @@ var state = {
                     },
                 ],
                 type: 'para',
-                paraStyle: oldPara.paraStyle,
+                paraStyle: state.getters.cloneToolbarParaStyle(),
             }
 
+            var oldPara = body.pts[paraIndex]
             body.doc.pts.splice(paraIndex, 0, emptyPara)
             
             var newPara = getPagePara(body.doc.pts[paraIndex], lastPosBottom,
@@ -1080,7 +1084,6 @@ var state = {
                 }
             }
             
-            var oldPara = body.pts[paraIndex]
             // create new empty paragraph
             var emptyPara = {
                 runs: [
@@ -1091,11 +1094,12 @@ var state = {
                     }
                 ],
                 type: 'para',
-                paraStyle: oldPara.paraStyle,
+                paraStyle: state.getters.cloneToolbarParaStyle(),
             }
             
             body.doc.pts.splice(paraIndex+1, 0, emptyPara)
-            
+
+            var oldPara = body.pts[paraIndex]
             var newPara = getPagePara(body.doc.pts[paraIndex+1], lastPosBottom,
                 body.doc.grid.pageWidth, body.doc.grid.pageHeight, body.doc.grid.pageSpacingHeight, 
                 body.doc.grid.marginTop, body.doc.grid.marginRight, body.doc.grid.marginBottom, body.doc.grid.marginLeft)
