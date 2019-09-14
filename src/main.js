@@ -2,23 +2,9 @@ import Vue from 'vue'
 import App from './App.vue'
 
 import state from './utils/state'
+import { defaultTextStyle, defaultParaStyle } from './utils/convert'
 
 Vue.config.productionTip = false
-
-var defaultTextStyle = {
-    fontFamily: '宋体',
-    fontSize: 14,
-    color: '#000',
-    backgroundColor: 'unset',
-    fontWeight: 'unset',
-    fontStyle: 'unset',
-    textDecoration: 'unset',
-    verticalAlign: 'unset',
-}
-
-var defaultParaStyle = {
-    textAlign: 'left',
-}
 
 var doc = {
     type: 'body',

@@ -614,6 +614,76 @@ var state = {
                 state.mutations.updateImageResizer()
             }
         },
+        updateTableGrid: function(payload){
+            let table = payload.table
+            let columnIndex = payload.columnIndex
+            let columnWidth = payload.columnWidth
+
+            table.doc.grid[columnIndex] = columnWidth
+
+            let body = table.parent
+            let ptIndex = body.pts.indexOf(table)
+
+            // get last position bottom
+            let lastPosBottom = state.mutations._getParaLastPosBottom(body, ptIndex-1)
+                        
+            // update document paragraph
+            lastPosBottom = state.mutations._updateTable(body, ptIndex, lastPosBottom)
+
+            // adjust following spacing
+            lastPosBottom = state.mutations._adjustBodyPtFollowingSpacing(body, ptIndex+1, lastPosBottom)
+
+            // adjust parent following spacing
+            lastPosBottom = state.mutations._adjustBodyParentFollowingSpacing(body, lastPosBottom)
+
+            // update page background
+            state.mutations._updatePageBackground(lastPosBottom)
+
+            // update cursor
+            let iterBody = function(body, newTable, oldBody){
+                for(let i = 0; i < body.pts.length; ++i){
+                    let pt = body.pts[i]
+                    if(pt.type == 'table'){
+                        return iterTable(pt, newTable, oldBody)
+                    }
+                }
+
+                return null
+            }
+
+            let iterTable = function(oldTable, newTable, oldBody){
+                for(let r = 0; r < oldTable.cells.length; ++r){
+                    let row = oldTable.cells[r]
+                    for(let c = 0; c < row.length; ++c ){
+                        let col = row[c]
+
+                        if(col == oldBody){
+                            let newBody = newTable.cells[r][c]
+                            return newBody
+                        }else{
+                            iterBody(col, oldTable, newTable, oldBody)
+                        }
+                    }
+                }
+
+                return null
+            } 
+
+            let ci = state.getters.cursorBodyIndex()
+            let front = state.document.cursor.front
+            let cbody = ci.body
+            let newBody = iterTable(table, body.pts[ptIndex], cbody)
+            if(newBody){
+                cbody = newBody
+            }
+            let paraIndex = ci.paraIndex
+            let runIndex = ci.runIndex
+            let startIndex = ci.startIndex
+            state.mutations._updateCursor(cbody, paraIndex, runIndex, startIndex, front)
+
+            // update image resizer
+            state.mutations.updateImageResizer()
+        },
         deleteFromParaRun: function(){
             let ci = state.getters.cursorBodyIndex()
             let ib = state.document.cursor.inlineBlock
@@ -1334,6 +1404,23 @@ var state = {
             para.doc.paraStyle = paraStyle
             para.obj.el.style['textAlign'] = paraStyle.textAlign
         },
+        _updateTable(body, ptIndex, lastPosBottom){
+
+            // recreate current page table
+            var oldTable = body.pts[ptIndex]
+            var newTable = getPageTable(body.doc, body.doc.pts[ptIndex], lastPosBottom)
+            newTable.parent = body
+            body.pts.splice(ptIndex, 1, newTable)
+
+            var newPageTable = new PageTable(body.doc.grid.marginLeft, newTable)
+            var oldPageTable = oldTable.obj.el
+            newTable.obj = newPageTable
+            window.goog.dom.replaceNode(newPageTable.render(), oldPageTable)
+            
+            lastPosBottom += newTable.tableHeight
+            
+            return lastPosBottom
+        },
         _adjustParaLineFollowingSpacing(body, paraIndex, lineIndex, lastPosBottom){
             var pagePara = body.pts[paraIndex]
             var paraHeight = 0
@@ -1411,6 +1498,8 @@ var state = {
             }
 
             pageTable.tableHeight = tableHeight
+
+            pageTable.obj.updateResizers()
 
             return lastPosBottom
         },
