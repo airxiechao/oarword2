@@ -73,7 +73,7 @@ var state = {
         cloneToolbarParaStyle: function(){
             return Object.assign({}, state.toolbar.paraStyle)
         },
-        _matchTableCell: function(oldTable, newTable, oldBody){
+        _matchTableCell: function(oldTable, newTable, oldBody, deleteRowIndex, deleteColumnIndex){
             let iterBody = function(body, newTable, oldBody){
                 for(let i = 0; i < body.pts.length; ++i){
                     let pt = body.pts[i]
@@ -88,15 +88,34 @@ var state = {
                 return false
             }
 
-            let iterTable = function(oldTable, newTable, oldBody){
+            let iterTable = function(oldTable, newTable, oldBody, deleteRowIndex, deleteColumnIndex){
                 for(let r = 0; r < oldTable.cells.length; ++r){
                     let row = oldTable.cells[r]
                     for(let c = 0; c < row.length; ++c ){
                         let col = row[c]
     
                         if(col == oldBody){
-                            if(newTable.cells[r] && newTable.cells[r][c]){
-                                let newBody = newTable.cells[r][c]
+                            let r2 = r
+                            let c2 = c
+
+                            if(deleteRowIndex !== undefined ){
+                                if(r == deleteRowIndex){
+                                    return null
+                                }else if(r > deleteRowIndex){
+                                    r2 = r - 1
+                                }
+                            }
+                            
+                            if(deleteColumnIndex !== undefined){
+                                if(c == deleteColumnIndex){
+                                    return null
+                                }else if(c > deleteColumnIndex){
+                                    c2 = c - 1
+                                }
+                            }
+
+                            if(newTable.cells[r2] && newTable.cells[r2][c2]){
+                                let newBody = newTable.cells[r2][c2]
                                 return newBody
                             }else{
                                 return null
@@ -113,7 +132,7 @@ var state = {
                 return false
             }
 
-            return iterTable(oldTable, newTable, oldBody)
+            return iterTable(oldTable, newTable, oldBody, deleteRowIndex, deleteColumnIndex)
         },
     },
     mutations: {
@@ -746,7 +765,7 @@ var state = {
             let paraIndex = ci.paraIndex
             let runIndex = ci.runIndex
             let startIndex = ci.startIndex
-            let newBody = state.getters._matchTableCell(table, body.pts[ptIndex], cbody)
+            let newBody = state.getters._matchTableCell(table, body.pts[ptIndex], cbody, rowIndex, columnIndex)
             if(newBody === false){
 
             }else if(newBody === null){
