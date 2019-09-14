@@ -73,6 +73,48 @@ var state = {
         cloneToolbarParaStyle: function(){
             return Object.assign({}, state.toolbar.paraStyle)
         },
+        _matchTableCell: function(oldTable, newTable, oldBody){
+            let iterBody = function(body, newTable, oldBody){
+                for(let i = 0; i < body.pts.length; ++i){
+                    let pt = body.pts[i]
+                    if(pt.type == 'table'){
+                        let newBody = iterTable(pt, newTable, oldBody)
+                        if(newBody !== false){
+                            return newBody
+                        }
+                    }
+                }
+
+                return false
+            }
+
+            let iterTable = function(oldTable, newTable, oldBody){
+                for(let r = 0; r < oldTable.cells.length; ++r){
+                    let row = oldTable.cells[r]
+                    for(let c = 0; c < row.length; ++c ){
+                        let col = row[c]
+    
+                        if(col == oldBody){
+                            if(newTable.cells[r] && newTable.cells[r][c]){
+                                let newBody = newTable.cells[r][c]
+                                return newBody
+                            }else{
+                                return null
+                            }
+                        }else{
+                            let newBody = iterBody(col, oldTable, newTable, oldBody)
+                            if(newBody !== false){
+                                return newBody
+                            }
+                        }
+                    }
+                }
+
+                return false
+            }
+
+            return iterTable(oldTable, newTable, oldBody)
+        },
     },
     mutations: {
         setDocumentObj: function(obj){
@@ -597,23 +639,6 @@ var state = {
             // update image resizer
             state.mutations.updateImageResizer()
         },
-        deleteTableFromBody: function(){
-            let table = state.getters.cursorTable()
-            if(table){
-                let body = table.parent
-                let ptIndex = body.pts.indexOf(table)
-                let lastPosBottom = state.mutations._deletePt(body, ptIndex)
-
-                // update page background
-                state.mutations._updatePageBackground(lastPosBottom)
-
-                // update cursor
-                state.mutations._updateCursor(body, ptIndex, 0, 0, true)
-
-                // update image resizer
-                state.mutations.updateImageResizer()
-            }
-        },
         updateTableGrid: function(payload){
             let table = payload.table
             let columnIndex = payload.columnIndex
@@ -640,45 +665,100 @@ var state = {
             state.mutations._updatePageBackground(lastPosBottom)
 
             // update cursor
-            let iterBody = function(body, newTable, oldBody){
-                for(let i = 0; i < body.pts.length; ++i){
-                    let pt = body.pts[i]
-                    if(pt.type == 'table'){
-                        return iterTable(pt, newTable, oldBody)
-                    }
-                }
-
-                return null
-            }
-
-            let iterTable = function(oldTable, newTable, oldBody){
-                for(let r = 0; r < oldTable.cells.length; ++r){
-                    let row = oldTable.cells[r]
-                    for(let c = 0; c < row.length; ++c ){
-                        let col = row[c]
-
-                        if(col == oldBody){
-                            let newBody = newTable.cells[r][c]
-                            return newBody
-                        }else{
-                            iterBody(col, oldTable, newTable, oldBody)
-                        }
-                    }
-                }
-
-                return null
-            } 
-
             let ci = state.getters.cursorBodyIndex()
             let front = state.document.cursor.front
             let cbody = ci.body
-            let newBody = iterTable(table, body.pts[ptIndex], cbody)
+            let newBody = state.getters._matchTableCell(table, body.pts[ptIndex], cbody)
             if(newBody){
                 cbody = newBody
             }
             let paraIndex = ci.paraIndex
             let runIndex = ci.runIndex
             let startIndex = ci.startIndex
+            state.mutations._updateCursor(cbody, paraIndex, runIndex, startIndex, front)
+
+            // update image resizer
+            state.mutations.updateImageResizer()
+        },
+        deleteTableFromBody: function(table){
+            let body = table.parent
+            let ptIndex = body.pts.indexOf(table)
+            let lastPosBottom = state.mutations._deletePt(body, ptIndex)
+
+            // update page background
+            state.mutations._updatePageBackground(lastPosBottom)
+
+            // update cursor
+            state.mutations._updateCursor(body, ptIndex, 0, 0, true)
+
+            // update image resizer
+            state.mutations.updateImageResizer()
+        },
+        deleteTableRowCol: function(payload){
+            let table = payload.table
+
+            let rowIndex = payload.rowIndex
+            let columnIndex = payload.columnIndex
+
+            if(rowIndex !== undefined){
+                if(table.doc.cells.length == 1){
+                    state.mutations.deleteTableFromBody(table)
+                    return
+                }else{
+                    table.doc.cells.splice(rowIndex, 1)
+                }
+                
+            }
+
+            if(columnIndex !== undefined){
+                if(table.doc.grid.length == 1){
+                    state.mutations.deleteTableFromBody(table)
+                    return
+                }else{
+                    table.doc.cells.forEach(r=>r.splice(columnIndex, 1))
+                    table.doc.grid.splice(columnIndex, 1)
+                }
+                
+            }
+
+            let body = table.parent
+            let ptIndex = body.pts.indexOf(table)
+
+            // get last position bottom
+            let lastPosBottom = state.mutations._getParaLastPosBottom(body, ptIndex-1)
+                        
+            // update document paragraph
+            lastPosBottom = state.mutations._updateTable(body, ptIndex, lastPosBottom)
+
+            // adjust following spacing
+            lastPosBottom = state.mutations._adjustBodyPtFollowingSpacing(body, ptIndex+1, lastPosBottom)
+
+            // adjust parent following spacing
+            lastPosBottom = state.mutations._adjustBodyParentFollowingSpacing(body, lastPosBottom)
+
+            // update page background
+            state.mutations._updatePageBackground(lastPosBottom)
+
+            // update cursor
+            let ci = state.getters.cursorBodyIndex()
+            let front = state.document.cursor.front
+            let cbody = ci.body
+            let paraIndex = ci.paraIndex
+            let runIndex = ci.runIndex
+            let startIndex = ci.startIndex
+            let newBody = state.getters._matchTableCell(table, body.pts[ptIndex], cbody)
+            if(newBody === false){
+
+            }else if(newBody === null){
+                cbody = body
+                paraIndex = ptIndex + 1
+                runIndex = 0
+                startIndex = 0
+                front = true
+            }else{
+                cbody = newBody
+            }
+
             state.mutations._updateCursor(cbody, paraIndex, runIndex, startIndex, front)
 
             // update image resizer

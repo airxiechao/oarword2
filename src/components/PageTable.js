@@ -115,7 +115,7 @@ class PageTable{
                 resizer.style['top'] = '0px'
                 return
             }
-
+            
             state.mutations.updateTableGrid({
                 table: this.table,
                 columnIndex: ci,
