@@ -74,13 +74,18 @@ var state = {
             return Object.assign({}, state.toolbar.paraStyle)
         },
         _matchTableCell: function(oldTable, newTable, oldBody, deleteRowIndex, deleteColumnIndex){
-            let iterBody = function(body, newTable, oldBody){
+
+            let iterBody = function(body, newBody, oldBody){
                 for(let i = 0; i < body.pts.length; ++i){
                     let pt = body.pts[i]
                     if(pt.type == 'table'){
-                        let newBody = iterTable(pt, newTable, oldBody)
-                        if(newBody !== false){
-                            return newBody
+                        let newTable = undefined
+                        if(newBody){
+                            newTable = newBody.pts[i]
+                        }
+                        let newBody2 = iterTable(pt, newTable, oldBody)
+                        if(newBody2 !== false){
+                            return newBody2
                         }
                     }
                 }
@@ -93,35 +98,40 @@ var state = {
                     let row = oldTable.cells[r]
                     for(let c = 0; c < row.length; ++c ){
                         let col = row[c]
+
+                        let r2 = r
+                        let c2 = c
+
+                        if(deleteRowIndex !== undefined){
+                            if(r == deleteRowIndex){
+                                r2 = -1
+                            }else if(r > deleteRowIndex){
+                                r2 = r - 1
+                            }
+                        }
+                        
+                        if(deleteColumnIndex !== undefined){
+                            if(c == deleteColumnIndex){
+                                c2 = -1
+                            }else if(c > deleteColumnIndex){
+                                c2 = c - 1
+                            }
+                        }
     
                         if(col == oldBody){
-                            let r2 = r
-                            let c2 = c
-
-                            if(deleteRowIndex !== undefined ){
-                                if(r == deleteRowIndex){
-                                    return null
-                                }else if(r > deleteRowIndex){
-                                    r2 = r - 1
-                                }
-                            }
-                            
-                            if(deleteColumnIndex !== undefined){
-                                if(c == deleteColumnIndex){
-                                    return null
-                                }else if(c > deleteColumnIndex){
-                                    c2 = c - 1
-                                }
-                            }
-
-                            if(newTable.cells[r2] && newTable.cells[r2][c2]){
+                            if(newTable && newTable.cells[r2] && newTable.cells[r2][c2]){
                                 let newBody = newTable.cells[r2][c2]
                                 return newBody
                             }else{
                                 return null
                             }
                         }else{
-                            let newBody = iterBody(col, oldTable, newTable, oldBody)
+                            let newCol = undefined
+                            if(newTable && newTable.cells[r2] && newTable.cells[r2][c2]){
+                                newCol = newTable.cells[r2][c2]
+                            }
+
+                            let newBody = iterBody(col, newCol, oldBody)
                             if(newBody !== false){
                                 return newBody
                             }
