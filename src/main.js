@@ -113,15 +113,79 @@ var doc = {
         },
         {
             type: 'table',
-            grid: [200, 200],
+            grid: [200, 200, 100],
             cells: [
                 [ // row 0
                     {
                         type: 'body',
-                        rowspan: 1,
-                        colspan: 1,
+                        rowspan: 2,
+                        colspan: 2,
                         grid: {},
                         pts: [
+                            {
+                                type: 'para',
+                                paraStyle:defaultParaStyle,
+                                runs: [
+                                    {
+                                        type: 'text',
+                                        text: '111',
+                                        textStyle: defaultTextStyle,
+                                    },
+                                    {
+                                        type: 'text',
+                                        text: '222',
+                                        textStyle: defaultTextStyle,
+                                    }
+                                ],
+                            },
+                            {
+                                type: 'para',
+                                paraStyle:defaultParaStyle,
+                                runs: [
+                                    {
+                                        type: 'text',
+                                        text: '111',
+                                        textStyle: defaultTextStyle,
+                                    },
+                                    {
+                                        type: 'text',
+                                        text: '222',
+                                        textStyle: defaultTextStyle,
+                                    }
+                                ],
+                            },
+                            {
+                                type: 'para',
+                                paraStyle:defaultParaStyle,
+                                runs: [
+                                    {
+                                        type: 'text',
+                                        text: '111',
+                                        textStyle: defaultTextStyle,
+                                    },
+                                    {
+                                        type: 'text',
+                                        text: '222',
+                                        textStyle: defaultTextStyle,
+                                    }
+                                ],
+                            },
+                            {
+                                type: 'para',
+                                paraStyle:defaultParaStyle,
+                                runs: [
+                                    {
+                                        type: 'text',
+                                        text: '111',
+                                        textStyle: defaultTextStyle,
+                                    },
+                                    {
+                                        type: 'text',
+                                        text: '222',
+                                        textStyle: defaultTextStyle,
+                                    }
+                                ],
+                            },
                             {
                                 type: 'para',
                                 paraStyle:defaultParaStyle,
@@ -163,9 +227,35 @@ var doc = {
                                 ],
                             },
                         ],
-                    }
+                    },
                 ],
                 [ // row 1
+                    {
+                        type: 'body',
+                        rowspan: 1,
+                        colspan: 1,
+                        grid: {},
+                        pts: [
+                            {
+                                type: 'para',
+                                paraStyle:defaultParaStyle,
+                                runs: [
+                                    {
+                                        type: 'text',
+                                        text: '333',
+                                        textStyle: defaultTextStyle,
+                                    },
+                                    {
+                                        type: 'text',
+                                        text: '444',
+                                        textStyle: defaultTextStyle,
+                                    }
+                                ],
+                            },
+                        ],
+                    },
+                ],
+                [ // row 2
                     {
                         type: 'body',
                         rowspan: 1,
@@ -202,18 +292,58 @@ var doc = {
                                 runs: [
                                     {
                                         type: 'text',
-                                        text: 'ccc',
+                                        text: '333',
                                         textStyle: defaultTextStyle,
                                     },
                                     {
                                         type: 'text',
-                                        text: 'ddd',
+                                        text: '444',
+                                        textStyle: defaultTextStyle,
+                                    }
+                                ],
+                            },
+                            {
+                                type: 'para',
+                                paraStyle:defaultParaStyle,
+                                runs: [
+                                    {
+                                        type: 'text',
+                                        text: '333',
+                                        textStyle: defaultTextStyle,
+                                    },
+                                    {
+                                        type: 'text',
+                                        text: '444',
                                         textStyle: defaultTextStyle,
                                     }
                                 ],
                             },
                         ],
-                    }
+                    },
+                    {
+                        type: 'body',
+                        rowspan: 1,
+                        colspan: 1,
+                        grid: {},
+                        pts: [
+                            {
+                                type: 'para',
+                                paraStyle:defaultParaStyle,
+                                runs: [
+                                    {
+                                        type: 'text',
+                                        text: '333',
+                                        textStyle: defaultTextStyle,
+                                    },
+                                    {
+                                        type: 'text',
+                                        text: '444',
+                                        textStyle: defaultTextStyle,
+                                    }
+                                ],
+                            },
+                        ],
+                    },
                 ]
             ],
         },

@@ -22,6 +22,10 @@ class PageTable{
                 
                 let tableCol = createElement('td', {
                     class: 'page-table-col',
+                    attrs: {
+                        rowspan: col.doc.rowspan,
+                        colspan: col.doc.colspan,
+                    },
                     style: {
                         position: 'relative',
                         width: col.doc.grid.pageWidth+'px',
@@ -29,7 +33,7 @@ class PageTable{
                         border: '1px solid #333',
                     }
                 }, [pageBody.render()])
-
+                
                 tableCols.push(tableCol)
             }
 

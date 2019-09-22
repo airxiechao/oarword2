@@ -184,17 +184,48 @@ function getPageTable(doc, table, lastPosBottom){
 
     let tableCells = []
     let tableHeight = 0
+    let tableMultiRowCol = []
+    let rowHeights = []
     for(let i = 0; i < table.cells.length; ++i){
         let tableRow = []
         tableCells.push(tableRow)
         let row = table.cells[i]
         let rowHeight = 0
+        // numCol is the column index of table grid
+        let numCol = 0
         for(let j = 0; j < row.length; ++j){
             let col = row[j]
             let rowspan = col.rowspan
             let colspan = col.colspan
 
-            col.grid.pageWidth = table.grid[j]
+            let mc = {
+                r0: i,
+                r1: i + rowspan - 1,
+                c0: numCol,
+                c1: numCol + colspan - 1,
+            }
+
+            if(rowspan > 1){
+                tableMultiRowCol.push(mc)
+            }
+            
+            // calculate numCol
+            for(let mi = 0; mi < tableMultiRowCol.length; ++mi){
+                let mrc = tableMultiRowCol[mi]
+                if(i > mrc.r0 && i <= mrc.r1){
+                    if(numCol >= mrc.c0 && numCol <= mrc.c1){
+                        numCol += mrc.c1 - mrc.c0 + 1
+                    }
+                }
+            }
+
+            let colWidth = 0
+            for(let cs = 0; cs < colspan; ++cs){
+                colWidth += table.grid[numCol+cs]
+            }
+            numCol += colspan
+
+            col.grid.pageWidth = colWidth
             col.grid.pageHeight = doc.grid.pageHeight
             col.grid.pageSpacingHeight = doc.grid.pageSpacingHeight 
             col.grid.marginTop = doc.grid.marginTop
@@ -204,16 +235,50 @@ function getPageTable(doc, table, lastPosBottom){
 
             let pb = getPageBody(col, lastPosBottom)
             let pageBody = pb
-            let bodyHeight = pb.bodyHeight
-            rowHeight = Math.max(rowHeight, bodyHeight)
-
             tableRow.push(pageBody)
+            let bodyHeight = pb.bodyHeight
+
+            // record multiple-row cell infomation
+            mc.wiedth = colWidth
+            mc.height = bodyHeight
+            mc.body = pageBody
+
+            if(rowspan == 1){
+                rowHeight = Math.max(rowHeight, bodyHeight)
+            }
+
         }
 
+        rowHeights.push(rowHeight)
+
+        // update the last row height of multiple-row cell
+        for(let mi = 0; mi < tableMultiRowCol.length; ++mi){
+            let mrc = tableMultiRowCol[mi]
+            if(i == mrc.r1){
+                let mh = 0
+                for(let ri = mrc.r0; ri <= mrc.r1; ++ri){
+                    mh += rowHeights[ri]
+                }
+                
+                if(mh < mrc.height){
+                    let rh = mrc.height - (mh - rowHeights[mrc.r1])
+                    rowHeight = Math.max(rowHeight, rh)
+                }else{
+                    mrc.body.bodyHeight = mh
+                }
+            }
+        }
+        
+        tableRow.forEach(r=>{
+            if(r.doc.rowspan == 1){
+                r.bodyHeight = rowHeight
+            }
+        })
+        
         lastPosBottom += rowHeight
         tableHeight += rowHeight
     }
-
+    
     let pageTable = {
         type: 'table',
         doc: table,

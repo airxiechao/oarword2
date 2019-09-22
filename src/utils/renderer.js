@@ -14,7 +14,6 @@ function createElement(tag, settings, children){
             }else if(s == 'class'){
                 el.className = settings['class']
             }
-            
         });
     }
     
