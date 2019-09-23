@@ -29,7 +29,7 @@ class PageTable{
                     style: {
                         position: 'relative',
                         width: col.doc.grid.pageWidth+'px',
-                        height: col.bodyHeight+'px',
+                        height: col.doc.grid.height+'px',
                         border: '1px solid #333',
                     }
                 }, [pageBody.render()])

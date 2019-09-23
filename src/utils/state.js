@@ -1034,15 +1034,22 @@ var state = {
                             let row = bodyParent.cells[i]
                             let colHeights = []
                             let found = false
+                            let colCount = 0
                             for(let j = 0; j < row.length; ++j){
                                 let col = row[j]
+
                                 if(col == body){
                                     found = true
                                     break
                                 }
-                                colHeights.push(col.bodyHeight)
+                                
+                                if(col.doc.rowspan == 1){
+                                    colHeights.push(col.doc.grid.height)
+                                }
+
+                                colCount += 1
                             }
-                            if(colHeights.length == row.length){
+                            if(colCount == row.length){
                                 lastPosBottom += Math.max(...colHeights)
                             }
                             if(found){
@@ -1572,44 +1579,144 @@ var state = {
         _adjustTableRowFollowingSpacing(body, tableIndex, rowIndex, lastPosBottom){
             var pageTable = body.pts[tableIndex]
             var tableHeight = 0
+            let tableMultiRowCol = []
+            let rowHeights = []
 
+            // adjust row before
             for(let i = 0; i < rowIndex; ++i){
                 let row = pageTable.cells[i]
                 let colHeights = []
+                let tableRow = []
                 for(let j = 0; j < row.length; ++j){
                     let col = row[j]
-                    colHeights.push(col.bodyHeight)
+                    tableRow.push(col)
+                    let rowspan = col.doc.rowspan
+                    let mc = {
+                        r0: i,
+                        r1: i + rowspan - 1
+                    }
+                    if(rowspan > 1){
+                        tableMultiRowCol.push(mc)
+                    }
+                    mc.body = col
+
+                    if(rowspan == 1){
+                        colHeights.push(col.bodyHeight)
+                    }
                 }
-                let colHeight = Math.max(...colHeights)
-                tableHeight += colHeight
-            }
-
-            for(let i = rowIndex; i < pageTable.cells.length; ++i){
-                let row = pageTable.cells[i]
-                let lpbs = []
-                for(let j = 0; j < row.length; ++j){
-                    let col = row[j]
-
-                    let lpb = state.mutations._adjustBodyPtFollowingSpacing(col, 0, lastPosBottom)
-                    lpbs.push(lpb)
-                }
-                let maxLpb = Math.max(...lpbs)
-                let colHeight = maxLpb - lastPosBottom
-
-                for(let j = 0; j < row.length; ++j){
-                    let col = row[j]
-                    let td = goog.dom.getParentElement(col.obj.el)
-                    td.style.height = colHeight+'px'
+                let rowHeight = Math.max(...colHeights)
+                rowHeights.push(rowHeight)
+                
+                // update the last row height of multiple-row cell
+                for(let mi = 0; mi < tableMultiRowCol.length; ++mi){
+                    let mrc = tableMultiRowCol[mi]
+                    if(i == mrc.r1){
+                        let mh = 0
+                        
+                        for(let ri = mrc.r0; ri <= mrc.r1; ++ri){
+                            mh += rowHeights[ri]
+                        }
+                        
+                        if(mh < mrc.body.bodyHeight){
+                            let rh = mrc.body.bodyHeight - (mh - rowHeights[mrc.r1])
+                            rowHeight = Math.max(rowHeight, rh)
+                        }else{
+                            mrc.body.doc.grid.height = mh
+                            let td = goog.dom.getParentElement(mrc.body.obj.el)
+                            td.style.height = rowHeight+'px'
+                        }
+                    }
                 }
                 
-                tableHeight += colHeight
-                lastPosBottom = maxLpb
+                tableRow.forEach(r=>{
+                    if(r.doc.rowspan == 1){
+                        r.doc.grid.height = rowHeight
+                    }
+                })
+
+                for(let j = 0; j < row.length; ++j){
+                    let col = row[j]
+                    if(col.doc.rowspan == 1){
+                        let td = goog.dom.getParentElement(col.obj.el)
+                        td.style.height = rowHeight+'px'
+                    }
+                }
+
+                tableHeight += rowHeight
+            }
+
+            // adjust row and after
+            for(let i = rowIndex; i < pageTable.cells.length; ++i){
+                let row = pageTable.cells[i]
+                let colHeights = []
+                let tableRow = []
+                for(let j = 0; j < row.length; ++j){
+                    let col = row[j]
+                    tableRow.push(col)
+                    let rowspan = col.doc.rowspan
+                    let mc = {
+                        r0: i,
+                        r1: i + rowspan - 1
+                    }
+                    if(rowspan > 1){
+                        tableMultiRowCol.push(mc)
+                    }
+
+                    let lpb = state.mutations._adjustBodyPtFollowingSpacing(col, 0, lastPosBottom)
+                    let colHeight = lpb - lastPosBottom
+                    
+                    mc.body = col
+
+                    if(rowspan == 1){
+                        colHeights.push(colHeight)
+                    }
+                }
+                let rowHeight = Math.max(...colHeights)
+                rowHeights.push(rowHeight)
+
+                // update the last row height of multiple-row cell
+                for(let mi = 0; mi < tableMultiRowCol.length; ++mi){
+                    let mrc = tableMultiRowCol[mi]
+                    
+                    if(i == mrc.r1){
+                        let mh = 0
+                        for(let ri = mrc.r0; ri <= mrc.r1; ++ri){
+                            mh += rowHeights[ri]
+                        }
+                        
+                        if(mh < mrc.body.bodyHeight){
+                            let rh = mrc.body.bodyHeight - (mh - rowHeights[mrc.r1])
+                            rowHeight = Math.max(rowHeight, rh)
+                        }else{
+                            mrc.body.doc.grid.height = mh
+                            let td = goog.dom.getParentElement(mrc.body.obj.el)
+                            td.style.height = rowHeight+'px'
+                        }
+                    }
+                }
+                
+                tableRow.forEach(r=>{
+                    if(r.doc.rowspan == 1){
+                        r.doc.grid.height = rowHeight
+                    }
+                })
+
+                for(let j = 0; j < row.length; ++j){
+                    let col = row[j]
+                    if(col.doc.rowspan == 1){
+                        let td = goog.dom.getParentElement(col.obj.el)
+                        td.style.height = rowHeight+'px'
+                    }
+                }
+
+                tableHeight += rowHeight
+                lastPosBottom += rowHeight
             }
 
             pageTable.tableHeight = tableHeight
 
             pageTable.obj.updateResizers()
-
+            
             return lastPosBottom
         },
         _adjustBodyPtFollowingSpacing(body, ptIndex, lastPosBottom){

@@ -237,10 +237,10 @@ function getPageTable(doc, table, lastPosBottom){
             let pageBody = pb
             tableRow.push(pageBody)
             let bodyHeight = pb.bodyHeight
+            col.grid.width = colWidth
+            col.grid.height = bodyHeight
 
             // record multiple-row cell infomation
-            mc.wiedth = colWidth
-            mc.height = bodyHeight
             mc.body = pageBody
 
             if(rowspan == 1){
@@ -260,18 +260,18 @@ function getPageTable(doc, table, lastPosBottom){
                     mh += rowHeights[ri]
                 }
                 
-                if(mh < mrc.height){
-                    let rh = mrc.height - (mh - rowHeights[mrc.r1])
+                if(mh < mrc.body.bodyHeight){
+                    let rh = mrc.body.bodyHeight - (mh - rowHeights[mrc.r1])
                     rowHeight = Math.max(rowHeight, rh)
                 }else{
-                    mrc.body.bodyHeight = mh
+                    mrc.body.doc.grid.height = mh
                 }
             }
         }
         
         tableRow.forEach(r=>{
             if(r.doc.rowspan == 1){
-                r.bodyHeight = rowHeight
+                r.doc.grid.height = rowHeight
             }
         })
         
