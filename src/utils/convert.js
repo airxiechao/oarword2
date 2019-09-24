@@ -487,6 +487,30 @@ function buildTextStyleCss(textStyle){
     return styleCss
 }
 
+function buildEmptyTableCell(){
+    let col = {
+        type: 'body',
+        rowspan: 1,
+        colspan: 1,
+        grid: {},
+        pts: [
+            {
+                type: 'para',
+                paraStyle: defaultParaStyle,
+                runs: [
+                    {
+                        type: 'text',
+                        text: '',
+                        textStyle: defaultTextStyle,
+                    },
+                ],
+            },
+        ],
+    }
+    
+    return col
+}
+
 function getRowColGridOfTableCell(cell){
 
     let table = cell.parent
@@ -501,6 +525,8 @@ function getRowColGridOfTableCell(cell){
             if(col === cell){
                 rowIndex = i
                 colIndex = j
+
+                i = table.cells.length
                 break
             }
         }
@@ -551,8 +577,8 @@ function getRowColGridOfTableCell(cell){
             if(col === cell){
                 return {
                     rowGrid0: i,
-                    colGrid0: i + rowspan - 1,
-                    rowGrid1: numCol,
+                    rowGrid1: i + rowspan - 1,
+                    colGrid0: numCol,
                     colGrid1: numCol + colspan - 1,
                 }
             }
@@ -587,5 +613,5 @@ const defaultParaStyle = {
 export { paraRunsToLines, getLineInlineBlocksAndHeightFromQueue, getPageLeftHeight, 
          getPagePara, getPageBody, getPreviousInlineOfBody, getNextInlineOfBody,
          getPreviousLineOfBody, getNextLineOfBody, getInlineBlockBodyIndex, getPageTable,
-         isTextStyleEqual, buildTextStyleCss, getRowColGridOfTableCell,
+         isTextStyleEqual, buildTextStyleCss, buildEmptyTableCell, getRowColGridOfTableCell,
          defaultTextStyle, defaultParaStyle }

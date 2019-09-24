@@ -73,7 +73,7 @@ class PageBackground{
             class: 'bg-mask-top',
             style: {
                 width: (this.pageWidth - this.marginLeft - this.marginRight) + 'px',
-                height: this.marginBottom + 'px',
+                height: (this.marginBottom-1) + 'px',
                 position: 'absolute',
                 top: '0px',
                 left: this.marginLeft+'px',
@@ -87,7 +87,7 @@ class PageBackground{
                 width: (this.pageWidth - this.marginLeft - this.marginRight) + 'px',
                 height: this.marginBottom + 'px',
                 position: 'absolute',
-                top: (this.pageHeight-this.marginBottom)+'px',
+                top: (this.pageHeight-this.marginBottom+1)+'px',
                 left: this.marginLeft+'px',
                 background: '#fff',
                 zIndex: 9,
