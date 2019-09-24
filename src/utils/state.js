@@ -1,7 +1,8 @@
 import { measureFontTextWH, getCursorPos, getPageLeftHeight } from './measure'
 import { getPagePara, getPageTable, getPageBody, getPreviousInlineOfBody, 
     getNextInlineOfBody, getPreviousLineOfBody, getNextLineOfBody, getInlineBlockBodyIndex,
-    isTextStyleEqual, defaultTextStyle, defaultParaStyle } from './convert'
+    isTextStyleEqual, getRowColGridOfTableCell,
+    defaultTextStyle, defaultParaStyle } from './convert'
 import { getPageNo, measureEleDocXY } from '../utils/measure'
 
 import PageParagraph from '../components/PageParagraph'
@@ -668,6 +669,96 @@ var state = {
             // update image resizer
             state.mutations.updateImageResizer()
         },
+        mergeTableCell: function(payload){
+            let cells = payload.cells
+            let table = cells[0].parent
+
+            // get cells grid border
+            let r0 = -1
+            let c0 = -1
+            let r1 = -1
+            let c1 = -1
+            let area = {}
+            let cellsRowCol = {}
+            let cell0 = null
+            for(let ci = 0; ci < cells.length; ++ci){
+                let cell = cells[i]
+                let {rowGrid0, colGrid0, rowGrid1, colGrid1} = getRowColGridOfTableCell(cell)
+                let cr = cellsRowCol[rowGrid0]
+                if(cr){
+                    cr[colGrid0] = {
+                        cell
+                    }
+                }else{
+                    cr = {}
+                    cr[colGrid0] = {
+                        cell
+                    }
+                }
+                
+                for(let i = rowGrid0; i <= rowGrid1; ++i){
+                    for(let j = colGrid0; j <= colGrid0; ++j){
+                        area[i+"_"+j] = 1
+                    }
+                }
+
+                r0 = Math.min(r0, rowGrid0)
+                c0 = Math.min(c0, colGrid0)
+                r1 = Math.max(r1, rowGrid1)
+                c1 = Math.max(c1, colGrid1)
+
+                if(rowGrid0 == r0 && colGrid0 == c0){
+                    cell0 = cell
+                }
+            }
+
+            // check if cells grid is fully covered
+            for(let i = r0; i <= r1; ++i){
+                for(let j = c0; j <= c1; ++j){
+                    if(area[i+"_"+j] === undefined){
+                        return
+                    }
+                }
+            }
+
+            // collect cell pts
+            let allPts = cell0.pts
+            for(let i = r0; i <= r1; ++i){
+                let cr = cellsRowCol[i]
+                if(!cr){
+                    continue
+                }
+
+                for(let j = c0; j <= c1; ++j){
+                    let cc = cr[j]
+                    if(!cc){
+                        continue
+                    }
+
+                    allPts.concat(cc.pts)
+                }
+            }
+
+            // remove other cell
+            let otherCells = cells.filter(c=>c!==cell0)
+            for(let i = 0; i < table.cells.length; ++i){
+                let row = table.cells[i]
+                
+                otherCells.forEach(c=>{
+                    let ci = row.indexOf(c)
+                    if(ci >= 0){
+                        row.splice(ci, 1)
+                    }
+                })
+            }
+
+            // change cell0 rowspan and colspan
+            cell0.doc.rowspan = r1 - r0 + 1
+            cell0.doc.colspan = c1 - c0 + 1
+
+            // update table view
+            state.mutations._replaceTable(table)
+        },
         updateTableGrid: function(payload){
             let table = payload.table
             let columnIndex = payload.columnIndex
@@ -675,39 +766,7 @@ var state = {
 
             table.doc.grid[columnIndex] = columnWidth
 
-            let body = table.parent
-            let ptIndex = body.pts.indexOf(table)
-
-            // get last position bottom
-            let lastPosBottom = state.mutations._getParaLastPosBottom(body, ptIndex-1)
-                        
-            // update document paragraph
-            lastPosBottom = state.mutations._updateTable(body, ptIndex, lastPosBottom)
-
-            // adjust following spacing
-            lastPosBottom = state.mutations._adjustBodyPtFollowingSpacing(body, ptIndex+1, lastPosBottom)
-
-            // adjust parent following spacing
-            lastPosBottom = state.mutations._adjustBodyParentFollowingSpacing(body, lastPosBottom)
-
-            // update page background
-            state.mutations._updatePageBackground(lastPosBottom)
-
-            // update cursor
-            let ci = state.getters.cursorBodyIndex()
-            let front = state.document.cursor.front
-            let cbody = ci.body
-            let newBody = state.getters._matchTableCell(table, body.pts[ptIndex], cbody)
-            if(newBody){
-                cbody = newBody
-            }
-            let paraIndex = ci.paraIndex
-            let runIndex = ci.runIndex
-            let startIndex = ci.startIndex
-            state.mutations._updateCursor(cbody, paraIndex, runIndex, startIndex, front)
-
-            // update image resizer
-            state.mutations.updateImageResizer()
+            state.mutations._replaceTable(table)
         },
         deleteTableFromBody: function(table){
             let body = table.parent
@@ -1374,6 +1433,41 @@ var state = {
             lastPosBottom = state.mutations._adjustBodyParentFollowingSpacing(body, lastPosBottom)
             
             return lastPosBottom
+        },
+        _replaceTable(table){
+            let body = table.parent
+            let ptIndex = body.pts.indexOf(table)
+
+            // get last position bottom
+            let lastPosBottom = state.mutations._getParaLastPosBottom(body, ptIndex-1)
+                        
+            // update document paragraph
+            lastPosBottom = state.mutations._updateTable(body, ptIndex, lastPosBottom)
+
+            // adjust following spacing
+            lastPosBottom = state.mutations._adjustBodyPtFollowingSpacing(body, ptIndex+1, lastPosBottom)
+
+            // adjust parent following spacing
+            lastPosBottom = state.mutations._adjustBodyParentFollowingSpacing(body, lastPosBottom)
+
+            // update page background
+            state.mutations._updatePageBackground(lastPosBottom)
+
+            // update cursor
+            let ci = state.getters.cursorBodyIndex()
+            let front = state.document.cursor.front
+            let cbody = ci.body
+            let newBody = state.getters._matchTableCell(table, body.pts[ptIndex], cbody)
+            if(newBody){
+                cbody = newBody
+            }
+            let paraIndex = ci.paraIndex
+            let runIndex = ci.runIndex
+            let startIndex = ci.startIndex
+            state.mutations._updateCursor(cbody, paraIndex, runIndex, startIndex, front)
+
+            // update image resizer
+            state.mutations.updateImageResizer()
         },
         _mergePreviousPara(body, paraIndex){
             let bodyDoc = body.doc

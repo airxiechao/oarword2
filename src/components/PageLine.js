@@ -28,6 +28,7 @@ class PageLine{
                 marginTop: this.ls.spacingHeight+'px',
                 height: this.ls.lineHeight+'px',
                 cursor: 'text',
+                fontSize: 0,
             }
         }, inlineBlocks)
 

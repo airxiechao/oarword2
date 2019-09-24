@@ -487,6 +487,88 @@ function buildTextStyleCss(textStyle){
     return styleCss
 }
 
+function getRowColGridOfTableCell(cell){
+
+    let table = cell.parent
+
+    // find row and col index
+    let rowIndex = -1
+    let colIndex = -1
+    for(let i = 0; i < table.cells.length; ++i){
+        let row = table.cells[i]
+        for(let j = 0; j < row.length; ++j){
+            let col = row[j]
+            if(col === cell){
+                rowIndex = i
+                colIndex = j
+                break
+            }
+        }
+    }
+
+    if(rowIndex < 0 || colIndex < 0){
+        return {
+            rowGrid0: -1,
+            colGrid0: -1,
+            rowGrid1: -1,
+            colGrid1: -1,
+        }
+    }
+
+    // find row and col grid
+    let tableMultiRowCol = []
+    for(let i = 0; i < table.cells.length; ++i){
+        let row = table.cells[i]
+
+        // numCol is the column index of table grid
+        let numCol = 0
+        for(let j = 0; j < row.length; ++j){
+            let col = row[j]
+            let rowspan = col.doc.rowspan
+            let colspan = col.doc.colspan
+
+            let mc = {
+                r0: i,
+                r1: i + rowspan - 1,
+                c0: numCol,
+                c1: numCol + colspan - 1,
+            }
+
+            if(rowspan > 1){
+                tableMultiRowCol.push(mc)
+            }
+            
+            // calculate numCol
+            for(let mi = 0; mi < tableMultiRowCol.length; ++mi){
+                let mrc = tableMultiRowCol[mi]
+                if(i > mrc.r0 && i <= mrc.r1){
+                    if(numCol >= mrc.c0 && numCol <= mrc.c1){
+                        numCol += mrc.c1 - mrc.c0 + 1
+                    }
+                }
+            }
+
+            if(col === cell){
+                return {
+                    rowGrid0: i,
+                    colGrid0: i + rowspan - 1,
+                    rowGrid1: numCol,
+                    colGrid1: numCol + colspan - 1,
+                }
+            }
+
+            numCol += colspan
+        }
+    }
+
+    return {
+        rowGrid0: -1,
+        colGrid0: -1,
+        rowGrid1: -1,
+        colGrid1: -1,
+    }
+}
+
 const defaultTextStyle = {
     fontFamily: '宋体',
     fontSize: 14,
@@ -505,4 +587,5 @@ const defaultParaStyle = {
 export { paraRunsToLines, getLineInlineBlocksAndHeightFromQueue, getPageLeftHeight, 
          getPagePara, getPageBody, getPreviousInlineOfBody, getNextInlineOfBody,
          getPreviousLineOfBody, getNextLineOfBody, getInlineBlockBodyIndex, getPageTable,
-         isTextStyleEqual, buildTextStyleCss, defaultTextStyle, defaultParaStyle }
+         isTextStyleEqual, buildTextStyleCss, getRowColGridOfTableCell,
+         defaultTextStyle, defaultParaStyle }
