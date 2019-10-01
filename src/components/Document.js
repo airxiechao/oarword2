@@ -18,7 +18,7 @@ class Document{
         this.marginBottom = body.doc.grid.marginBottom
         this.marginLeft = body.doc.grid.marginLeft
         this.body = body
-
+        
         state.mutations.setDocumentObj(this)
     }
 

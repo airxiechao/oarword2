@@ -209,5 +209,117 @@ function getWidthFontTextPos(text, textStyle, width){
     }
 }
 
+function measureInlineBlockTextMouseStartIndex(e, ib){
+    let docXY = measureElePageXY(document.getElementsByClassName('doc')[0])
+    let elXY = measureEleDocXY(ib.obj.el)
+    let pointLeft = e.clientX - docXY.x - elXY.x
+    if(pointLeft < 0){
+        return false
+    }
+    
+    let lastw = 0
+    let found = false
+    for(var i = 1; i <= ib.text.length; ++i){
+        let t = ib.text.substr(0, i)
+        let wh = measureFontTextWH(t, ib.textStyle)
+
+        if(wh.w >= pointLeft){
+            found = true
+            break
+        }
+
+        lastw = wh.w
+    }
+    
+    if(found){
+        return {
+            inlineBlock: ib,
+            startIndex: i-1,
+        }
+    }
+
+    return null
+}
+
+function measureInlineBlockImageMouseStartIndex(e, ib){
+    let docXY = measureElePageXY(document.getElementsByClassName('doc')[0])
+    let elXY = measureEleDocXY(ib.obj.el)
+    let pointLeft = e.clientX - docXY.x - elXY.x
+    
+    if(pointLeft < 0 || pointLeft > ib.imageStyle.width){
+        return null;
+    }
+
+    return {
+        inlineBlock: ib,
+        startIndex: 0,
+    }
+}
+
+function measureLineMouseStartIndex(lineObj, e){
+    let found = null
+    for(let i = 0; i < lineObj.ls.inlineBlocks.length; ++i){
+        let ib = lineObj.ls.inlineBlocks[i]
+        
+        if(ib.type == 'text'){
+            found = measureInlineBlockTextMouseStartIndex(e, ib)     
+        }else if(ib.type == 'image'){
+            found = measureInlineBlockImageMouseStartIndex(e, ib)
+        }
+
+        if(found){
+            return found
+        }
+    }
+
+    if(!found){
+        let ib = lineObj.ls.inlineBlocks[lineObj.ls.inlineBlocks.length-1]
+        
+        if(ib.type == 'text'){
+            let si = Math.max(0, ib.text.length-1)
+            return {
+                inlineBlock: ib,
+                startIndex: si,
+            }  
+        }else if(ib.type == 'image'){
+            return {
+                inlineBlock: ib,
+                startIndex: 0,
+            }
+        }
+    }
+}
+
+function measureInlineBlockSpanX(inlineBlock, startIndex, endIndex){
+    if(inlineBlock.type == 'text'){
+        let text = inlineBlock.text
+        let textStyle = inlineBlock.textStyle
+        
+        let startX = 0
+        if( startIndex > 0 ){
+            let t1 = text.substr(0, startIndex)
+            let w1 = measureFontTextWH(t1, textStyle).w
+            startX = w1
+        }
+
+        let endX = 0
+        if( endIndex > 0 ){
+            let t2 = text.substr(0, endIndex+1)
+            let w2 = measureFontTextWH(t2, textStyle).w
+            endX = w2
+        }
+
+        return {
+            startX: startX,
+            endX: endX,
+        }
+    }else if(inlineBlock.type == 'image'){
+        return {
+            startX: 0,
+            endX:  inlineBlock.imageStyle.width,
+        }
+    }
+}
+
 export { measureFontTextWH, measureImageWH, measureElePageXY, measureEleDocXY, getCursorPos, getPageNo, getPageLeftHeight,
-         getWidthFontTextPos }
+         getWidthFontTextPos, measureLineMouseStartIndex, measureInlineBlockSpanX }

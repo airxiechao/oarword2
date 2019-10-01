@@ -15,8 +15,6 @@ class PageBody{
         this.marginLeft = body.doc.grid.marginLeft
         this.body = body
         this.lastPosBottom = lastPosBottom
-
-        state.mutations.setDocumentObj(this)
     }
 
     render(){

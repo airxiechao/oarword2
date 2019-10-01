@@ -1,13 +1,13 @@
 import { measureFontTextWH, getCursorPos, getPageLeftHeight } from './measure'
 import { getPagePara, getPageTable, getPageBody, getPreviousInlineOfBody, 
     getNextInlineOfBody, getPreviousLineOfBody, getNextLineOfBody, getInlineBlockBodyIndex,
-    isTextStyleEqual, buildEmptyTableCell, getRowColGridOfTableCell,
-    defaultTextStyle, defaultParaStyle } from './convert'
+    isTextStyleEqual, buildEmptyTableCell, getRowColGridOfTableCell } from './convert'
 import { getPageNo, measureEleDocXY } from '../utils/measure'
 
 import PageParagraph from '../components/PageParagraph'
 import PageTable from '../components/PageTable'
 import PageBackground from '../components/PageBackground'
+import DocRangeSelect from '../components/DocRangeSelect'
 
 var state = {
     document: {
@@ -17,6 +17,21 @@ var state = {
             front: false,
         },
         imageResizer: {},
+        rangeSelect: {
+            dragged: false,
+            overlays: [],
+            dragger: null,
+            start: {
+                line: null,
+                inlineBlock: null,
+                startIndex: null,
+            },
+            end: {
+                line: null,
+                inlineBlock: null,
+                startIndex: null,
+            },
+        },
         inputBox: {},
         body: null,
     },
@@ -73,6 +88,66 @@ var state = {
         },
         cloneToolbarParaStyle: function(){
             return Object.assign({}, state.toolbar.paraStyle)
+        },
+        getRangeSelectInlineBlocks: function(){
+            let startLine = state.document.rangeSelect.start.line
+            let startIb = state.document.rangeSelect.start.inlineBlock
+            let startSi = state.document.rangeSelect.start.startIndex
+            let startPara = startIb.parent.parent
+            let startBody = startPara.parent
+
+            let endLine = state.document.rangeSelect.end.line
+            let endIb = state.document.rangeSelect.end.inlineBlock
+            let endSi = state.document.rangeSelect.end.startIndex
+            let endPara = endIb.parent.parent
+            let endBody = endPara.parent
+
+            if(!startLine || !endLine){
+                return []
+            }
+
+            let pi = startBody.pts.indexOf(startPara)
+            let li = startPara.lines.indexOf(startLine)
+            let bi = startLine.inlineBlocks.indexOf(startIb)
+
+            let range = []
+            ptLoop: for(let i = pi; i < startBody.pts.length; ++i){
+                let para = startBody.pts[i]
+                if(para.type == 'table'){
+                    break ptLoop
+                }
+
+                for(let j = 0; j < para.lines.length; ++j){
+                    if(i == pi && j == 0){
+                        j = li
+                    }
+
+                    let line = para.lines[j]
+                    for(let k = 0; k < line.inlineBlocks.length; ++k){
+                        if(i == pi && j == li && k == 0){
+                            k = bi
+                        }
+
+                        let ib = line.inlineBlocks[k]
+
+                        let selectInlineBlock = ib
+                        let selectStartIndex = ib === startIb ? startSi : 0
+                        let selectEndIndex = ib === endIb ? endSi : (ib.type == 'text' ? ib.text.length-1 : 0)
+
+                        range.push({
+                            inlineBlock: selectInlineBlock,
+                            startIndex: selectStartIndex,
+                            endIndex: selectEndIndex,
+                        })
+                        
+                        if(ib === endIb){
+                            break ptLoop
+                        }
+                    }
+                }
+            }
+            
+            return range
         },
         _matchTableCell: function(oldTable, newTable, oldBody, deleteRowIndex, deleteColumnIndex){
 
@@ -165,6 +240,60 @@ var state = {
         },
         hideImageResizer: function(){
             state.document.imageResizer.obj.hide()
+        },
+        updateRangeSelectDragged(dragged){
+            state.document.rangeSelect.dragged = dragged
+        },
+        startRangeSelect: function(dragger, line, inlineBlock, startIndex){
+            state.mutations.clearRangeSelectOverlays()
+
+            state.document.rangeSelect.dragger = dragger
+            state.document.rangeSelect.start = {
+                line: line,
+                inlineBlock: inlineBlock,
+                startIndex: startIndex,
+            }
+        },
+        dragRangeSelect: function(line, inlineBlock, startIndex){
+            state.mutations.clearRangeSelectOverlays()
+
+            state.document.rangeSelect.end = {
+                line: line,
+                inlineBlock: inlineBlock,
+                startIndex: startIndex,
+            }
+
+            state.mutations.showRangeSelectOverlays()
+        },
+        endRangeSelect: function(line, inlineBlock, startIndex){
+            state.mutations.clearRangeSelectOverlays()
+
+            let dragger = state.document.rangeSelect.dragger
+            if(dragger){
+                state.document.rangeSelect.dragger = null
+                state.document.rangeSelect.end = {
+                    line: line,
+                    inlineBlock: inlineBlock,
+                    startIndex: startIndex,
+                }
+
+                state.mutations.showRangeSelectOverlays()
+            }
+        },
+        showRangeSelectOverlays: function(){
+            let range = state.getters.getRangeSelectInlineBlocks()
+            let select = new DocRangeSelect(range)
+            select.render()
+
+            state.document.rangeSelect.overlays.push(select)
+        },
+        clearRangeSelectOverlays: function(){
+            for(let i = 0; i < state.document.rangeSelect.overlays.length; ++i){
+                let overlay = state.document.rangeSelect.overlays[i]
+                overlay.remove()
+            }
+
+            state.document.rangeSelect.overlays = []
         },
         updateImageResizer: function(){
             state.document.imageResizer.obj.updateTarget()

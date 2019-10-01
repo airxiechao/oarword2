@@ -1,7 +1,7 @@
 import PageInlineBlock from './PageInlineBlock'
 
 import { createElement } from '../utils/renderer'
-import { measureFontTextWH, measureElePageXY, measureEleDocXY } from '../utils/measure.js'
+import { measureFontTextWH, measureElePageXY, measureEleDocXY, measureLineMouseStartIndex } from '../utils/measure.js'
 
 class PageLine{
     constructor(ls){
@@ -33,8 +33,45 @@ class PageLine{
         }, inlineBlocks)
 
         window.goog.events.listen(this.el, window.goog.events.EventType.CLICK, this.clickLineHandler.bind(this));
+        window.goog.events.listen(this.el, window.goog.events.EventType.MOUSEDOWN, this.mouseDownLineHandler.bind(this));
+        window.goog.events.listen(this.el, window.goog.events.EventType.MOUSEMOVE, this.mouseMoveLineHandler.bind(this));
+        window.goog.events.listen(this.el, window.goog.events.EventType.MOUSEUP, this.mouseUpLineHandler.bind(this));
 
         return this.el
+    }
+
+    mouseDownLineHandler(e){
+        let resizer = e.target
+        let dragger = new goog.fx.Dragger(resizer)
+        state.mutations.updateRangeSelectDragged(false)
+        
+        dragger.addEventListener(goog.fx.Dragger.EventType.DRAG, function(e) {
+            if(!state.document.rangeSelect.dragged){
+                state.mutations.updateRangeSelectDragged(true)
+
+                let { inlineBlock, startIndex } = measureLineMouseStartIndex(this, e)
+                state.mutations.startRangeSelect(dragger, this.ls, inlineBlock, startIndex)
+            }
+            
+        }.bind(this))
+
+        dragger.addEventListener(goog.fx.Dragger.EventType.END, function(e) {
+            dragger.dispose();
+        }.bind(this))
+
+        dragger.startDrag(e);
+    }
+
+    mouseMoveLineHandler(e){
+        if(state.document.rangeSelect.dragged && state.document.rangeSelect.dragger){
+            let { inlineBlock, startIndex } = measureLineMouseStartIndex(this, e)
+            state.mutations.dragRangeSelect(this.ls, inlineBlock, startIndex)
+        }
+    }
+
+    mouseUpLineHandler(e){
+        let { inlineBlock, startIndex } = measureLineMouseStartIndex(this, e)
+        state.mutations.endRangeSelect(this.ls, inlineBlock, startIndex)
     }
 
     clickLineHandler(e){
