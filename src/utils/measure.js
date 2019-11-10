@@ -303,7 +303,7 @@ function measureInlineBlockSpanX(inlineBlock, startIndex, endIndex){
         }
 
         let endX = 0
-        if( endIndex > 0 ){
+        if( endIndex >= 0 ){
             let t2 = text.substr(0, endIndex+1)
             let w2 = measureFontTextWH(t2, textStyle).w
             endX = w2
