@@ -314,10 +314,54 @@ var state = {
 
             state.document.rangeSelect.overlays = []
         },
+        updateRangeSelectStart(body, paraIndex, lineIndex, inlineBlockIndex, startIndex){
+            let para = body.pts[paraIndex]
+            let line = para.lines[lineIndex]
+            let inlineBlock = line.inlineBlocks[inlineBlockIndex]
+            state.document.rangeSelect.start = {
+                line: line,
+                inlineBlock: inlineBlock,
+                startIndex: startIndex,
+            }
+        },
+        updateRangeSelectEnd(body, paraIndex, lineIndex, inlineBlockIndex, startIndex){
+            let para = body.pts[paraIndex]
+            let line = para.lines[lineIndex]
+            let inlineBlock = line.inlineBlocks[inlineBlockIndex]
+
+            if(startIndex == -1){
+                if(inlineBlock.type == 'text'){
+                    let text = inlineBlock.text
+                    startIndex = text.length - 1
+                }else{
+                    startIndex = 0
+                }
+            }
+
+            state.document.rangeSelect.end = {
+                line: line,
+                inlineBlock: inlineBlock,
+                startIndex: startIndex,
+            }
+        },
         adjustRangeSelectInlineBlockDocs: function(){
             let range = state.getters.getRangeSelectInlineBlocks()
             let lastBody = null
             let lastParaIndex = null
+
+            let rangeSelectStartBody = null
+            let rangeSelectStartParaIndex = null
+            let rangeSelectStartLineIndex = null
+            let rangeSelectStartInlineBlockIndex = null
+            let rangeSelectStartStartIndex = null
+            let rangeSelectStartSplit = false
+
+            let rangeSelectEndBody = null
+            let rangeSelectEndParaIndex = null
+            let rangeSelectEndLineIndex = null
+            let rangeSelectEndInlineBlockIndex = null
+            let rangeSelectEndStartIndex = null
+
             for(let i = 0; i < range.length; ++i){
                 let { inlineBlock, startIndex, endIndex } = range[i]
                 let body = inlineBlock.parent.parent.parent
@@ -325,6 +369,55 @@ var state = {
                 let paraDoc = inlineBlock.parent.parent.doc
                 let paraIndex = bodyDoc.pts.indexOf(paraDoc)
                 let runIndex = paraDoc.runs.indexOf(inlineBlock.doc)
+
+                if(i == 0){
+                    // range select start
+                    let { line, inlineBlock, startIndex } = state.document.rangeSelect.start
+                    let para = line.parent
+                    let lineIndex = para.lines.indexOf(line)
+                    let inlineBlockIndex = line.inlineBlocks.indexOf(inlineBlock)
+                    
+                    rangeSelectStartBody = body
+                    rangeSelectStartParaIndex = paraIndex
+                    rangeSelectStartLineIndex = lineIndex
+                    if(inlineBlock.type == 'text'){
+                        if(startIndex == 0){
+                            rangeSelectStartInlineBlockIndex = inlineBlockIndex
+                            rangeSelectStartStartIndex = startIndex
+                        }else{
+                            rangeSelectStartInlineBlockIndex = inlineBlockIndex + 1
+                            rangeSelectStartStartIndex = 0
+                            rangeSelectStartSplit = true
+                        }
+                    }else{
+                        rangeSelectStartInlineBlockIndex = inlineBlockIndex
+                        rangeSelectStartStartIndex = startIndex
+                    }
+                }
+                
+                if(i == range.length - 1){
+                    // range select end
+                    let { line, inlineBlock, startIndex } = state.document.rangeSelect.end
+                    let para = line.parent
+                    let lineIndex = para.lines.indexOf(line)
+                    let inlineBlockIndex = line.inlineBlocks.indexOf(inlineBlock)
+                    
+                    rangeSelectEndBody = body
+                    rangeSelectEndParaIndex = paraIndex
+                    rangeSelectEndLineIndex = lineIndex
+
+                    if(state.document.rangeSelect.start.inlineBlock === state.document.rangeSelect.end.inlineBlock && rangeSelectStartSplit){
+                        inlineBlockIndex += 1
+                    }
+
+                    if(inlineBlock.type == 'text'){
+                        rangeSelectEndInlineBlockIndex = inlineBlockIndex
+                        rangeSelectEndStartIndex = -1
+                    }else{
+                        rangeSelectEndInlineBlockIndex = inlineBlockIndex
+                        rangeSelectEndStartIndex = startIndex
+                    }
+                }
 
                 if(inlineBlock.type == 'text'){
                     let text = inlineBlock.text
@@ -353,7 +446,20 @@ var state = {
             }
 
             // update range select
-            
+            state.mutations.updateRangeSelectStart(
+                rangeSelectStartBody, 
+                rangeSelectStartParaIndex,
+                rangeSelectStartLineIndex,
+                rangeSelectStartInlineBlockIndex,
+                rangeSelectStartStartIndex)
+
+            state.mutations.updateRangeSelectEnd(
+                rangeSelectEndBody,
+                rangeSelectEndParaIndex,
+                rangeSelectEndLineIndex,
+                rangeSelectEndInlineBlockIndex,
+                rangeSelectEndStartIndex
+            )
         },
         
         // ----------------------------------------------------------------- cursor mutation -------------------------------------------------------
