@@ -101,7 +101,7 @@ var doc = {
             runs: [
                 {
                     type: 'text',
-                    text: 'ccc',
+                    text: 'ccccccccccccccccccccccc',
                     textStyle: defaultTextStyle,
                 },
                 {

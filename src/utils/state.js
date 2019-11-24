@@ -316,23 +316,44 @@ var state = {
         },
         adjustRangeSelectInlineBlockDocs: function(){
             let range = state.getters.getRangeSelectInlineBlocks()
+            let lastBody = null
+            let lastParaIndex = null
             for(let i = 0; i < range.length; ++i){
                 let { inlineBlock, startIndex, endIndex } = range[i]
+                let body = inlineBlock.parent.parent.parent
+                let bodyDoc = body.doc
+                let paraDoc = inlineBlock.parent.parent.doc
+                let paraIndex = bodyDoc.pts.indexOf(paraDoc)
+                let runIndex = paraDoc.runs.indexOf(inlineBlock.doc)
+
                 if(inlineBlock.type == 'text'){
                     let text = inlineBlock.text
                     if(startIndex > 0 || endIndex < text.length - 1){
-                        let body = inlineBlock.parent.parent.parent
-                        let bodyDoc = body.doc
-                        let paraDoc = inlineBlock.parent.parent.doc
-                        let paraIndex = bodyDoc.pts.indexOf(paraDoc)
-                        let runIndex = paraDoc.runs.indexOf(inlineBlock.doc)
                         startIndex += inlineBlock.startIndex
                         endIndex += inlineBlock.startIndex
 
                         state.mutations._splitRunText(bodyDoc, paraIndex, runIndex, startIndex, endIndex)
+
+                        // paragraph changed
+                        if(lastBody !== null && lastParaIndex !== null && lastParaIndex != paraIndex){
+                            let lastPosBottom = state.mutations._getParaLastPosBottom(lastBody, lastParaIndex)
+                            state.mutations._updatePara(lastBody, lastParaIndex, lastPosBottom)
+                        }
+
+                        lastBody = body
+                        lastParaIndex = paraIndex
                     }
                 }
             }
+
+            // paragraph changed
+            if(lastBody !== null && lastParaIndex !== null){
+                let lastPosBottom = state.mutations._getParaLastPosBottom(lastBody, lastParaIndex)
+                state.mutations._updatePara(lastBody, lastParaIndex, lastPosBottom)
+            }
+
+            // update range select
+            
         },
         
         // ----------------------------------------------------------------- cursor mutation -------------------------------------------------------
