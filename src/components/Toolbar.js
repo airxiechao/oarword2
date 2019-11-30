@@ -315,21 +315,25 @@ class Toolbar{
     fontFamilyChanged(){
         let fontFamily = this.getValue()
         state.mutations.setToolbarTextStyle('fontFamily', fontFamily)
+        state.mutations.setRangeSelectInlineBlocksTextStyleAsToolbar()
     }
 
     fontSizeChanged(){
         let fontSize = this.getValue()
         state.mutations.setToolbarTextStyle('fontSize', Number(fontSize))
+        state.mutations.setRangeSelectInlineBlocksTextStyleAsToolbar()
     }
 
     colorChanged(){
         let color = this.getValue()
         state.mutations.setToolbarTextStyle('color', color)
+        state.mutations.setRangeSelectInlineBlocksTextStyleAsToolbar()
     }
 
     backgroundColorChanged(){
         let backgroundColor = this.getValue()
         state.mutations.setToolbarTextStyle('backgroundColor', backgroundColor ? backgroundColor : 'unset')
+        state.mutations.setRangeSelectInlineBlocksTextStyleAsToolbar()
     }
 
     fontWeightChanged(){
@@ -340,6 +344,7 @@ class Toolbar{
             fontWeight = 'normal';
         }
         state.mutations.setToolbarTextStyle('fontWeight', fontWeight)
+        state.mutations.setRangeSelectInlineBlocksTextStyleAsToolbar()
     }
 
     fontStyleChanged(){
@@ -350,6 +355,7 @@ class Toolbar{
             fontStyle = 'normal';
         }
         state.mutations.setToolbarTextStyle('fontStyle', fontStyle)
+        state.mutations.setRangeSelectInlineBlocksTextStyleAsToolbar()
     }
 
     textDecorationChanged(){
@@ -360,6 +366,7 @@ class Toolbar{
             textDecoration = 'none';
         }
         state.mutations.setToolbarTextStyle('textDecoration', textDecoration)
+        state.mutations.setRangeSelectInlineBlocksTextStyleAsToolbar()
     }
 
     verticalAlignChanged(){
@@ -370,6 +377,7 @@ class Toolbar{
             verticalAlign = 'sub';
         }
         state.mutations.setToolbarTextStyle('verticalAlign', verticalAlign)
+        state.mutations.setRangeSelectInlineBlocksTextStyleAsToolbar()
     }
 
     textAlignChanged(){

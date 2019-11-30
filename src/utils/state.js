@@ -149,6 +149,9 @@ var state = {
             
             return range
         },
+        hasRangeSelectOverlays: function(){
+            return state.document.rangeSelect.overlays.length > 0
+        },
         _matchTableCell: function(oldTable, newTable, oldBody, deleteRowIndex, deleteColumnIndex){
 
             let iterBody = function(body, newBody, oldBody){
@@ -344,7 +347,7 @@ var state = {
                 startIndex: startIndex,
             }
         },
-        adjustRangeSelectInlineBlockDocs: function(){
+        adjustRangeSelectInlineBlock: function(textStyle){
             let range = state.getters.getRangeSelectInlineBlocks()
             let lastBody = null
             let lastParaIndex = null
@@ -426,16 +429,22 @@ var state = {
                         endIndex += inlineBlock.startIndex
 
                         state.mutations._splitRunText(bodyDoc, paraIndex, runIndex, startIndex, endIndex)
-
-                        // paragraph changed
-                        if(lastBody !== null && lastParaIndex !== null && lastParaIndex != paraIndex){
-                            let lastPosBottom = state.mutations._getParaLastPosBottom(lastBody, lastParaIndex)
-                            state.mutations._updatePara(lastBody, lastParaIndex, lastPosBottom)
+                        if(i == 0){
+                            runIndex += 1
                         }
-
-                        lastBody = body
-                        lastParaIndex = paraIndex
                     }
+
+                    // change text style
+                    bodyDoc.pts[paraIndex].runs[runIndex].textStyle = textStyle
+
+                    // paragraph changed
+                    if(lastBody !== null && lastParaIndex !== null && lastParaIndex != paraIndex){
+                        let lastPosBottom = state.mutations._getParaLastPosBottom(lastBody, lastParaIndex)
+                        state.mutations._updatePara(lastBody, lastParaIndex, lastPosBottom)
+                    }
+
+                    lastBody = body
+                    lastParaIndex = paraIndex
                 }
             }
 
@@ -460,6 +469,18 @@ var state = {
                 rangeSelectEndInlineBlockIndex,
                 rangeSelectEndStartIndex
             )
+
+            // update range select overlay
+            state.mutations.clearRangeSelectOverlays()
+            state.mutations.showRangeSelectOverlays()
+
+            // update cursor
+            let endIb = state.document.rangeSelect.end.inlineBlock
+            state.document.cursor.inlineBlock = endIb
+            state.document.cursor.inlineStartIndex = endIb.type == 'text' ? endIb.text.length - 1 : 0
+            state.document.cursor.front = false
+            state.mutations._updateCursorAndInputBoxPos()
+            state.mutations.updateImageResizer()
         },
         
         // ----------------------------------------------------------------- cursor mutation -------------------------------------------------------
@@ -558,6 +579,14 @@ var state = {
 
             state.mutations._updateCursorAndInputBoxPos()
             state.mutations.updateImageResizer()
+        },
+        setRangeSelectInlineBlocksTextStyleAsToolbar: function(){
+            if(!state.getters.hasRangeSelectOverlays()){
+                return
+            }
+
+            let textStyle = state.getters.cloneToolbarTextStyle()
+            state.mutations.adjustRangeSelectInlineBlock(textStyle)
         },
 
         // ----------------------------------------------------------- move cursor mutation -----------------------------------------------------------
@@ -1982,6 +2011,12 @@ var state = {
             window.goog.dom.replaceNode(newPagePara.render(), oldPagePara)
             
             lastPosBottom += newPara.paraHeight
+
+            // adjust following page paragraph spacing
+            lastPosBottom = state.mutations._adjustBodyPtFollowingSpacing(body, paraIndex+1, lastPosBottom)
+            
+            // adjust parent following spacing
+            lastPosBottom = state.mutations._adjustBodyParentFollowingSpacing(body, lastPosBottom)
             
             return lastPosBottom
         },
