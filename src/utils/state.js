@@ -1,7 +1,7 @@
 import { measureFontTextWH, getCursorPos, getPageLeftHeight } from './measure'
 import { getPagePara, getPageTable, getPageBody, getPreviousInlineOfBody, 
     getNextInlineOfBody, getPreviousLineOfBody, getNextLineOfBody, getInlineBlockBodyIndex,
-    isTextStyleEqual, buildEmptyTableCell, getRowColGridOfTableCell } from './convert'
+    isTextStyleEqual, buildEmptyTableCell, getRowColGridOfTableCell, getInlineBlockByRun } from './convert'
 import { getPageNo, measureEleDocXY } from '../utils/measure'
 
 import PageParagraph from '../components/PageParagraph'
@@ -318,6 +318,16 @@ var state = {
             state.document.rangeSelect.overlays = []
         },
         updateRangeSelectStart(body, paraIndex, lineIndex, inlineBlockIndex, startIndex){
+
+            if(!body){
+                state.document.rangeSelect.start = {
+                    line: null,
+                    inlineBlock: null,
+                    startIndex: null,
+                }
+                return
+            }
+
             let para = body.pts[paraIndex]
             let line = para.lines[lineIndex]
             let inlineBlock = line.inlineBlocks[inlineBlockIndex]
@@ -328,6 +338,16 @@ var state = {
             }
         },
         updateRangeSelectEnd(body, paraIndex, lineIndex, inlineBlockIndex, startIndex){
+
+            if(!body){
+                state.document.rangeSelect.end = {
+                    line: null,
+                    inlineBlock: null,
+                    startIndex: null,
+                }
+                return
+            }
+
             let para = body.pts[paraIndex]
             let line = para.lines[lineIndex]
             let inlineBlock = line.inlineBlocks[inlineBlockIndex]
@@ -435,7 +455,9 @@ var state = {
                     }
 
                     // change text style
-                    bodyDoc.pts[paraIndex].runs[runIndex].textStyle = textStyle
+                    if(textStyle){
+                        bodyDoc.pts[paraIndex].runs[runIndex].textStyle = textStyle
+                    }
 
                     // paragraph changed
                     if(lastBody !== null && lastParaIndex !== null && lastParaIndex != paraIndex){
@@ -479,6 +501,113 @@ var state = {
             state.document.cursor.inlineBlock = endIb
             state.document.cursor.inlineStartIndex = endIb.type == 'text' ? endIb.text.length - 1 : 0
             state.document.cursor.front = false
+            state.mutations._updateCursorAndInputBoxPos()
+            state.mutations.updateImageResizer()
+        },
+        deleteRangeSelectInlineBlock: function(){
+            state.mutations.adjustRangeSelectInlineBlock()
+
+            let range = state.getters.getRangeSelectInlineBlocks()
+            let lastBody = null
+            let lastParaIndex = null
+
+            let rangeSelectStartBody = null
+            let rangeSelectStartParaIndex = null
+            let rangeSelectStartLineIndex = null
+            let rangeSelectStartInlineBlockIndex = null
+            let rangeSelectStartRunIndex = null
+            let rangeSelectStartStartIndex = null
+            let rangeSelectStartSplit = false
+
+            let rangeSelectEndBody = null
+            let rangeSelectEndParaIndex = null
+            let rangeSelectEndLineIndex = null
+            let rangeSelectEndInlineBlockIndex = null
+            let rangeSelectEndStartIndex = null
+
+            for(let i = 0; i < range.length; ++i){
+                let { inlineBlock, startIndex, endIndex } = range[i]
+                let body = inlineBlock.parent.parent.parent
+                let bodyDoc = body.doc
+                let paraDoc = inlineBlock.parent.parent.doc
+                let paraIndex = bodyDoc.pts.indexOf(paraDoc)
+                let runIndex = paraDoc.runs.indexOf(inlineBlock.doc)
+
+                if(i == 0){
+                    // range select start
+                    rangeSelectStartBody = body
+                    rangeSelectStartParaIndex = paraIndex
+                    rangeSelectStartRunIndex = runIndex
+                }
+
+                if(i == range.length - 1){
+                    // range select end
+                    rangeSelectEndBody = body
+                    rangeSelectEndParaIndex = paraIndex
+                }
+
+                // delete inline block
+                state.mutations._deleteRun(bodyDoc, paraIndex, runIndex)
+
+                // paragraph changed
+                if(lastBody !== null && lastParaIndex !== null && lastParaIndex != paraIndex){
+                    if(lastBody.doc.pts[lastParaIndex].runs.length == 0){
+                        state.mutations._deletePt(lastBody, lastParaIndex)
+    
+                        body = null
+                        paraIndex = null
+                    }else{
+                        let lastPosBottom = state.mutations._getParaLastPosBottom(lastBody, lastParaIndex)
+                        state.mutations._updatePara(lastBody, lastParaIndex, lastPosBottom)
+                    }
+                }
+
+                lastBody = body
+                lastParaIndex = paraIndex
+            }
+
+            // paragraph changed
+            if(lastBody !== null && lastParaIndex !== null){
+                if(lastBody.doc.pts[lastParaIndex].runs.length == 0){
+                    state.mutations._deletePt(lastBody, lastParaIndex)
+                }else{
+                    if(rangeSelectEndParaIndex != rangeSelectStartParaIndex){
+                        state.mutations._mergePreviousPara(lastBody, lastParaIndex)
+                        lastParaIndex -= 1
+                    }
+
+                    let lastPosBottom = state.mutations._getParaLastPosBottom(lastBody, lastParaIndex)
+                    state.mutations._updatePara(lastBody, lastParaIndex, lastPosBottom)
+                }
+            }
+
+            // update range select
+            state.mutations.updateRangeSelectStart(null)
+
+            state.mutations.updateRangeSelectEnd(null)
+
+            // update range select overlay
+            state.mutations.clearRangeSelectOverlays()
+
+            // update cursor
+            let cib = null
+            let csi = 0
+            let cft = true
+            if(rangeSelectStartBody.doc.pts[rangeSelectStartParaIndex].runs.length - 1 < rangeSelectStartRunIndex){
+                rangeSelectStartRunIndex = rangeSelectStartBody.doc.pts[rangeSelectStartParaIndex].runs.length - 1
+                cib = getInlineBlockByRun(rangeSelectStartBody, rangeSelectStartParaIndex, rangeSelectStartRunIndex, 0)
+                if(cib.type == 'text'){
+                    csi = cib.text.length - 1
+                    cft = false
+                }
+            }else{
+                cib = getInlineBlockByRun(rangeSelectStartBody, rangeSelectStartParaIndex, rangeSelectStartRunIndex, 0)
+            }
+
+            state.document.cursor.inlineBlock = cib
+            state.document.cursor.inlineStartIndex = csi
+            state.document.cursor.front = cft
+            
             state.mutations._updateCursorAndInputBoxPos()
             state.mutations.updateImageResizer()
         },
@@ -1529,6 +1658,10 @@ var state = {
          ***********************************************************************************************************************************/
 
         // ------------------------------------------------------- private run mutation ------------------------------------------------------------
+        _deleteRun(bodyDoc, paraIndex, runIndex){
+            var para = bodyDoc.pts[paraIndex]
+            para.runs.splice(runIndex, 1)
+        },
         _deleteRunImage(bodyDoc, paraIndex, runIndex){
             var para = bodyDoc.pts[paraIndex]
             para.runs.splice(runIndex, 1)

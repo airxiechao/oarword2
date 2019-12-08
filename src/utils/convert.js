@@ -460,6 +460,30 @@ function getInlineBlockBodyIndex(inlineBlock){
     }
 }
 
+function getInlineBlockByRun(body, paraIndex, runIndex, startIndex){
+    let para = body.pts[paraIndex]
+    let run = para.doc.runs[runIndex]
+    for(let i = 0; i < para.lines.length; ++i){
+        let line = para.lines[i]
+        for(let j = 0; j < line.inlineBlocks.length; ++j){
+            let ib = line.inlineBlocks[j]
+            if(ib.doc == run){
+                if(ib.startIndex == startIndex){
+                    return ib
+                }else{
+                    if(ib.type == 'text'){
+                        if(ib.startIndex > startIndex && startIndex < ib.startIndex+ib.text.length){
+                            return ib
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return null
+}
+
 function isTextStyleEqual(textStyle1, textStyle2){
     let keys = ['fontFamily', 'fontSize', 'color', 'backgroundColor', 'fontWeight', 'fontStyle', 'textDecoration', 'verticalAlign']
     let equal = true
@@ -614,4 +638,4 @@ export { paraRunsToLines, getLineInlineBlocksAndHeightFromQueue, getPageLeftHeig
          getPagePara, getPageBody, getPreviousInlineOfBody, getNextInlineOfBody,
          getPreviousLineOfBody, getNextLineOfBody, getInlineBlockBodyIndex, getPageTable,
          isTextStyleEqual, buildTextStyleCss, buildEmptyTableCell, getRowColGridOfTableCell,
-         defaultTextStyle, defaultParaStyle }
+         defaultTextStyle, defaultParaStyle, getInlineBlockByRun }

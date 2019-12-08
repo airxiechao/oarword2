@@ -245,7 +245,11 @@ class DocInputBox{
             // key delete
             case 8:
             {
-                state.mutations.deleteFromParaRun()
+                if(state.getters.hasRangeSelectOverlays()){
+                    state.mutations.deleteRangeSelectInlineBlock()
+                }else{
+                    state.mutations.deleteFromParaRun()
+                }
                 break;
             }
             // key enter
