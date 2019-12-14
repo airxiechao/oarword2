@@ -53,9 +53,15 @@ class DocInputBox{
 
     inputHandler(e){
         if(!this.imeStatus){
-            if(this.el.textContent != ''){
+            let text = this.el.textContent 
+
+            if(state.getters.hasRangeSelectOverlays()){
+                state.mutations.deleteRangeSelectInlineBlock()
+            }
+            
+            if(text != ''){
                 state.mutations.addTextToParaRun({
-                    text: this.el.textContent,
+                    text: text,
                     textStyle: state.getters.cloneToolbarTextStyle(),
                 })
                 this.el.textContent = ''
@@ -164,6 +170,10 @@ class DocInputBox{
 
     imeHandler(e){
         if(e.type == 'startIme' ) {
+            if(state.getters.hasRangeSelectOverlays()){
+                state.mutations.deleteRangeSelectInlineBlock()
+            }
+            
             this.imeStatus = true
             state.mutations.setImeStatus(this.imeStatus)
 
@@ -255,6 +265,9 @@ class DocInputBox{
             // key enter
             case 13:
             {
+                if(state.getters.hasRangeSelectOverlays()){
+                    state.mutations.deleteRangeSelectInlineBlock()
+                }
                 state.mutations.splitParaRun()
                 break;
             }

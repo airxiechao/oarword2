@@ -461,8 +461,15 @@ var state = {
 
                     // paragraph changed
                     if(lastBody !== null && lastParaIndex !== null && lastParaIndex != paraIndex){
+                        // update para
                         let lastPosBottom = state.mutations._getParaLastPosBottom(lastBody, lastParaIndex)
-                        state.mutations._updatePara(lastBody, lastParaIndex, lastPosBottom)
+                        lastPosBottom = state.mutations._updatePara(lastBody, lastParaIndex, lastPosBottom)
+                        
+                        // adjust following page paragraph spacing
+                        lastPosBottom = state.mutations._adjustBodyPtFollowingSpacing(lastBody, lastParaIndex+1, lastPosBottom)
+                        
+                        // adjust parent following spacing
+                        lastPosBottom = state.mutations._adjustBodyParentFollowingSpacing(lastBody, lastPosBottom)
                     }
 
                     lastBody = body
@@ -473,7 +480,13 @@ var state = {
             // paragraph changed
             if(lastBody !== null && lastParaIndex !== null){
                 let lastPosBottom = state.mutations._getParaLastPosBottom(lastBody, lastParaIndex)
-                state.mutations._updatePara(lastBody, lastParaIndex, lastPosBottom)
+                lastPosBottom = state.mutations._updatePara(lastBody, lastParaIndex, lastPosBottom)
+
+                // adjust following page paragraph spacing
+                lastPosBottom = state.mutations._adjustBodyPtFollowingSpacing(lastBody, lastParaIndex+1, lastPosBottom)
+                        
+                // adjust parent following spacing
+                lastPosBottom = state.mutations._adjustBodyParentFollowingSpacing(lastBody, lastPosBottom)
             }
 
             // update range select
@@ -558,7 +571,13 @@ var state = {
                         paraIndex = null
                     }else{
                         let lastPosBottom = state.mutations._getParaLastPosBottom(lastBody, lastParaIndex)
-                        state.mutations._updatePara(lastBody, lastParaIndex, lastPosBottom)
+                        lastPosBottom = state.mutations._updatePara(lastBody, lastParaIndex, lastPosBottom)
+                        
+                        // adjust following page paragraph spacing
+                        lastPosBottom = state.mutations._adjustBodyPtFollowingSpacing(lastBody, lastParaIndex+1, lastPosBottom)
+                        
+                        // adjust parent following spacing
+                        lastPosBottom = state.mutations._adjustBodyParentFollowingSpacing(lastBody, lastPosBottom)
                     }
                 }
 
@@ -577,7 +596,13 @@ var state = {
                     }
 
                     let lastPosBottom = state.mutations._getParaLastPosBottom(lastBody, lastParaIndex)
-                    state.mutations._updatePara(lastBody, lastParaIndex, lastPosBottom)
+                    lastPosBottom = state.mutations._updatePara(lastBody, lastParaIndex, lastPosBottom)
+
+                    // adjust following page paragraph spacing
+                    lastPosBottom = state.mutations._adjustBodyPtFollowingSpacing(lastBody, lastParaIndex+1, lastPosBottom)
+                        
+                    // adjust parent following spacing
+                    lastPosBottom = state.mutations._adjustBodyParentFollowingSpacing(lastBody, lastPosBottom)
                 }
             }
 
@@ -2144,12 +2169,6 @@ var state = {
             window.goog.dom.replaceNode(newPagePara.render(), oldPagePara)
             
             lastPosBottom += newPara.paraHeight
-
-            // adjust following page paragraph spacing
-            lastPosBottom = state.mutations._adjustBodyPtFollowingSpacing(body, paraIndex+1, lastPosBottom)
-            
-            // adjust parent following spacing
-            lastPosBottom = state.mutations._adjustBodyParentFollowingSpacing(body, lastPosBottom)
             
             return lastPosBottom
         },
