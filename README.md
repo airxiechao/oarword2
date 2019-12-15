@@ -14,3 +14,6 @@ yarn run serve
 ```
 yarn run build
 ```
+
+## Project progress
+see Issuses
