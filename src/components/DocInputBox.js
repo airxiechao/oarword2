@@ -215,7 +215,7 @@ class DocInputBox{
             // hot keys: ctrl+z
             case 90: {
                 if( e.ctrlKey ) {
-                    
+                    state.mutations.goBackwardHistory()
                 }
     
                 break;
@@ -223,7 +223,7 @@ class DocInputBox{
             // hot keys: ctrl+y
             case 89: {
                 if( e.ctrlKey ) {
-                    
+                    state.mutations.goForwardHistory()
                 }
     
                 break;

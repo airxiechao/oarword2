@@ -4,10 +4,13 @@ import { getPagePara, getPageTable, getPageBody, getPreviousInlineOfBody,
     isTextStyleEqual, buildEmptyTableCell, getRowColGridOfTableCell, getInlineBlockByRun } from './convert'
 import { getPageNo, measureEleDocXY } from '../utils/measure'
 
+import Document from '../components/Document'
 import PageParagraph from '../components/PageParagraph'
 import PageTable from '../components/PageTable'
 import PageBackground from '../components/PageBackground'
 import DocRangeSelect from '../components/DocRangeSelect'
+
+import { cloneDeep } from 'lodash'
 
 var state = {
     document: {
@@ -33,6 +36,10 @@ var state = {
             },
         },
         copy: [],
+        history: {
+            stack: [],
+            top: -1,
+        },
         inputBox: {},
         body: null,
     },
@@ -1817,6 +1824,61 @@ var state = {
             state.mutations.updateImageResizer()
 
         },
+
+        // ----------------------------------------------------------------- history mutation ------------------------------------------------------
+        pushToHistory(){
+            let body = cloneDeep(state.document.body)
+
+            // pop above top
+            for(let i = state.document.history.stack.length-1; i > state.document.history.top; --i){
+                state.document.history.stack.pop()
+            }
+
+            state.document.history.stack.push(body)
+            state.document.history.top += 1
+            if(state.document.history.top < 0){
+                state.document.history.top = 0
+            }
+        },
+        goBackwardHistory(){
+            
+            state.document.history.top -= 1
+            let body = state.document.history.stack[state.document.history.top]
+            if(body){
+                state.document.body = body
+
+                // update doc
+                let oldDoc =  state.document.obj.el
+                let doc = new Document(state.document.body);   
+                window.goog.dom.replaceNode(doc.render(), oldDoc)
+                doc.resizeHandler()
+
+                // reset cursor
+                state.mutations.resetCursorInlineBlock()
+            }
+        },
+        goForwardHistory(){
+
+            if(state.document.history.top >= state.document.history.stack.length -1){
+                return
+            }
+            
+            state.document.history.top += 1
+            let body = state.document.history.stack[state.document.history.top]
+            if(body){
+                state.document.body = body
+
+                // update doc
+                let oldDoc =  state.document.obj.el
+                let doc = new Document(state.document.body);   
+                window.goog.dom.replaceNode(doc.render(), oldDoc)
+                doc.resizeHandler()
+
+                // reset cursor
+                state.mutations.resetCursorInlineBlock()
+            }
+        },
+
         
         /***********************************************************************************************************************************
          *                                                        private muations
