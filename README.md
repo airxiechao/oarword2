@@ -16,4 +16,4 @@ yarn run build
 ```
 
 ## Project progress
-see Issuses
+see 'Projects'
