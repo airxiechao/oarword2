@@ -231,7 +231,10 @@ class DocInputBox{
             // hot keys: ctrl+c
             case 67: {
                 if( e.ctrlKey ) {
-                    
+                    if(state.getters.hasRangeSelectOverlays()){
+                        let docPts = state.getters.getRangeSelectDocPts()
+                        state.mutations.setCopy(docPts)
+                    }
                 }
     
                 break;
@@ -239,7 +242,11 @@ class DocInputBox{
             // hot keys: ctrl+v
             case 86: {
                 if( e.ctrlKey ) {
-                    
+                    if(state.getters.hasRangeSelectOverlays()){
+                        state.mutations.deleteRangeSelectInlineBlock()
+                    }
+
+                    state.mutations.pasteCopy()
                 }
     
                 break;
@@ -247,7 +254,12 @@ class DocInputBox{
             // hot keys: ctrl+x
             case 88: {
                 if( e.ctrlKey ) {
-                    
+                    if(state.getters.hasRangeSelectOverlays()){
+                        let docPts = state.getters.getRangeSelectDocPts()
+                        state.mutations.setCopy(docPts)
+
+                        state.mutations.deleteRangeSelectInlineBlock()
+                    }
                 }
     
                 break;

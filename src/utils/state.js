@@ -32,6 +32,7 @@ var state = {
                 startIndex: null,
             },
         },
+        copy: [],
         inputBox: {},
         body: null,
     },
@@ -139,6 +140,81 @@ var state = {
                             startIndex: selectStartIndex,
                             endIndex: selectEndIndex,
                         })
+                        
+                        if(ib === endIb){
+                            break ptLoop
+                        }
+                    }
+                }
+            }
+            
+            return range
+        },
+        getRangeSelectDocPts: function(){
+            let startLine = state.document.rangeSelect.start.line
+            let startIb = state.document.rangeSelect.start.inlineBlock
+            let startSi = state.document.rangeSelect.start.startIndex
+            let startPara = startIb.parent.parent
+            let startBody = startPara.parent
+
+            let endLine = state.document.rangeSelect.end.line
+            let endIb = state.document.rangeSelect.end.inlineBlock
+            let endSi = state.document.rangeSelect.end.startIndex
+            let endPara = endIb.parent.parent
+            let endBody = endPara.parent
+            
+            if(!startLine || !endLine){
+                return []
+            }
+
+            let pi = startBody.pts.indexOf(startPara)
+            let li = startPara.lines.indexOf(startLine)
+            let bi = startLine.inlineBlocks.indexOf(startIb)
+
+            let range = []
+            ptLoop: for(let i = pi; i < startBody.pts.length; ++i){
+                let para = startBody.pts[i]
+                if(para.type == 'table'){
+                    break ptLoop
+                }
+
+                let pt = {
+                    type: 'para',
+                    paraStyle: para.doc.paraStyle,
+                    runs: [],
+                }
+                range.push(pt)
+
+                for(let j = 0; j < para.lines.length; ++j){
+                    if(i == pi && j == 0){
+                        j = li
+                    }
+
+                    let line = para.lines[j]
+                    for(let k = 0; k < line.inlineBlocks.length; ++k){
+                        if(i == pi && j == li && k == 0){
+                            k = bi
+                        }
+
+                        let ib = line.inlineBlocks[k]
+
+                        let selectInlineBlock = ib
+                        let selectStartIndex = ib === startIb ? startSi : 0
+                        let selectEndIndex = ib === endIb ? endSi : (ib.type == 'text' ? ib.text.length-1 : 0)
+
+                        if(selectInlineBlock.type == 'text'){
+                            pt.runs.push({
+                                type: 'text',
+                                text: selectInlineBlock.doc.text.substring(selectStartIndex, selectEndIndex+1),
+                                textStyle: selectInlineBlock.doc.textStyle,
+                            })
+                        }else if(selectInlineBlock.type == 'image'){
+                            pt.runs.push({
+                                type: 'image',
+                                image: selectInlineBlock.doc.image,
+                                imageStyle: selectInlineBlock.doc.imageStyle
+                            })
+                        }
                         
                         if(ib === endIb){
                             break ptLoop
@@ -260,6 +336,9 @@ var state = {
         setImeStatus: function(imeStatus){
             var cursor = state.document.cursor.obj
             cursor.updateVisibility(!imeStatus)
+        },
+        setCopy: function(docPts){
+            state.document.copy = docPts
         },
 
         // ---------------------------------------------------------- range select mutations --------------------------------------------------------------
@@ -1276,49 +1355,20 @@ var state = {
             let ci = state.getters.cursorBodyIndex()
             let body = ci.body
             let paraIndex = ci.paraIndex
-            let runLen = body.doc.pts[paraIndex].runs.length
             let runIndex = ci.runIndex
-            let runDoc = body.doc.pts[paraIndex].runs[runIndex]
-            let contentLen = runDoc.type == 'text' ? runDoc.text.length : 1
             let startIndex = ci.startIndex
             let front = state.document.cursor.front
+
+            let lastPosBottom = state.mutations._splitPara(body, paraIndex, runIndex, startIndex, front)
             
-            if(runIndex == 0 && startIndex == 0 && front){
-                // add paragraph before
-                let lastPosBottom = state.mutations._addEmptyParaBefore(body, paraIndex)
+            // update page background
+            state.mutations._updatePageBackground(lastPosBottom)
 
-                // update page background
-                state.mutations._updatePageBackground(lastPosBottom)
+            // update cursor
+            state.mutations._updateCursor(body, paraIndex+1, 0, 0, true)
 
-                // update cursor
-                state.mutations._updateCursor(body, paraIndex+1, 0, 0)
-
-                // update image resizer
-                state.mutations.updateImageResizer()
-            }else if(runIndex == runLen - 1 && startIndex == contentLen - 1 && !front){
-                // add paragraph after
-                let lastPosBottom = state.mutations._addEmptyParaAfter(body, paraIndex)
-                
-                // update page background
-                state.mutations._updatePageBackground(lastPosBottom)
-
-                // update cursor
-                state.mutations._updateCursor(body, paraIndex+1, 0, 0, true)
-
-                // update image resizer
-                state.mutations.updateImageResizer()
-            }else{
-                let lastPosBottom = state.mutations._splitParaInner(body, paraIndex, runIndex, front ? startIndex : startIndex + 1)
-                
-                // update page background
-                state.mutations._updatePageBackground(lastPosBottom)
-
-                // update cursor
-                state.mutations._updateCursor(body, paraIndex+1, 0, 0, true)
-
-                // update image resizer
-                state.mutations.updateImageResizer()
-            }
+            // update image resizer
+            state.mutations.updateImageResizer()
         },
 
         // ----------------------------------------------------------- table mutation --------------------------------------------------------
@@ -1677,6 +1727,96 @@ var state = {
             // update image resizer
             state.mutations.updateImageResizer()
         },
+
+        // ----------------------------------------------------------------- paste mutation --------------------------------------------------------
+        pasteCopy(){
+            if(state.document.copy.length == 0){
+                return
+            }
+
+            if(!state.getters.cursorInlineBlock()){
+                return
+            }
+
+            let ib = state.document.cursor.inlineBlock
+            let ci = state.getters.cursorBodyIndex()
+            let body = ci.body
+            let paraIndex = ci.paraIndex
+            let runIndex = ci.runIndex
+            let startIndex = ci.startIndex
+            let front = state.document.cursor.front
+
+            // split run
+            let splited = false
+            if(ib.type == 'text'){
+                splited = state.mutations._splitRunText(body.doc, paraIndex, runIndex, 0, front ? Math.max(0, startIndex-1) : startIndex)
+            }
+            if(splited){
+                runIndex += 1
+            }
+
+            for(let i = 0; i < state.document.copy.length; ++i){
+                let docPt = state.document.copy[i]
+
+                if(i > 0){
+                    paraIndex += 1
+                    runIndex = 0
+                }
+
+                // add runs to para
+                for(let j = 0; j < docPt.runs.length; ++j){
+                    let run = docPt.runs[j]
+
+                    if(j > 0){
+                        runIndex += 1
+                    }
+
+                    if(run.type == 'text'){
+                        state.mutations._addRunTextAfter(body.doc, paraIndex, runIndex, run.text, run.textStyle)
+                    }else if(ib.type == 'image'){
+                        state.mutations._addRunImageAfter(body.doc, paraIndex, runIndex, run.image, run.imageStyle)
+                    }
+                    
+                    startIndex = run.type == 'text' ? run.text.length - 1 : 0
+                }
+
+                // break para
+                
+                if(state.document.copy.length > 1){
+                    state.mutations._splitPara(body, paraIndex, runIndex, startIndex, false)
+                }
+
+                // update para
+
+                // get last position bottom
+                let lastPosBottom = state.mutations._getParaLastPosBottom(body, paraIndex)
+
+                // update document paragraph
+                lastPosBottom = state.mutations._updatePara(body, paraIndex, lastPosBottom)
+
+                // adjust following spacing
+                lastPosBottom = state.mutations._adjustBodyPtFollowingSpacing(body, paraIndex+1, lastPosBottom)
+
+                // adjust parent following spacing
+                lastPosBottom = state.mutations._adjustBodyParentFollowingSpacing(body, lastPosBottom)
+                
+                // update page background
+                state.mutations._updatePageBackground(lastPosBottom)
+            }
+
+            // update range select
+            state.mutations.updateRangeSelectStart(null)
+            state.mutations.updateRangeSelectEnd(null)
+            state.mutations.clearRangeSelectOverlays()
+
+            // update cursor
+            state.mutations._updateCursor(body, paraIndex, runIndex, startIndex, false)
+            state.mutations._updateCursorAndInputBoxPos()
+
+            // update image resizer
+            state.mutations.updateImageResizer()
+
+        },
         
         /***********************************************************************************************************************************
          *                                                        private muations
@@ -1789,6 +1929,7 @@ var state = {
                 bodyDoc.pts[paraIndex].runs.splice(runIndex+2, 0, rightRun)
             }
 
+            return midText || rightText
         },
         _spliceRunImage(bodyDoc, paraIndex, runIndex, startIndex, image, imageStyle){
             let run = bodyDoc.pts[paraIndex].runs[runIndex]
@@ -2511,6 +2652,25 @@ var state = {
             
             lastPosBottom += newTable.tableHeight
             
+            return lastPosBottom
+        },
+
+        _splitPara: function(body, paraIndex, runIndex, startIndex, front){
+            let runLen = body.doc.pts[paraIndex].runs.length
+            let runDoc = body.doc.pts[paraIndex].runs[runIndex]
+            let contentLen = runDoc.type == 'text' ? runDoc.text.length : 1
+            
+            let lastPosBottom = null
+            if(runIndex == 0 && startIndex == 0 && front){
+                // add paragraph before
+                lastPosBottom = state.mutations._addEmptyParaBefore(body, paraIndex)
+            }else if(runIndex == runLen - 1 && startIndex == contentLen - 1 && !front){
+                // add paragraph after
+                lastPosBottom = state.mutations._addEmptyParaAfter(body, paraIndex)
+            }else{
+                lastPosBottom = state.mutations._splitParaInner(body, paraIndex, runIndex, front ? startIndex : startIndex + 1)
+            }
+
             return lastPosBottom
         },
 
