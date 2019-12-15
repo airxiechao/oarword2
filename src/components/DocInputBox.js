@@ -65,6 +65,8 @@ class DocInputBox{
                     textStyle: state.getters.cloneToolbarTextStyle(),
                 })
                 this.el.textContent = ''
+
+                state.mutations.pushToHistory()
             }
         }else{
             var ib = state.document.cursor.inlineBlock
@@ -193,6 +195,8 @@ class DocInputBox{
                 this.dummy.remove()
             }
 
+            state.mutations.pushToHistory()
+
         } else if(e.type == 'updateIme') {
             
         }
@@ -247,6 +251,8 @@ class DocInputBox{
                     }
 
                     state.mutations.pasteCopy()
+
+                    state.mutations.pushToHistory()
                 }
     
                 break;
@@ -259,6 +265,8 @@ class DocInputBox{
                         state.mutations.setCopy(docPts)
 
                         state.mutations.deleteRangeSelectInlineBlock()
+
+                        state.mutations.pushToHistory()
                     }
                 }
     
@@ -272,6 +280,9 @@ class DocInputBox{
                 }else{
                     state.mutations.deleteFromParaRun()
                 }
+
+                state.mutations.pushToHistory()
+
                 break;
             }
             // key enter
@@ -281,6 +292,9 @@ class DocInputBox{
                     state.mutations.deleteRangeSelectInlineBlock()
                 }
                 state.mutations.splitParaRun()
+
+                state.mutations.pushToHistory()
+
                 break;
             }
             // left

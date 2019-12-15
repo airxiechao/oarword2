@@ -16,6 +16,7 @@ export default {
         let doc = new Document(state.document.body);   
         window.goog.dom.appendChild(this.$el, doc.render())
         doc.resizeHandler()
+        state.mutations.pushToHistory()
 
         // set cursor
         state.mutations.resetCursorInlineBlock()

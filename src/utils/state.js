@@ -1827,25 +1827,25 @@ var state = {
 
         // ----------------------------------------------------------------- history mutation ------------------------------------------------------
         pushToHistory(){
-            let body = cloneDeep(state.document.body)
+
+            let bodyDoc = cloneDeep(state.document.body.doc)
 
             // pop above top
             for(let i = state.document.history.stack.length-1; i > state.document.history.top; --i){
                 state.document.history.stack.pop()
             }
 
-            state.document.history.stack.push(body)
+            state.document.history.stack.push(bodyDoc)
             state.document.history.top += 1
             if(state.document.history.top < 0){
                 state.document.history.top = 0
             }
         },
         goBackwardHistory(){
-            
             state.document.history.top -= 1
-            let body = state.document.history.stack[state.document.history.top]
-            if(body){
-                state.document.body = body
+            let bodyDoc = state.document.history.stack[state.document.history.top]
+            if(bodyDoc){
+                state.mutations.setDocument(cloneDeep(bodyDoc))
 
                 // update doc
                 let oldDoc =  state.document.obj.el
@@ -1858,15 +1858,14 @@ var state = {
             }
         },
         goForwardHistory(){
-
             if(state.document.history.top >= state.document.history.stack.length -1){
                 return
             }
             
             state.document.history.top += 1
-            let body = state.document.history.stack[state.document.history.top]
-            if(body){
-                state.document.body = body
+            let bodyDoc = state.document.history.stack[state.document.history.top]
+            if(bodyDoc){
+                state.mutations.setDocument(cloneDeep(bodyDoc))
 
                 // update doc
                 let oldDoc =  state.document.obj.el
