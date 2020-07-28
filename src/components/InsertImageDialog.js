@@ -1,6 +1,7 @@
-import { createElement } from '../utils/renderer'
-import { measureImageWH } from '../utils/measure'
-import state from '../utils/state'
+import { createElement } from '../renderer'
+import { measureImageWH } from '../measure'
+import state from '../state'
+import * as runProcess from '../process/runProcess'
 
 import interact from 'interactjs'
 
@@ -24,15 +25,15 @@ class InsertImageDialog{
                 width: '15px',
             }
         })
-        goog.events.listen(dialogClose,
-            goog.events.EventType.CLICK,
+        window.goog.events.listen(dialogClose,
+            window.goog.events.EventType.CLICK,
             function(e) {
                 this.close()
             }.bind(this)
         );
         
         // dialog message bar
-        let msg = this.msg = goog.dom.createTextNode('')
+        let msg = this.msg = window.goog.dom.createTextNode('')
         let dialogMessageBar = this.dialogMessageBar = createElement('div', {
             class: 'dialog-messagebar',
             style: {
@@ -46,7 +47,7 @@ class InsertImageDialog{
         }, [msg])
 
         // dialog body
-        let t = goog.dom.createTextNode('插入图片');
+        let t = window.goog.dom.createTextNode('插入图片');
         let dialogTitle = createElement('div', {
             class: 'dialog-title',
             style: {
@@ -67,8 +68,8 @@ class InsertImageDialog{
                 id: 'image-type-upload',
             }
         })
-        goog.events.listen(uploadType,
-            goog.events.EventType.CLICK,
+        window.goog.events.listen(uploadType,
+            window.goog.events.EventType.CLICK,
             function(e) {
                 this.imageTypeChanged(e)
             }.bind(this)
@@ -82,14 +83,14 @@ class InsertImageDialog{
                 checked: 'true',
             },
         })
-        goog.events.listen(urlType,
-            goog.events.EventType.CLICK,
+        window.goog.events.listen(urlType,
+            window.goog.events.EventType.CLICK,
             function(e) {
                 this.imageTypeChanged(e)
             }.bind(this)
         );
 
-        let imageType = createElement('div', {}, [uploadType, goog.dom.createTextNode('从电脑上传'), urlType, goog.dom.createTextNode('输入图片网址')])
+        let imageType = createElement('div', {}, [uploadType, window.goog.dom.createTextNode('从电脑上传'), urlType, window.goog.dom.createTextNode('输入图片网址')])
 
         let file = this.file = createElement('input', {
             style: {
@@ -130,7 +131,7 @@ class InsertImageDialog{
                 fontSize: 'inherit',
             }
         }, [
-            goog.dom.createTextNode('图片网址：'),
+            window.goog.dom.createTextNode('图片网址：'),
             url,
         ])
 
@@ -149,9 +150,9 @@ class InsertImageDialog{
                 fontWeight: 'bold',
                 fontSize: '12px',
             }
-        }, [goog.dom.createTextNode('确定')])
-        goog.events.listen(btnOk,
-            goog.events.EventType.CLICK,
+        }, [window.goog.dom.createTextNode('确定')])
+        window.goog.events.listen(btnOk,
+            window.goog.events.EventType.CLICK,
             function(e) {
                 this.ok()
             }.bind(this)
@@ -161,9 +162,9 @@ class InsertImageDialog{
             style: {
                 fontSize: '12px',
             }
-        }, [goog.dom.createTextNode('取消')])
-        goog.events.listen(btnCancle,
-            goog.events.EventType.CLICK,
+        }, [window.goog.dom.createTextNode('取消')])
+        window.goog.events.listen(btnCancle,
+            window.goog.events.EventType.CLICK,
             function(e) {
                 this.close()
             }.bind(this)
@@ -217,7 +218,7 @@ class InsertImageDialog{
             },
         }, [dialog])
 
-        goog.dom.appendChild(window.document.body, dialogWrap)
+        window.goog.dom.appendChild(window.document.body, dialogWrap)
 
         this.el = dialogWrap
 
@@ -266,7 +267,7 @@ class InsertImageDialog{
                     this.showMessage('请输入图片网址！')
                 }else{
                     measureImageWH(url, function(w, h){
-                        state.mutations.addImageToParaRun({
+                        runProcess.addImageToParaRun({
                             image: url,
                             imageStyle: {
                                 width: w,

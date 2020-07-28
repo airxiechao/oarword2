@@ -1,8 +1,8 @@
 import PageParagraph from './PageParagraph'
 import PageTable from './PageTable'
 
-import { createElement } from '../utils/renderer'
-import state from '../utils/state'
+import { createElement } from '../renderer'
+import state from '../state'
 
 class PageBody{
     constructor(lastPosBottom, body){

@@ -1,6 +1,8 @@
-import { createElement } from '../utils/renderer'
+import { createElement } from '../renderer'
 import PageBody from './PageBody'
-import state from '../utils/state'
+import state from '../state'
+
+import * as tableProcess from '../process/tableProcess'
 
 class PageTable{
     constructor(posLeft, table){
@@ -120,7 +122,7 @@ class PageTable{
                 return
             }
             
-            state.mutations.updateTableGrid({
+            tableProcess.updateTableGrid({
                 table: this.table,
                 columnIndex: ci,
                 columnWidth: cw,

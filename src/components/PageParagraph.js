@@ -1,6 +1,6 @@
 import PageLine from './PageLine'
 
-import { createElement } from '../utils/renderer'
+import { createElement } from '../renderer'
 
 class PageParagraph{
     constructor(posLeft, para){

@@ -1,4 +1,4 @@
-import { createElement } from '../utils/renderer'
+import { createElement } from '../renderer'
 
 class PageBackground{
     constructor(pageWidth, pageHeight, pageSpacingHeight, marginTop, marginRight, marginBottom, marginLeft, pageIndex){

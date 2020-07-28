@@ -1,5 +1,5 @@
-import { createElement } from '../utils/renderer'
-import { buildTextStyleCss } from '../utils/convert'
+import { createElement } from '../renderer'
+import { buildTextStyleCss } from '../convert'
 
 export default class PageInlineBlockText{
     constructor(ib){

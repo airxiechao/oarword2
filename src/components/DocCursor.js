@@ -1,5 +1,7 @@
-import { createElement, updateElement } from '../utils/renderer'
-import state from '../utils/state'
+import { createElement, updateElement } from '../renderer'
+import state from '../state'
+
+import * as cursorProcess from '../process/cursorProcess'
 
 class DocCursor{
     constructor(){
@@ -7,7 +9,7 @@ class DocCursor{
         this.cursorPosX = 0
         this.cursorPoxY = 0
 
-        state.mutations.setCursorObj(this)
+        cursorProcess.setCursorObj(this)
     }
 
     render(){

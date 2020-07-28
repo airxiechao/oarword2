@@ -1,75 +1,79 @@
-import { createElement } from '../utils/renderer'
-import state from '../utils/state'
-import InsertImageDialog from './InsertImageDialog';
+import { createElement } from '../renderer'
+import InsertImageDialog from './InsertImageDialog'
+
+import * as tableProcess from '../process/tableProcess'
+import * as toolbarProcess from '../process/toolbarProcess'
+import * as historyProcess from '../process/historyProcess'
+import * as rangeProcess from '../process/rangeProcess'
 
 class Toolbar{
     constructor(){
-        state.mutations.setToolbarObj(this)
+        toolbarProcess.setToolbarObj(this)
     }
 
     mounted(){
         var that = this;
 
-        this.toolbar = new goog.ui.Toolbar();
+        this.toolbar = new window.goog.ui.Toolbar();
         this.toolbar.render(this.el);
 
-        var tbSep0 = new goog.ui.ToolbarSeparator();
+        var tbSep0 = new window.goog.ui.ToolbarSeparator();
         this.toolbar.addChild(tbSep0, true);
         tbSep0.getElement().style.height = '100%';
 
         // font family
-        var fontMenu = new goog.ui.Menu();
-        goog.array.forEach(['宋体','楷体','黑体', null, 'Arial', 'Courier New','Times New Roman'], function(font) {
+        var fontMenu = new window.goog.ui.Menu();
+        window.goog.array.forEach(['宋体','楷体','黑体', null, 'Arial', 'Courier New','Times New Roman'], function(font) {
             if( font ) {
-                var item = new goog.ui.Option(font);
+                var item = new window.goog.ui.Option(font);
                 fontMenu.addChild(item, true);
                 item.getElement().getElementsByClassName('goog-menuitem-content')[0].style.fontFamily = font;
             } else {
-                fontMenu.addChild(new goog.ui.MenuSeparator(), true);
+                fontMenu.addChild(new window.goog.ui.MenuSeparator(), true);
             }
         });
         var fontFamily = '宋体'
-        var fontSelector = new goog.ui.ToolbarSelect(fontFamily, fontMenu);
-        state.mutations.setToolbarTextStyle('fontFamily', fontFamily)
+        var fontSelector = new window.goog.ui.ToolbarSelect(fontFamily, fontMenu);
+        toolbarProcess.setToolbarTextStyle('fontFamily', fontFamily)
         this.toolbar.fontSelector = fontSelector
         this.toolbar.addChild(fontSelector, true);
         fontSelector.getElement().getElementsByClassName('goog-toolbar-menu-button-caption')[0].style.width = '70px';
-        goog.events.listen(fontSelector, 'change', this.fontFamilyChanged);
+        window.goog.events.listen(fontSelector, 'change', this.fontFamilyChanged);
 
-        var tbSep1 = new goog.ui.ToolbarSeparator();
+        var tbSep1 = new window.goog.ui.ToolbarSeparator();
         this.toolbar.addChild(tbSep1, true);
         tbSep1.getElement().style.marginLeft = '0px';
 
         // font size
-        var sizeMenu = new goog.ui.Menu();
-        goog.array.forEach([8, 9, 10, 11, 12, 14, 18, 24, 36, 48, 58, 70], function(size) {
-            var item = new goog.ui.Option(size + '');
+        var sizeMenu = new window.goog.ui.Menu();
+        window.goog.array.forEach([8, 9, 10, 11, 12, 14, 18, 24, 36, 48, 58, 70], function(size) {
+            var item = new window.goog.ui.Option(size + '');
             sizeMenu.addChild(item, true);
             item.getElement().style.paddingRight = '3.5em';
             item.getElement().getElementsByClassName('goog-menuitem-content')[0].style.fontSize = size + 'px';
         });
         var fontSize = 14
-        var sizeSelector = new goog.ui.ToolbarSelect(fontSize+'', sizeMenu);
-        state.mutations.setToolbarTextStyle('fontSize', fontSize)
+        var sizeSelector = new window.goog.ui.ToolbarSelect(fontSize+'', sizeMenu);
+        toolbarProcess.setToolbarTextStyle('fontSize', fontSize)
         this.toolbar.sizeSelector = sizeSelector;
         this.toolbar.addChild(sizeSelector, true);
         sizeSelector.getElement().getElementsByClassName('goog-toolbar-menu-button-caption')[0].style.width = '10px';
         sizeMenu.getElement().style.height = '300px';
         sizeMenu.getElement().style.overflowY = 'scroll';
-        goog.events.listen(sizeSelector, 'change', this.fontSizeChanged);
+        window.goog.events.listen(sizeSelector, 'change', this.fontSizeChanged);
 
-        var tbSep2 = new goog.ui.ToolbarSeparator();
+        var tbSep2 = new window.goog.ui.ToolbarSeparator();
         this.toolbar.addChild(tbSep2, true);
         tbSep2.getElement().style.marginLeft = '0px';
 
         // font color
-        var fontColorSelector = new goog.ui.ColorMenuButton('A', goog.ui.ColorMenuButton.newColorMenu(), goog.ui.ToolbarColorMenuButtonRenderer.getInstance());
+        var fontColorSelector = new window.goog.ui.ColorMenuButton('A', window.goog.ui.ColorMenuButton.newColorMenu(), window.goog.ui.ToolbarColorMenuButtonRenderer.getInstance());
 
         this.toolbar.addChild(fontColorSelector, true);
         this.toolbar.fontColorSelector = fontColorSelector;
         var color = '#000000'
         fontColorSelector.setSelectedColor(color);
-        state.mutations.setToolbarTextStyle('color', color)
+        toolbarProcess.setToolbarTextStyle('color', color)
         var fontColorCap = fontColorSelector.getElement().getElementsByClassName('goog-toolbar-menu-button-caption')[0];
         var fontColorDrop = fontColorSelector.getElement().getElementsByClassName('goog-toolbar-menu-button-dropdown')[0];
         fontColorCap.style.padding = '0px';
@@ -77,21 +81,21 @@ class Toolbar{
         fontColorCap.style.width = '16px';
         fontColorCap.style.textAlign = 'center';
         fontColorDrop.style.marginRight = '1px';
-        goog.events.listen(fontColorSelector, goog.ui.Component.EventType.ACTION, this.colorChanged);
+        window.goog.events.listen(fontColorSelector, window.goog.ui.Component.EventType.ACTION, this.colorChanged);
 
         // background color
-        var bgColorMenu = goog.ui.ColorMenuButton.newColorMenu();
-        var noneBgColorItem = new goog.ui.MenuItem('无填充颜色', goog.ui.ColorMenuButton.NO_COLOR);
+        var bgColorMenu = window.goog.ui.ColorMenuButton.newColorMenu();
+        var noneBgColorItem = new window.goog.ui.MenuItem('无填充颜色', window.goog.ui.ColorMenuButton.NO_COLOR);
         bgColorMenu.addChildAt(noneBgColorItem, 0, true);
-        bgColorMenu.addChildAt(new goog.ui.Separator(), 1, true);
+        bgColorMenu.addChildAt(new window.goog.ui.Separator(), 1, true);
 
         noneBgColorItem.getElement().style.paddingRight = '0px';
 
-        var bgColorSelector = new goog.ui.ColorMenuButton('A', bgColorMenu, goog.ui.ToolbarColorMenuButtonRenderer.getInstance());
+        var bgColorSelector = new window.goog.ui.ColorMenuButton('A', bgColorMenu, window.goog.ui.ToolbarColorMenuButtonRenderer.getInstance());
 
         this.toolbar.addChild(bgColorSelector, true);
         this.toolbar.bgColorSelector = bgColorSelector;
-        state.mutations.setToolbarTextStyle('backgroundColor', 'unset')
+        toolbarProcess.setToolbarTextStyle('backgroundColor', 'unset')
         var bgColorCap = bgColorSelector.getElement().getElementsByClassName('goog-toolbar-menu-button-caption')[0];
         var bgColorDrop = bgColorSelector.getElement().getElementsByClassName('goog-toolbar-menu-button-dropdown')[0];
         bgColorCap.style.padding = '0px';
@@ -101,45 +105,45 @@ class Toolbar{
         bgColorCap.style.color = '#FFF';
         bgColorCap.style.backgroundColor = '#000';
         bgColorDrop.style.marginRight = '1px';
-        goog.events.listen(bgColorSelector, goog.ui.Component.EventType.ACTION, this.backgroundColorChanged);
+        window.goog.events.listen(bgColorSelector, window.goog.ui.Component.EventType.ACTION, this.backgroundColorChanged);
 
         // bold toggle
-        var boldSet = new goog.ui.ToolbarToggleButton('B');
+        var boldSet = new window.goog.ui.ToolbarToggleButton('B');
         this.toolbar.boldSet = boldSet;
-        state.mutations.setToolbarTextStyle('fongWeight', 'unset')
+        toolbarProcess.setToolbarTextStyle('fongWeight', 'unset')
         this.toolbar.addChild(boldSet, true);
         boldSet.getElement().style.fontFamily = 'Times New Roman';
-        goog.events.listen(boldSet, goog.ui.Component.EventType.ACTION, this.fontWeightChanged.bind(this));
+        window.goog.events.listen(boldSet, window.goog.ui.Component.EventType.ACTION, this.fontWeightChanged.bind(this));
 
         // italic
-        var italicSet = new goog.ui.ToolbarToggleButton('I');
+        var italicSet = new window.goog.ui.ToolbarToggleButton('I');
         this.toolbar.italicSet = italicSet;
-        state.mutations.setToolbarTextStyle('textStyle', 'unset')
+        toolbarProcess.setToolbarTextStyle('textStyle', 'unset')
         this.toolbar.addChild(italicSet, true);
         italicSet.getElement().style.fontFamily = 'Times New Roman';
         italicSet.getElement().style.fontStyle = 'italic';
-        goog.events.listen(italicSet, goog.ui.Component.EventType.ACTION, this.fontStyleChanged.bind(this));
+        window.goog.events.listen(italicSet, window.goog.ui.Component.EventType.ACTION, this.fontStyleChanged.bind(this));
 
         // underline
-        var underlineSet = new goog.ui.ToolbarToggleButton('U');
+        var underlineSet = new window.goog.ui.ToolbarToggleButton('U');
         this.toolbar.underlineSet = underlineSet;
-        state.mutations.setToolbarTextStyle('textDecoration', 'unset')
+        toolbarProcess.setToolbarTextStyle('textDecoration', 'unset')
         this.toolbar.addChild(underlineSet, true);
         underlineSet.getElement().style.fontFamily = 'Times New Roman';
         underlineSet.getElement().getElementsByClassName('goog-toolbar-button-inner-box')[0].style.textDecoration = 'underline';
-        goog.events.listen(underlineSet, goog.ui.Component.EventType.ACTION, this.textDecorationChanged.bind(this));
+        window.goog.events.listen(underlineSet, window.goog.ui.Component.EventType.ACTION, this.textDecorationChanged.bind(this));
 
         // superscript
-        var spsIcon = goog.dom.createDom('div');
+        var spsIcon = window.goog.dom.createDom('div');
         spsIcon.style.background = 'url(img/sprite.png) no-repeat -3px -1703px';
         spsIcon.style.width = '14px';
         spsIcon.style.height = '16px';
-        var superScriptSet = new goog.ui.ToolbarToggleButton(spsIcon);
+        var superScriptSet = new window.goog.ui.ToolbarToggleButton(spsIcon);
         this.toolbar.superScriptSet = superScriptSet;
-        state.mutations.setToolbarTextStyle('verticalAlign', 'unset')
+        toolbarProcess.setToolbarTextStyle('verticalAlign', 'unset')
         this.toolbar.addChild(superScriptSet, true);
-        goog.events.listen(superScriptSet,
-            goog.ui.Component.EventType.ACTION,
+        window.goog.events.listen(superScriptSet,
+            window.goog.ui.Component.EventType.ACTION,
             function(e) {
                 if( this.isChecked() ) {
                     subScriptSet.setChecked(false);
@@ -149,16 +153,16 @@ class Toolbar{
         );
 
         // subscript
-        var sbsIcon = goog.dom.createDom('div');
+        var sbsIcon = window.goog.dom.createDom('div');
         sbsIcon.style.background = 'url(img/sprite.png) no-repeat -24px -1914px';
         sbsIcon.style.width = '14px';
         sbsIcon.style.height = '16px';
-        var subScriptSet = new goog.ui.ToolbarToggleButton(sbsIcon);
+        var subScriptSet = new window.goog.ui.ToolbarToggleButton(sbsIcon);
         this.toolbar.subScriptSet = subScriptSet;
-        state.mutations.setToolbarTextStyle('verticalAlign', 'unset')
+        toolbarProcess.setToolbarTextStyle('verticalAlign', 'unset')
         this.toolbar.addChild(subScriptSet, true);
-        goog.events.listen(subScriptSet,
-            goog.ui.Component.EventType.ACTION,
+        window.goog.events.listen(subScriptSet,
+            window.goog.ui.Component.EventType.ACTION,
             function(e) {
                 if( this.isChecked() ) {
                     superScriptSet.setChecked(false);
@@ -167,20 +171,20 @@ class Toolbar{
             }
         );
 
-        var tbSepFont = new goog.ui.ToolbarSeparator();
+        var tbSepFont = new window.goog.ui.ToolbarSeparator();
         this.toolbar.addChild(tbSepFont, true);
         tbSepFont.getElement().style.marginLeft = '0px';
 
         // paragraph align left
-        var alignLeftIcon = goog.dom.createDom('div');
+        var alignLeftIcon = window.goog.dom.createDom('div');
         alignLeftIcon.style.background = 'url(img/sprite.png) no-repeat -3px -2018px';
         alignLeftIcon.style.width = '14px';
         alignLeftIcon.style.height = '16px';
-        var alignLeftSet = new goog.ui.ToolbarToggleButton(alignLeftIcon);
+        var alignLeftSet = new window.goog.ui.ToolbarToggleButton(alignLeftIcon);
         this.toolbar.alignLeftSet = alignLeftSet;
         this.toolbar.addChild(alignLeftSet, true);
-        goog.events.listen(alignLeftSet,
-            goog.ui.Component.EventType.ACTION,
+        window.goog.events.listen(alignLeftSet,
+            window.goog.ui.Component.EventType.ACTION,
             function(e) {
                 if( this.isChecked() ) {
                     //alignLeftSet.setChecked(false);
@@ -197,15 +201,15 @@ class Toolbar{
         );
 
         // paragraph align center
-        var alignCenterIcon = goog.dom.createDom('div');
+        var alignCenterIcon = window.goog.dom.createDom('div');
         alignCenterIcon.style.background = 'url(img/sprite.png) no-repeat -3px -1787px';
         alignCenterIcon.style.width = '14px';
         alignCenterIcon.style.height = '16px';
-        var alignCenterSet = new goog.ui.ToolbarToggleButton(alignCenterIcon);
+        var alignCenterSet = new window.goog.ui.ToolbarToggleButton(alignCenterIcon);
         this.toolbar.alignCenterSet = alignCenterSet;
         this.toolbar.addChild(alignCenterSet, true);
-        goog.events.listen(alignCenterSet,
-            goog.ui.Component.EventType.ACTION,
+        window.goog.events.listen(alignCenterSet,
+            window.goog.ui.Component.EventType.ACTION,
             function(e) {
                 if( this.isChecked() ) {
                     alignLeftSet.setChecked(false);
@@ -222,15 +226,15 @@ class Toolbar{
         );
 
         // paragraph align right
-        var alignRightIcon = goog.dom.createDom('div');
+        var alignRightIcon = window.goog.dom.createDom('div');
         alignRightIcon.style.background = 'url(img/sprite.png) no-repeat -24px -548px';
         alignRightIcon.style.width = '14px';
         alignRightIcon.style.height = '16px';
-        var alignRightSet = new goog.ui.ToolbarToggleButton(alignRightIcon);
+        var alignRightSet = new window.goog.ui.ToolbarToggleButton(alignRightIcon);
         this.toolbar.alignRightSet = alignRightSet;
         this.toolbar.addChild(alignRightSet, true);
-        goog.events.listen(alignRightSet,
-            goog.ui.Component.EventType.ACTION,
+        window.goog.events.listen(alignRightSet,
+            window.goog.ui.Component.EventType.ACTION,
             function(e) {
                 if( this.isChecked() ) {
                     alignLeftSet.setChecked(false);
@@ -246,50 +250,50 @@ class Toolbar{
             }
         );
 
-        var tbSepAlign = new goog.ui.ToolbarSeparator();
+        var tbSepAlign = new window.goog.ui.ToolbarSeparator();
         this.toolbar.addChild(tbSepAlign, true);
         tbSepAlign.getElement().style.marginLeft = '0px';
 
         // insert picture button
-        var insertImgIcon = goog.dom.createDom('div');
+        var insertImgIcon = window.goog.dom.createDom('div');
         insertImgIcon.style.background = 'url(img/components-toolbar-icons.png) no-repeat -480px 0';
         insertImgIcon.style.width = '16px';
         insertImgIcon.style.height = '16px';
 
-        var insertImgBtn = new goog.ui.ToolbarButton(insertImgIcon);
+        var insertImgBtn = new window.goog.ui.ToolbarButton(insertImgIcon);
         this.toolbar.addChild(insertImgBtn, true);
-        goog.events.listen(insertImgBtn.getElement(),
-            goog.events.EventType.CLICK,
+        window.goog.events.listen(insertImgBtn.getElement(),
+            window.goog.events.EventType.CLICK,
             function(e) {
                 let insertImagedialog = new InsertImageDialog()
             }
         );
 
         // insert table button
-        var tableDimensionMenu = new goog.ui.Menu();
-        var dimensionPicker = new goog.ui.DimensionPicker();
+        var tableDimensionMenu = new window.goog.ui.Menu();
+        var dimensionPicker = new window.goog.ui.DimensionPicker();
         tableDimensionMenu.addChild(dimensionPicker, true);
         
-        goog.events.listen(dimensionPicker, goog.ui.Component.EventType.ACTION,
+        window.goog.events.listen(dimensionPicker, window.goog.ui.Component.EventType.ACTION,
             function(e) {
                 var picker = e.target;
                 var size = picker.getValue();
 
-                state.mutations.addTableToBody(size)
+                tableProcess.addTableToBody(size)
             }
         );
 
-        var insertTableIcon = goog.dom.createDom('div');
+        var insertTableIcon = window.goog.dom.createDom('div');
         insertTableIcon.style.background = 'url(img/components-toolbar-icons.png) no-repeat -336px -16px';
         insertTableIcon.style.width = '16px';
         insertTableIcon.style.height = '16px';
 
-        var insertTableBtn = new goog.ui.ToolbarMenuButton(insertTableIcon, tableDimensionMenu);
+        var insertTableBtn = new window.goog.ui.ToolbarMenuButton(insertTableIcon, tableDimensionMenu);
         this.toolbar.addChild(insertTableBtn, true);
         insertTableBtn.getElement().getElementsByClassName('goog-toolbar-menu-button-caption')[0].style.paddingRight = '0px';
         insertTableBtn.getElement().getElementsByClassName('goog-toolbar-menu-button-dropdown')[0].style.marginRight = '1px';
 
-        var tbSepInsert = new goog.ui.ToolbarSeparator();
+        var tbSepInsert = new window.goog.ui.ToolbarSeparator();
         this.toolbar.addChild(tbSepInsert, true);
         tbSepInsert.getElement().style.marginLeft = '0px';
     }
@@ -314,38 +318,38 @@ class Toolbar{
 
     fontFamilyChanged(){
         let fontFamily = this.getValue()
-        state.mutations.setToolbarTextStyle('fontFamily', fontFamily)
-        if(state.getters.hasRangeSelectOverlays()){
-            state.mutations.setRangeSelectInlineBlocksTextStyleAsToolbar()
-            state.mutations.pushToHistory()
+        toolbarProcess.setToolbarTextStyle('fontFamily', fontFamily)
+        if(rangeProcess.hasRangeSelectOverlays()){
+            rangeProcess.setRangeSelectInlineBlocksTextStyleAsToolbar()
+            historyProcess.pushToHistory()
         }
         
     }
 
     fontSizeChanged(){
         let fontSize = this.getValue()
-        state.mutations.setToolbarTextStyle('fontSize', Number(fontSize))
-        if(state.getters.hasRangeSelectOverlays()){
-            state.mutations.setRangeSelectInlineBlocksTextStyleAsToolbar()
-            state.mutations.pushToHistory()
+        toolbarProcess.setToolbarTextStyle('fontSize', Number(fontSize))
+        if(rangeProcess.hasRangeSelectOverlays()){
+            rangeProcess.setRangeSelectInlineBlocksTextStyleAsToolbar()
+            historyProcess.pushToHistory()
         }
     }
 
     colorChanged(){
         let color = this.getValue()
-        state.mutations.setToolbarTextStyle('color', color)
-        if(state.getters.hasRangeSelectOverlays()){
-            state.mutations.setRangeSelectInlineBlocksTextStyleAsToolbar()
-            state.mutations.pushToHistory()
+        toolbarProcess.setToolbarTextStyle('color', color)
+        if(rangeProcess.hasRangeSelectOverlays()){
+            rangeProcess.setRangeSelectInlineBlocksTextStyleAsToolbar()
+            historyProcess.pushToHistory()
         }
     }
 
     backgroundColorChanged(){
         let backgroundColor = this.getValue()
-        state.mutations.setToolbarTextStyle('backgroundColor', backgroundColor ? backgroundColor : 'unset')
-        if(state.getters.hasRangeSelectOverlays()){
-            state.mutations.setRangeSelectInlineBlocksTextStyleAsToolbar()
-            state.mutations.pushToHistory()
+        toolbarProcess.setToolbarTextStyle('backgroundColor', backgroundColor ? backgroundColor : 'unset')
+        if(rangeProcess.hasRangeSelectOverlays()){
+            rangeProcess.setRangeSelectInlineBlocksTextStyleAsToolbar()
+            historyProcess.pushToHistory()
         }
     }
 
@@ -356,10 +360,10 @@ class Toolbar{
         } else {
             fontWeight = 'normal';
         }
-        state.mutations.setToolbarTextStyle('fontWeight', fontWeight)
-        if(state.getters.hasRangeSelectOverlays()){
-            state.mutations.setRangeSelectInlineBlocksTextStyleAsToolbar()
-            state.mutations.pushToHistory()
+        toolbarProcess.setToolbarTextStyle('fontWeight', fontWeight)
+        if(rangeProcess.hasRangeSelectOverlays()){
+            rangeProcess.setRangeSelectInlineBlocksTextStyleAsToolbar()
+            historyProcess.pushToHistory()
         }
     }
 
@@ -370,10 +374,10 @@ class Toolbar{
         } else {
             fontStyle = 'normal';
         }
-        state.mutations.setToolbarTextStyle('fontStyle', fontStyle)
-        if(state.getters.hasRangeSelectOverlays()){
-            state.mutations.setRangeSelectInlineBlocksTextStyleAsToolbar()
-            state.mutations.pushToHistory()
+        toolbarProcess.setToolbarTextStyle('fontStyle', fontStyle)
+        if(rangeProcess.hasRangeSelectOverlays()){
+            rangeProcess.setRangeSelectInlineBlocksTextStyleAsToolbar()
+            historyProcess.pushToHistory()
         }
     }
 
@@ -384,10 +388,10 @@ class Toolbar{
         } else {
             textDecoration = 'none';
         }
-        state.mutations.setToolbarTextStyle('textDecoration', textDecoration)
-        if(state.getters.hasRangeSelectOverlays()){
-            state.mutations.setRangeSelectInlineBlocksTextStyleAsToolbar()
-            state.mutations.pushToHistory()
+        toolbarProcess.setToolbarTextStyle('textDecoration', textDecoration)
+        if(rangeProcess.hasRangeSelectOverlays()){
+            rangeProcess.setRangeSelectInlineBlocksTextStyleAsToolbar()
+            historyProcess.pushToHistory()
         }
     }
 
@@ -398,10 +402,10 @@ class Toolbar{
         } else if ( this.toolbar.subScriptSet.isChecked() ) {
             verticalAlign = 'sub';
         }
-        state.mutations.setToolbarTextStyle('verticalAlign', verticalAlign)
-        if(state.getters.hasRangeSelectOverlays()){
-            state.mutations.setRangeSelectInlineBlocksTextStyleAsToolbar()
-            state.mutations.pushToHistory()
+        toolbarProcess.setToolbarTextStyle('verticalAlign', verticalAlign)
+        if(rangeProcess.hasRangeSelectOverlays()){
+            rangeProcess.setRangeSelectInlineBlocksTextStyleAsToolbar()
+            historyProcess.pushToHistory()
         }
     }
 
@@ -415,12 +419,12 @@ class Toolbar{
             textAlign = 'right'
         }
 
-        state.mutations.setToolbarParaStyle({
+        toolbarProcess.setToolbarParaStyle({
             textAlign: textAlign
         })
 
-        state.mutations.setCursorParaStyleAsToolbar()
-        state.mutations.pushToHistory()
+        toolbarProcess.setCursorParaStyleAsToolbar()
+        historyProcess.pushToHistory()
     }
 
     updateFontFamily(fontFamily){

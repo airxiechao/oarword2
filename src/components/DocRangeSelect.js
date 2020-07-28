@@ -1,5 +1,5 @@
-import { createElement } from "../utils/renderer"
-import { measureEleDocXY, measureInlineBlockSpanX } from "../utils/measure"
+import { createElement } from "../renderer"
+import { measureEleDocXY, measureInlineBlockSpanX } from "../measure"
 
 class DocRangeSelect {
     constructor(range){

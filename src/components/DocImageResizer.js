@@ -1,6 +1,8 @@
-import { createElement } from '../utils/renderer'
-import { measureEleDocXY } from '../utils/measure'
-import state from '../utils/state'
+import { createElement } from '../renderer'
+import { measureEleDocXY } from '../measure'
+
+import * as runProcess from '../process/runProcess'
+import * as imageProcess from '../process/imageProcess'
 
 export default class DocImageResizer{
     constructor(targetObj){
@@ -12,7 +14,7 @@ export default class DocImageResizer{
         this.w = this.targetObj ? this.targetObj.el.offsetWidth : 0
         this.h = this.targetObj ? this.targetObj.el.offsetHeight : 0
 
-        state.mutations.setImageResizerObj(this)
+        imageProcess.setImageResizerObj(this)
     }
 
     render(){
@@ -182,7 +184,7 @@ export default class DocImageResizer{
 
     mouseDownHandler(e){
         let resizer = e.target
-        let dragger = new goog.fx.Dragger(resizer)
+        let dragger = new window.goog.fx.Dragger(resizer)
 
         let oldX = this.x
         let oldY = this.y
@@ -244,7 +246,7 @@ export default class DocImageResizer{
         dragger.addEventListener(goog.fx.Dragger.EventType.END, function(e) {
             dragger.dispose();
 
-            state.mutations.updateImageStyle({
+            runProcess.updateImageStyle({
                 ib: this.targetObj.ib,
                 imageStyle: {
                     width: this.w,

@@ -1,5 +1,5 @@
 
-function measureFontTextWH(text, textStyle){
+export function measureFontTextWH(text, textStyle){
     let fontFamily = textStyle.fontFamily ? textStyle.fontFamily : ''
     let fontSize = textStyle.fontSize ? textStyle.fontSize + 'px' : ''
     let fontWeight = textStyle.fontWeight ? textStyle.fontWeight : ''
@@ -22,7 +22,7 @@ function measureFontTextWH(text, textStyle){
     return {w:w, h:h};
 }
 
-function measureImageWH(image, f_success, f_error){
+export function measureImageWH(image, f_success, f_error){
     let dummy = document.createElement('img');
     dummy.style.visibility = 'hidden';
     dummy.style.display = 'inline-block';
@@ -45,7 +45,7 @@ function measureImageWH(image, f_success, f_error){
     document.body.appendChild(dummy)
 }
 
-function measureElePageXY(ele){
+export function measureElePageXY(ele){
     var x = 0, y = 0;
 
     while( ele ) {
@@ -60,7 +60,7 @@ function measureElePageXY(ele){
     return {x:x, y:y};
 }
 
-function measureEleDocXY(ele){
+export function measureEleDocXY(ele){
     var x = 0, y = 0;
 
     while( ele ) {
@@ -75,7 +75,7 @@ function measureEleDocXY(ele){
     return {x:x, y:y};
 }
 
-function getCursorPos(cursorInlineBlock, inlineStartIndex, front){
+export function getCursorPos(cursorInlineBlock, inlineStartIndex, front){
     let cursorPosX = 0
     let cursorPosY = 0
     let cursorHeight = 0
@@ -136,18 +136,18 @@ function getCursorPos(cursorInlineBlock, inlineStartIndex, front){
     }
 }
 
-function getPageNo(posY, pageHeight, pageSpacingHeight){
+export function getPageNo(posY, pageHeight, pageSpacingHeight){
     var pageNo = parseInt(posY/(pageHeight+pageSpacingHeight)) + 1
     return pageNo
 }
 
-function getPageLeftHeight(posTop, marginBottom, pageHeight, pageSpacingHeight){
+export function getPageLeftHeight(posTop, marginBottom, pageHeight, pageSpacingHeight){
     var pageNo = getPageNo(posTop, pageHeight, pageSpacingHeight)
     var leftHeight = pageNo*(pageHeight+pageSpacingHeight) - posTop - marginBottom - pageSpacingHeight
     return leftHeight
 }
 
-function getWidthFontTextPos(text, textStyle, width){
+export function getWidthFontTextPos(text, textStyle, width){
     var twh = measureFontTextWH(text, textStyle)
     if(twh.w <= width){
         return {
@@ -209,7 +209,7 @@ function getWidthFontTextPos(text, textStyle, width){
     }
 }
 
-function measureInlineBlockTextMouseStartIndex(e, ib){
+export function measureInlineBlockTextMouseStartIndex(e, ib){
     let docXY = measureElePageXY(document.getElementsByClassName('doc')[0])
     let elXY = measureEleDocXY(ib.obj.el)
     let pointLeft = e.clientX - docXY.x - elXY.x
@@ -241,7 +241,7 @@ function measureInlineBlockTextMouseStartIndex(e, ib){
     return null
 }
 
-function measureInlineBlockImageMouseStartIndex(e, ib){
+export function measureInlineBlockImageMouseStartIndex(e, ib){
     let docXY = measureElePageXY(document.getElementsByClassName('doc')[0])
     let elXY = measureEleDocXY(ib.obj.el)
     let pointLeft = e.clientX - docXY.x - elXY.x
@@ -256,7 +256,7 @@ function measureInlineBlockImageMouseStartIndex(e, ib){
     }
 }
 
-function measureLineMouseStartIndex(lineObj, e){
+export function measureLineMouseStartIndex(lineObj, e){
     let found = null
     for(let i = 0; i < lineObj.ls.inlineBlocks.length; ++i){
         let ib = lineObj.ls.inlineBlocks[i]
@@ -290,7 +290,7 @@ function measureLineMouseStartIndex(lineObj, e){
     }
 }
 
-function measureInlineBlockSpanX(inlineBlock, startIndex, endIndex){
+export function measureInlineBlockSpanX(inlineBlock, startIndex, endIndex){
     if(inlineBlock.type == 'text'){
         let text = inlineBlock.text
         let textStyle = inlineBlock.textStyle
@@ -321,5 +321,66 @@ function measureInlineBlockSpanX(inlineBlock, startIndex, endIndex){
     }
 }
 
-export { measureFontTextWH, measureImageWH, measureElePageXY, measureEleDocXY, getCursorPos, getPageNo, getPageLeftHeight,
-         getWidthFontTextPos, measureLineMouseStartIndex, measureInlineBlockSpanX }
+/**
+ * 获取段落开始之前的最后底部位置
+ * @param {*} body 
+ * @param {*} paraIndex 
+ */
+export function getParaLastPosBottom(body, paraIndex){
+    let lastPosBottom = 0
+    
+    while(body){
+        
+        for(let i = 0 ; i < paraIndex; ++i){
+            let pt = body.pts[i]
+            if(pt.type == 'para'){
+                lastPosBottom += pt.paraHeight
+            }else if(pt.type == 'table'){
+                lastPosBottom += pt.tableHeight
+            }
+        }
+
+        let bodyParent = body.parent
+        if(!bodyParent){
+            lastPosBottom += body.doc.grid.marginTop
+            break
+        }else{
+            if(bodyParent.type == 'table'){
+                for(let i = 0; i < bodyParent.cells.length; ++i){
+                    let row = bodyParent.cells[i]
+                    let colHeights = []
+                    let found = false
+                    let colCount = 0
+                    for(let j = 0; j < row.length; ++j){
+                        let col = row[j]
+
+                        if(col == body){
+                            found = true
+                            break
+                        }
+                        
+                        if(col.doc.rowspan == 1){
+                            colHeights.push(col.doc.grid.height)
+                        }
+
+                        colCount += 1
+                    }
+                    if(colCount == row.length){
+                        lastPosBottom += Math.max(...colHeights)
+                    }
+                    if(found){
+                        break
+                    }
+                }
+
+                body = bodyParent.parent
+                paraIndex = body.pts.indexOf(bodyParent)
+            }else{
+                break
+            }
+        }
+        
+    }
+
+    return lastPosBottom
+}

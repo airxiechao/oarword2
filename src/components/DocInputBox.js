@@ -1,6 +1,14 @@
-import { createElement, updateElement } from '../utils/renderer'
-import { buildTextStyleCss } from '../utils/convert'
-import state from '../utils/state'
+import { createElement, updateElement } from '../renderer'
+import { buildTextStyleCss } from '../convert'
+import state from '../state'
+
+import * as runProcess from '../process/runProcess'
+import * as copyProcess from '../process/copyProcess'
+import * as historyProcess from '../process/historyProcess'
+import * as cursorProcess from '../process/cursorProcess'
+import * as rangeProcess from '../process/rangeProcess'
+import * as inputProcess from '../process/inputProcess'
+import * as toolbarProcess from '../process/toolbarProcess'
 
 class DocInputBox{
     constructor(){
@@ -9,7 +17,7 @@ class DocInputBox{
         this.imeStatus = false
         this.dummy = null
 
-        state.mutations.setInputBoxObj(this)
+        inputProcess.setInputBoxObj(this)
     }
 
     render(){
@@ -55,18 +63,18 @@ class DocInputBox{
         if(!this.imeStatus){
             let text = this.el.textContent 
 
-            if(state.getters.hasRangeSelectOverlays()){
-                state.mutations.deleteRangeSelectInlineBlock()
+            if(rangeProcess.hasRangeSelectOverlays()){
+                rangeProcess.deleteRangeSelectInlineBlock()
             }
             
             if(text != ''){
-                state.mutations.addTextToParaRun({
+                runProcess.addTextToParaRun({
                     text: text,
-                    textStyle: state.getters.cloneToolbarTextStyle(),
+                    textStyle: toolbarProcess.cloneToolbarTextStyle(),
                 })
                 this.el.textContent = ''
 
-                state.mutations.pushToHistory()
+                historyProcess.pushToHistory()
             }
         }else{
             var ib = state.document.cursor.inlineBlock
@@ -79,7 +87,7 @@ class DocInputBox{
                 var rightText = text.substr(si)
                 var midText = this.el.textContent
                 var leftTextStyle = ib.textStyle
-                var midTextStyle = state.getters.cloneToolbarTextStyle()
+                var midTextStyle = toolbarProcess.cloneToolbarTextStyle()
     
                 var leftTextStyleCss = buildTextStyleCss(leftTextStyle)
                 leftTextStyleCss['display'] = 'inline-block'
@@ -130,10 +138,10 @@ class DocInputBox{
                 this.dummy = dummy
     
                 ib.obj.el.style.display = 'none'
-                goog.dom.insertSiblingAfter(this.dummy, ib.obj.el)
+                window.goog.dom.insertSiblingAfter(this.dummy, ib.obj.el)
             }else if(ib.type == 'image'){
                 var midText = this.el.textContent
-                var midTextStyle = state.getters.cloneToolbarTextStyle()
+                var midTextStyle = toolbarProcess.cloneToolbarTextStyle()
                 
                 var midTextStyleCss = buildTextStyleCss(midTextStyle)
                 midTextStyleCss['textDecoration'] = 'underline'
@@ -160,9 +168,9 @@ class DocInputBox{
                 this.dummy = dummy
                 
                 if(front){
-                    goog.dom.insertSiblingBefore(this.dummy, ib.obj.el)
+                    window.dom.insertSiblingBefore(this.dummy, ib.obj.el)
                 }else{
-                    goog.dom.insertSiblingAfter(this.dummy, ib.obj.el)
+                    window.goog.dom.insertSiblingAfter(this.dummy, ib.obj.el)
                 }
                 
             }
@@ -172,22 +180,22 @@ class DocInputBox{
 
     imeHandler(e){
         if(e.type == 'startIme' ) {
-            if(state.getters.hasRangeSelectOverlays()){
-                state.mutations.deleteRangeSelectInlineBlock()
+            if(rangeProcess.hasRangeSelectOverlays()){
+                rangeProcess.deleteRangeSelectInlineBlock()
             }
             
             this.imeStatus = true
-            state.mutations.setImeStatus(this.imeStatus)
+            inputProcess.setImeStatus(this.imeStatus)
 
         } else if(e.type == 'endIme' ) {
-            state.mutations.addTextToParaRun({
+            runProcess.addTextToParaRun({
                 text: this.el.textContent,
-                textStyle: state.getters.cloneToolbarTextStyle(),
+                textStyle: toolbarProcess.cloneToolbarTextStyle(),
             })
             this.el.textContent = ''
 
             this.imeStatus = false
-            state.mutations.setImeStatus(this.imeStatus)
+            inputProcess.setImeStatus(this.imeStatus)
 
             var ib = state.document.cursor.inlineBlock
             ib.obj.el.style.display = 'inline-block'
@@ -195,7 +203,7 @@ class DocInputBox{
                 this.dummy.remove()
             }
 
-            state.mutations.pushToHistory()
+            historyProcess.pushToHistory()
 
         } else if(e.type == 'updateIme') {
             
@@ -219,7 +227,7 @@ class DocInputBox{
             // hot keys: ctrl+z
             case 90: {
                 if( e.ctrlKey ) {
-                    state.mutations.goBackwardHistory()
+                    historyProcess.goBackwardHistory()
                 }
     
                 break;
@@ -227,7 +235,7 @@ class DocInputBox{
             // hot keys: ctrl+y
             case 89: {
                 if( e.ctrlKey ) {
-                    state.mutations.goForwardHistory()
+                    historyProcess.goForwardHistory()
                 }
     
                 break;
@@ -235,9 +243,9 @@ class DocInputBox{
             // hot keys: ctrl+c
             case 67: {
                 if( e.ctrlKey ) {
-                    if(state.getters.hasRangeSelectOverlays()){
-                        let docPts = state.getters.getRangeSelectDocPts()
-                        state.mutations.setCopy(docPts)
+                    if(rangeProcess.hasRangeSelectOverlays()){
+                        let docPts = rangeProcess.getRangeSelectDocPts()
+                        copyProcess.setCopy(docPts)
                     }
                 }
     
@@ -246,13 +254,13 @@ class DocInputBox{
             // hot keys: ctrl+v
             case 86: {
                 if( e.ctrlKey ) {
-                    if(state.getters.hasRangeSelectOverlays()){
-                        state.mutations.deleteRangeSelectInlineBlock()
+                    if(rangeProcess.hasRangeSelectOverlays()){
+                        rangeProcess.deleteRangeSelectInlineBlock()
                     }
 
-                    state.mutations.pasteCopy()
+                    copyProcess.pasteCopy()
 
-                    state.mutations.pushToHistory()
+                    historyProcess.pushToHistory()
                 }
     
                 break;
@@ -260,13 +268,13 @@ class DocInputBox{
             // hot keys: ctrl+x
             case 88: {
                 if( e.ctrlKey ) {
-                    if(state.getters.hasRangeSelectOverlays()){
-                        let docPts = state.getters.getRangeSelectDocPts()
-                        state.mutations.setCopy(docPts)
+                    if(rangeProcess.hasRangeSelectOverlays()){
+                        let docPts = rangeProcess.getRangeSelectDocPts()
+                        copyProcess.setCopy(docPts)
 
-                        state.mutations.deleteRangeSelectInlineBlock()
+                        rangeProcess.deleteRangeSelectInlineBlock()
 
-                        state.mutations.pushToHistory()
+                        historyProcess.pushToHistory()
                     }
                 }
     
@@ -275,50 +283,50 @@ class DocInputBox{
             // key delete
             case 8:
             {
-                if(state.getters.hasRangeSelectOverlays()){
-                    state.mutations.deleteRangeSelectInlineBlock()
+                if(rangeProcess.hasRangeSelectOverlays()){
+                    rangeProcess.deleteRangeSelectInlineBlock()
                 }else{
-                    state.mutations.deleteFromParaRun()
+                    runProcess.deleteFromParaRun()
                 }
 
-                state.mutations.pushToHistory()
+                historyProcess.pushToHistory()
 
                 break;
             }
             // key enter
             case 13:
             {
-                if(state.getters.hasRangeSelectOverlays()){
-                    state.mutations.deleteRangeSelectInlineBlock()
+                if(rangeProcess.hasRangeSelectOverlays()){
+                    rangeProcess.deleteRangeSelectInlineBlock()
                 }
-                state.mutations.splitParaRun()
+                runProcess.splitParaRun()
 
-                state.mutations.pushToHistory()
+                historyProcess.pushToHistory()
 
                 break;
             }
             // left
             case 37:
             {
-                state.mutations.leftMoveCursor()
+                cursorProcess.leftMoveCursor()
                 break;
             }
             // up
             case 38:
             {
-                state.mutations.upMoveCursor()
+                cursorProcess.upMoveCursor()
                 break;
             }
             // right
             case 39:
             {
-                state.mutations.rightMoveCursor()
+                cursorProcess.rightMoveCursor()
                 break;
             }
             // down
             case 40:
             {
-                state.mutations.downMoveCursor()
+                cursorProcess.downMoveCursor()
                 break;
             }
         }

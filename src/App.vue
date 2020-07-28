@@ -2,7 +2,9 @@
 import Document from './components/Document'
 import Toolbar from './components/Toolbar'
 
-import state from './utils/state'
+import state from './state'
+import * as historyProcess from './process/historyProcess'
+import * as cursorProcess from './process/cursorProcess'
 
 export default {
     name: 'app',
@@ -16,10 +18,10 @@ export default {
         let doc = new Document(state.document.body);   
         window.goog.dom.appendChild(this.$el, doc.render())
         doc.resizeHandler()
-        state.mutations.pushToHistory()
+        historyProcess.pushToHistory()
 
         // set cursor
-        state.mutations.resetCursorInlineBlock()
+        cursorProcess.resetCursorInlineBlock()
     },
     render: function(createElement){
         let app = createElement('div', {

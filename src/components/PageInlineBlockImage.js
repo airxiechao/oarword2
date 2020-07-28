@@ -1,5 +1,7 @@
-import { createElement } from '../utils/renderer'
-import state from '../utils/state'
+import { createElement } from '../renderer'
+import state from '../state'
+
+import * as imageProcess from '../process/imageProcess'
 
 export default class PageInlineBlockImage{
     constructor(ib){
@@ -44,13 +46,13 @@ export default class PageInlineBlockImage{
         let resizerTargetObj = state.document.imageResizer.obj.targetObj
 
         if(this.showImageResizer){
-            state.mutations.hideImageResizer()
+            imageProcess.hideImageResizer()
             this.showImageResizer = false
         }else{
             if(resizerTargetObj && resizerTargetObj !== this){
                 resizerTargetObj.showImageResizer = false
             }
-            state.mutations.showImageResizer(this)
+            imageProcess.showImageResizer(this)
             this.showImageResizer = true
         }
     }

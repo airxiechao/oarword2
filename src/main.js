@@ -1,8 +1,10 @@
 import Vue from 'vue'
 import App from './App.vue'
 
-import state from './utils/state'
-import { defaultTextStyle, defaultParaStyle } from './utils/convert'
+import state from './state'
+import { defaultTextStyle, defaultParaStyle } from './convert'
+
+import * as documentProcess from './process/documentProcess'
 
 Vue.config.productionTip = false
 
@@ -400,7 +402,7 @@ var doc = {
     ],
 }
 
-state.mutations.setDocument(doc)
+documentProcess.setDocument(doc)
 
 new Vue({
     render: h => h(App),

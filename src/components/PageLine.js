@@ -1,7 +1,10 @@
 import PageInlineBlock from './PageInlineBlock'
 
-import { createElement } from '../utils/renderer'
-import { measureFontTextWH, measureElePageXY, measureEleDocXY, measureLineMouseStartIndex } from '../utils/measure.js'
+import { createElement } from '../renderer'
+import { measureFontTextWH, measureElePageXY, measureEleDocXY, measureLineMouseStartIndex } from '../measure.js'
+
+import * as cursorProcess from '../process/cursorProcess'
+import * as rangeProcess from '../process/rangeProcess'
 
 class PageLine{
     constructor(ls){
@@ -43,14 +46,14 @@ class PageLine{
     mouseDownLineHandler(e){
         let resizer = e.target
         let dragger = new goog.fx.Dragger(resizer)
-        state.mutations.updateRangeSelectDragged(false)
+        rangeProcess.updateRangeSelectDragged(false)
         
         dragger.addEventListener(goog.fx.Dragger.EventType.DRAG, function(e) {
             if(!state.document.rangeSelect.dragged){
-                state.mutations.updateRangeSelectDragged(true)
+                rangeProcess.updateRangeSelectDragged(true)
 
                 let { inlineBlock, startIndex } = measureLineMouseStartIndex(this, e)
-                state.mutations.startRangeSelect(dragger, this.ls, inlineBlock, startIndex)
+                rangeProcess.startRangeSelect(dragger, this.ls, inlineBlock, startIndex)
             }
             
         }.bind(this))
@@ -65,13 +68,13 @@ class PageLine{
     mouseMoveLineHandler(e){
         if(state.document.rangeSelect.dragged && state.document.rangeSelect.dragger){
             let { inlineBlock, startIndex } = measureLineMouseStartIndex(this, e)
-            state.mutations.dragRangeSelect(this.ls, inlineBlock, startIndex)
+            rangeProcess.dragRangeSelect(this.ls, inlineBlock, startIndex)
         }
     }
 
     mouseUpLineHandler(e){
         let { inlineBlock, startIndex } = measureLineMouseStartIndex(this, e)
-        state.mutations.endRangeSelect(this.ls, inlineBlock, startIndex)
+        rangeProcess.endRangeSelect(this.ls, inlineBlock, startIndex)
     }
 
     clickLineHandler(e){
@@ -96,14 +99,14 @@ class PageLine{
             if(ib.type == 'text'){
                 let si = Math.max(0, ib.text.length-1)
                 let front = ib.text.length == 0 ? true : false;
-                state.mutations.setCursorInlineBlock({
+                cursorProcess.setCursorInlineBlock({
                         inlineBlock: ib,
                         inlineStartIndex: si,
                         front: front,
                     }
                 )    
             }else if(ib.type == 'image'){
-                state.mutations.setCursorInlineBlock({
+                cursorProcess.setCursorInlineBlock({
                         inlineBlock: ib,
                         inlineStartIndex: 0,
                         front: false,
@@ -144,7 +147,7 @@ class PageLine{
         
         if(found){
             // update cursor
-            state.mutations.setCursorInlineBlock({
+            cursorProcess.setCursorInlineBlock({
                     inlineBlock: ib,
                     inlineStartIndex: i-1,
                     front: front,
@@ -169,7 +172,7 @@ class PageLine{
             front = false
         }
         
-        state.mutations.setCursorInlineBlock({
+        cursorProcess.setCursorInlineBlock({
                 inlineBlock: ib,
                 inlineStartIndex: 0,
                 front: front,

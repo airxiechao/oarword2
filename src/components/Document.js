@@ -4,9 +4,10 @@ import DocCursor from './DocCursor'
 import DocInputBox from './DocInputBox'
 import DocImageResizer from './DocImageResizer'
 
-import { getPageNo } from '../utils/measure'
-import { createElement } from '../utils/renderer'
-import state from '../utils/state'
+import { getPageNo } from '../measure'
+import { createElement } from '../renderer'
+
+import * as documentProcess from '../process/documentProcess'
 
 class Document{
     constructor(body){
@@ -19,7 +20,7 @@ class Document{
         this.marginLeft = body.doc.grid.marginLeft
         this.body = body
         
-        state.mutations.setDocumentObj(this)
+        documentProcess.setDocumentObj(this)
     }
 
     render(){
