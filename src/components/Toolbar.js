@@ -57,7 +57,7 @@ class Toolbar{
         toolbarProcess.setToolbarTextStyle('fontSize', fontSize)
         this.toolbar.sizeSelector = sizeSelector;
         this.toolbar.addChild(sizeSelector, true);
-        sizeSelector.getElement().getElementsByClassName('goog-toolbar-menu-button-caption')[0].style.width = '10px';
+        sizeSelector.getElement().getElementsByClassName('goog-toolbar-menu-button-caption')[0].style.width = '20px';
         sizeMenu.getElement().style.height = '300px';
         sizeMenu.getElement().style.overflowY = 'scroll';
         window.goog.events.listen(sizeSelector, 'change', this.fontSizeChanged);

@@ -1,4 +1,4 @@
-function createElement(tag, settings, children){
+export function createElement(tag, settings, children){
     var el = window.goog.dom.createElement(tag)
 
     if(settings){
@@ -26,7 +26,7 @@ function createElement(tag, settings, children){
     return el
 }
 
-function updateElement(el, settings){
+export function updateElement(el, settings){
     if(settings){
         Object.keys(settings).forEach(function(s) {
             if(s == 'style'){
@@ -46,5 +46,3 @@ function updateElement(el, settings){
 
     return el
 }
-
-export { createElement, updateElement }

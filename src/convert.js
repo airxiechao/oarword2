@@ -1,6 +1,6 @@
 import { measureFontTextWH, getPageLeftHeight, getWidthFontTextPos } from './measure'
 
-function paraRunsToLines(runs, paraWidth, posTop, marginTop, marginBottom, pageHeight, pageSpacingHeight){
+export function paraRunsToLines(runs, paraWidth, posTop, marginTop, marginBottom, pageHeight, pageSpacingHeight){
     let paraLines = []
     let paraHeight = 0
 
@@ -66,7 +66,7 @@ function paraRunsToLines(runs, paraWidth, posTop, marginTop, marginBottom, pageH
     }
 }
 
-function getLineInlineBlocksAndHeightFromQueue(runsQueue, lineWidth){
+export function getLineInlineBlocksAndHeightFromQueue(runsQueue, lineWidth){
     let totalWidth = 0
     let maxHeight = 0
     let lineInlineBlocks = []
@@ -77,7 +77,7 @@ function getLineInlineBlocksAndHeightFromQueue(runsQueue, lineWidth){
             let wh = {w:0,h:0}
             let i = 0
             if(run.text.length == 0){
-                wh.h = measureFontTextWH('|', {}).h
+                wh.h = measureFontTextWH('|', run.textStyle).h
                 maxHeight = Math.max(maxHeight, wh.h)
             }else{
                 let iwh = getWidthFontTextPos(run.text, run.textStyle, lineWidth - totalWidth)
@@ -152,7 +152,7 @@ function getLineInlineBlocksAndHeightFromQueue(runsQueue, lineWidth){
     }
 }
 
-function getPagePara(para, lastPosBottom,
+export function getPagePara(para, lastPosBottom,
         pageWidth, pageHeight, pageSpacingHeight, 
         marginTop, marginRight, marginBottom, marginLeft){
 
@@ -180,7 +180,7 @@ function getPagePara(para, lastPosBottom,
     return pagePara
 }
 
-function getPageTable(doc, table, lastPosBottom){
+export function getPageTable(doc, table, lastPosBottom){
 
     let tableCells = []
     let tableHeight = 0
@@ -298,7 +298,7 @@ function getPageTable(doc, table, lastPosBottom){
     return pageTable
 }
 
-function getPageBody(doc, lastPosBottom){
+export function getPageBody(doc, lastPosBottom){
 
     let pageWidth = doc.grid.pageWidth
     let pageHeight = doc.grid.pageHeight
@@ -346,7 +346,7 @@ function getPageBody(doc, lastPosBottom){
     return pageBody
 }
 
-function getPreviousLineOfBody(inlineBlock){
+export function getPreviousLineOfBody(inlineBlock){
     let body = inlineBlock.parent.parent.parent
     let lastline = null
     for(let i = 0; i < body.pts.length; ++i){
@@ -371,7 +371,7 @@ function getPreviousLineOfBody(inlineBlock){
     return lastline
 }
 
-function getNextLineOfBody(inlineBlock){
+export function getNextLineOfBody(inlineBlock){
     let body = inlineBlock.parent.parent.parent
     let nextline = null
     for(let i = body.pts.length - 1; i >= 0; --i){
@@ -396,7 +396,7 @@ function getNextLineOfBody(inlineBlock){
     return nextline
 }
 
-function getPreviousInlineOfBody(inlineBlock){
+export function getPreviousInlineOfBody(inlineBlock){
     let body = inlineBlock.parent.parent.parent
     let lastib = null
     for(let i = 0; i < body.pts.length; ++i){
@@ -419,7 +419,7 @@ function getPreviousInlineOfBody(inlineBlock){
     return lastib
 }
 
-function getNextInlineOfBody(inlineBlock){
+export function getNextInlineOfBody(inlineBlock){
     let body = inlineBlock.parent.parent.parent
     let nextib = null
     for(let i = body.pts.length - 1; i >= 0; --i){
@@ -442,7 +442,7 @@ function getNextInlineOfBody(inlineBlock){
     return nextib
 }
 
-function getInlineBlockBodyIndex(inlineBlock){
+export function getInlineBlockBodyIndex(inlineBlock){
     let ib = inlineBlock
     let line = ib.parent
     let para = line.parent
@@ -460,7 +460,7 @@ function getInlineBlockBodyIndex(inlineBlock){
     }
 }
 
-function getInlineBlockByRun(body, paraIndex, runIndex, startIndex){
+export function getInlineBlockByRun(body, paraIndex, runIndex, startIndex){
     let para = body.pts[paraIndex]
     let run = para.doc.runs[runIndex]
     for(let i = 0; i < para.lines.length; ++i){
@@ -484,7 +484,7 @@ function getInlineBlockByRun(body, paraIndex, runIndex, startIndex){
     return null
 }
 
-function isTextStyleEqual(textStyle1, textStyle2){
+export function isTextStyleEqual(textStyle1, textStyle2){
     let keys = ['fontFamily', 'fontSize', 'color', 'backgroundColor', 'fontWeight', 'fontStyle', 'textDecoration', 'verticalAlign']
     let equal = true
     keys.forEach((key)=>{
@@ -496,7 +496,7 @@ function isTextStyleEqual(textStyle1, textStyle2){
     return equal
 }
 
-function buildTextStyleCss(textStyle){
+export function buildTextStyleCss(textStyle){
     let styleCss = {
         fontFamily: textStyle.fontFamily ? textStyle.fontFamily : 'unset',
         fontSize: textStyle.fontSize ? textStyle.fontSize + 'px' : 'unset',
@@ -511,7 +511,7 @@ function buildTextStyleCss(textStyle){
     return styleCss
 }
 
-function buildEmptyTableCell(){
+export function buildEmptyTableCell(){
     let col = {
         type: 'body',
         rowspan: 1,
@@ -535,7 +535,7 @@ function buildEmptyTableCell(){
     return col
 }
 
-function getRowColGridOfTableCell(cell){
+export function getRowColGridOfTableCell(cell){
 
     let table = cell.parent
 
@@ -619,7 +619,7 @@ function getRowColGridOfTableCell(cell){
     }
 }
 
-const defaultTextStyle = {
+export const defaultTextStyle = {
     fontFamily: '宋体',
     fontSize: 14,
     color: '#000',
@@ -630,12 +630,6 @@ const defaultTextStyle = {
     verticalAlign: 'unset',
 }
 
-const defaultParaStyle = {
+export const defaultParaStyle = {
     textAlign: 'left',
 }
-
-export { paraRunsToLines, getLineInlineBlocksAndHeightFromQueue, getPageLeftHeight, 
-         getPagePara, getPageBody, getPreviousInlineOfBody, getNextInlineOfBody,
-         getPreviousLineOfBody, getNextLineOfBody, getInlineBlockBodyIndex, getPageTable,
-         isTextStyleEqual, buildTextStyleCss, buildEmptyTableCell, getRowColGridOfTableCell,
-         defaultTextStyle, defaultParaStyle, getInlineBlockByRun }
