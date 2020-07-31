@@ -78,6 +78,10 @@ class PageLine{
     }
 
     clickLineHandler(e){
+        if(rangeProcess.hasRangeSelectOverlays()){
+            return
+        }
+        
         let found = false
         for(let i = 0; i < this.ls.inlineBlocks.length; ++i){
             let ib = this.ls.inlineBlocks[i]
