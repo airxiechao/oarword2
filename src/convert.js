@@ -633,3 +633,29 @@ export const defaultTextStyle = {
 export const defaultParaStyle = {
     textAlign: 'left',
 }
+
+export const defaultDoc = {
+    type: 'body',
+    grid: {
+        pageWidth: 800,
+        pageHeight: 800 * Math.sqrt(2),
+        pageSpacingHeight: 5,
+        marginTop: 100,
+        marginRight: 100,
+        marginBottom: 100,
+        marginLeft: 100,
+    },
+    pts: [
+        {
+            type: 'para',
+            paraStyle: defaultParaStyle,
+            runs: [
+                {
+                    type: 'text',
+                    text: '',
+                    textStyle: defaultTextStyle,
+                },
+            ],
+        },
+    ],
+}

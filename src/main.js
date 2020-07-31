@@ -1,18 +1,15 @@
 import Vue from 'vue'
-import App from './App.vue'
+import Editor from './Editor.vue'
 
-import state from './state'
 import { defaultTextStyle, defaultParaStyle } from './convert'
-
-import * as documentProcess from './process/documentProcess'
 
 Vue.config.productionTip = false
 
-var doc = {
+let doc = {
     type: 'body',
     grid: {
         pageWidth: 800,
-        pageHeight: 400 * Math.sqrt(2),
+        pageHeight: 800 * Math.sqrt(2),
         pageSpacingHeight: 5,
         marginTop: 100,
         marginRight: 100,
@@ -22,7 +19,7 @@ var doc = {
     pts: [
         {
             type: 'para',
-            paraStyle:defaultParaStyle,
+            paraStyle: defaultParaStyle,
             runs: [
                 {
                     type: 'text',
@@ -99,7 +96,7 @@ var doc = {
         },
         {
             type: 'para',
-            paraStyle:defaultParaStyle,
+            paraStyle: defaultParaStyle,
             runs: [
                 {
                     type: 'text',
@@ -126,7 +123,7 @@ var doc = {
                         pts: [
                             {
                                 type: 'para',
-                                paraStyle:defaultParaStyle,
+                                paraStyle: defaultParaStyle,
                                 runs: [
                                     {
                                         type: 'text',
@@ -142,7 +139,7 @@ var doc = {
                             },
                             {
                                 type: 'para',
-                                paraStyle:defaultParaStyle,
+                                paraStyle: defaultParaStyle,
                                 runs: [
                                     {
                                         type: 'text',
@@ -158,7 +155,7 @@ var doc = {
                             },
                             {
                                 type: 'para',
-                                paraStyle:defaultParaStyle,
+                                paraStyle: defaultParaStyle,
                                 runs: [
                                     {
                                         type: 'text',
@@ -174,7 +171,7 @@ var doc = {
                             },
                             {
                                 type: 'para',
-                                paraStyle:defaultParaStyle,
+                                paraStyle: defaultParaStyle,
                                 runs: [
                                     {
                                         type: 'text',
@@ -190,7 +187,7 @@ var doc = {
                             },
                             {
                                 type: 'para',
-                                paraStyle:defaultParaStyle,
+                                paraStyle: defaultParaStyle,
                                 runs: [
                                     {
                                         type: 'text',
@@ -214,7 +211,7 @@ var doc = {
                         pts: [
                             {
                                 type: 'para',
-                                paraStyle:defaultParaStyle,
+                                paraStyle: defaultParaStyle,
                                 runs: [
                                     {
                                         type: 'text',
@@ -240,7 +237,7 @@ var doc = {
                         pts: [
                             {
                                 type: 'para',
-                                paraStyle:defaultParaStyle,
+                                paraStyle: defaultParaStyle,
                                 runs: [
                                     {
                                         type: 'text',
@@ -266,7 +263,7 @@ var doc = {
                         pts: [
                             {
                                 type: 'para',
-                                paraStyle:defaultParaStyle,
+                                paraStyle: defaultParaStyle,
                                 runs: [
                                     {
                                         type: 'text',
@@ -290,7 +287,7 @@ var doc = {
                         pts: [
                             {
                                 type: 'para',
-                                paraStyle:defaultParaStyle,
+                                paraStyle: defaultParaStyle,
                                 runs: [
                                     {
                                         type: 'text',
@@ -306,7 +303,7 @@ var doc = {
                             },
                             {
                                 type: 'para',
-                                paraStyle:defaultParaStyle,
+                                paraStyle: defaultParaStyle,
                                 runs: [
                                     {
                                         type: 'text',
@@ -330,7 +327,7 @@ var doc = {
                         pts: [
                             {
                                 type: 'para',
-                                paraStyle:defaultParaStyle,
+                                paraStyle: defaultParaStyle,
                                 runs: [
                                     {
                                         type: 'text',
@@ -351,7 +348,7 @@ var doc = {
         },
         {
             type: 'para',
-            paraStyle:defaultParaStyle,
+            paraStyle: defaultParaStyle,
             runs: [
                 {
                     type: 'text',
@@ -385,7 +382,7 @@ var doc = {
         },
         {
             type: 'para',
-            paraStyle:defaultParaStyle,
+            paraStyle: defaultParaStyle,
             runs: [
                 {
                     type: 'text',
@@ -402,8 +399,10 @@ var doc = {
     ],
 }
 
-documentProcess.setDocument(doc)
-
 new Vue({
-    render: h => h(App),
+    render: h => h(Editor, {
+        props: {
+            doc: doc,
+        }
+    }),
 }).$mount('#app')
