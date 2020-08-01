@@ -211,8 +211,8 @@ class DocInputBox{
     }
 
     keydownHandler(e){
-        if(e.ctrlKey ) {
-            e.stopPropagation();
+        if(e.ctrlKey) {
+            //e.stopPropagation();
             e.preventDefault();
         }
 

@@ -28,15 +28,7 @@ export function  goBackwardHistory(){
   let bodyDoc = state.document.history.stack[state.document.history.top]
   if(bodyDoc){
       documentProcess.setDocument(cloneDeep(bodyDoc))
-
-      // update doc
-      let oldDoc =  state.document.obj.el
-      let doc = new Document(state.document.body);   
-      window.goog.dom.replaceNode(doc.render(), oldDoc)
-      doc.resizeHandler()
-
-      // reset cursor
-      cursorProcess.resetCursorInlineBlock()
+      documentProcess.updateDocument()
   }
 }
 
@@ -49,14 +41,6 @@ export function goForwardHistory(){
   let bodyDoc = state.document.history.stack[state.document.history.top]
   if(bodyDoc){
       documentProcess.setDocument(cloneDeep(bodyDoc))
-
-      // update doc
-      let oldDoc =  state.document.obj.el
-      let doc = new Document(state.document.body);   
-      window.goog.dom.replaceNode(doc.render(), oldDoc)
-      doc.resizeHandler()
-
-      // reset cursor
-      cursorProcess.resetCursorInlineBlock()
+      documentProcess.updateDocument()
   }
 }
