@@ -85,7 +85,7 @@ class PageBackground{
             class: 'bg-mask-bottom',
             style: {
                 width: (this.pageWidth - this.marginLeft - this.marginRight) + 'px',
-                height: this.marginBottom + 'px',
+                height: (this.marginBottom-1) + 'px',
                 position: 'absolute',
                 top: (this.pageHeight-this.marginBottom+1)+'px',
                 left: this.marginLeft+'px',
@@ -101,7 +101,8 @@ class PageBackground{
                 position: 'absolute',
                 top: this.pageHeight+'px',
                 left: this.marginLeft+'px',
-                background: 'rgb(235, 235, 235)',
+                background: 'rgb(224 224 224)',
+                boxShadow: 'inset 0px 0px 3px #ccc',
                 zIndex: 9,
             }
         }))
@@ -112,7 +113,7 @@ class PageBackground{
                 width: this.pageWidth+'px',
                 height: this.pageHeight+'px',
                 background: '#fff',
-                //boxShadow: '0px 0px 3px 1px #ccc',
+                boxShadow: 'rgb(204, 204, 204) 0px 0px 3px 1px',
                 position: 'absolute',
                 top: (this.pageHeight+this.pageSpacingHeight)*this.pageIndex + 'px',
                 left: '0px',
