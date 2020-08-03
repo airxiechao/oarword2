@@ -1,5 +1,6 @@
 <script>
 import Document from "./components/Document";
+import Menubar from "./components/Menubar"
 import Toolbar from "./components/Toolbar";
 
 import state from "./state";
@@ -26,6 +27,11 @@ export default {
     documentProcess.setDocument(this.doc);
   },
   mounted() {
+    // add menubar
+    let menubar = new Menubar();
+    window.goog.dom.appendChild(this.$el, menubar.render());
+    menubar.mounted();
+    
     // add toolbar
     let toolbar = new Toolbar();
     window.goog.dom.appendChild(this.$el, toolbar.render());

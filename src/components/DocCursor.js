@@ -16,9 +16,9 @@ class DocCursor{
         this.el = createElement('div', {
             class: 'doc-cursor',
             style: {
-                width: '0px',
+                width: '2px',
                 height: this.cursorHeight + 'px',
-                borderLeft: '1.5px solid #555',
+                borderLeft: '2px solid #555',
                 position: 'absolute',
                 left: this.cursorPosX + 'px',
                 top: this.cursorPoxY + 'px',
