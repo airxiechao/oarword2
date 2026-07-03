@@ -1,4 +1,5 @@
 # oarword2
+![截图](docs/截图.jpg)
 
 ## Project setup
 ```
