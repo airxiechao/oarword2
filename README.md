@@ -15,5 +15,5 @@ yarn run serve
 yarn run build
 ```
 
-## Project progress
-see 'Projects'
+## Design and Progress
+![设计文档](docs/oarword2设计文档.jpg)
