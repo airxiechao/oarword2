@@ -10,7 +10,7 @@
   "dependencies": {
     "core-js": "^2.6.5",
     "interactjs": "^1.5.4",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.21",
     "reqwest": "^2.0.5",
     "vue": "^2.6.10",
     "vuex": "^3.1.0"
